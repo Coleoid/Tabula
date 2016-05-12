@@ -1,25 +1,22 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using log4net;
-using TestopiaAPI;
 
 namespace Tabula
 {
+   
     public class TabulaStepRunner
     {
         Stack<string> CallStack;
         List<RunResult> RunResults;
         bool SkipRemainder = false;
-        private ILog _logger;
         private RunResult Result;
 
-        public TabulaStepRunner(ILog logger)
+        public TabulaStepRunner()
         {
             CallStack = new Stack<string>();
             RunResults = new List<RunResult>();
-            _logger = logger;
         }
 
         public void Do(Action action, string sourceLocation, string actionText)
@@ -90,7 +87,7 @@ namespace Tabula
             else
             {
                 errorMessage = ex.Message;
-                if (ex is StepNotImplementedException)
+                if (ex is NotImplementedException)
                 {
                     outcome = ActionOutcome.Waived;
                 }
@@ -113,8 +110,9 @@ namespace Tabula
 
             if (SkipRemainder)
             {
-                _logger.ErrorFormat("Step [{0}] \nthrew exception at {1}:  {2}",
-                    Result.ActionText, CallStack.Peek(), ex.Message);
+                //TODO:  Some sort of message.  For now, I'm dodging the logger question.
+                //_logger.ErrorFormat("Step [{0}] \nthrew exception at {1}:  {2}",
+                //    Result.ActionText, CallStack.Peek(), ex.Message);
             }
         }
 
