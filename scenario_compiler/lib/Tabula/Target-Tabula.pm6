@@ -1,14 +1,8 @@
-use Tabula::Build-Context;
-
-class Target-Testopia {
-    has $.Context;
-
-    submethod BUILD {
-        $!Context = Build-Context.new();
-    }
+class Target-Tabula {
 
     method TOP($/) {
         make $<Scenario>.made
+        # future:  make all modules (with usual case being one scenario :)
     }
 
     method Action($/) {
@@ -16,14 +10,10 @@ class Target-Testopia {
     }
 
     method Block($/) {
-        $!Context.BeginScope($<String>);
-
         make
-            '{  //  ' ~ ($<String> // "unnamed block") ~ "\n"
+            ($<String> // "") ~ "...\n"
             ~ ($<Section> ?? [~] $<Section>.map({.made}) !! "")
-            ~ $<Block-End><Indentation> ~ "\}\n";
-
-        $!Context.EndScope();
+            ~ $<Block-End><Indentation> ~ '.'
     }
 
     method Break-Line($/) {
@@ -39,43 +29,37 @@ class Target-Testopia {
     }
 
     method Command-Tag($/) {
-
-        my $cmd = $<PhraseList>.elems == 1 ?? 'tag' !! 'tags';
+        my $cmd = $<Phrases>.elems == 1 ?? 'tag' !! 'tags';
         make ">$cmd: $<Phrases>"
     }
 
     method Command-Use($/) {
-        for $<Phrases> {
-            $!Context.AddLibraryToScope($_);
-        }
+        make ">use: $<Phrases>"
+    }
+
+    method Document($/) {
+        make "crappy first draft"
+    }
+
+    method Empty-Cell($/) {
+        make $/
     }
 
     method Paragraph($/) {
-        #TODO:  Line number counting
-        make
-            "\tpublic void paragraph_01()\n\{"
-            ~ [~] $<Statement>.map({ "\t\t" ~ .made})
-            ~ "\}\n\n"
-    }
-
-    method Phrase($/) {
-        make $<Symbol>.join(' ');
+        make [~] $<Statement>.map({.made})
+        # future (grammar):  blank lines and shifts from statements to tables
     }
 
     method Phrases($/) {
-        make $<Phrase>.join(', ');
+        make $<Phrase>.join(', ')
+    }
+
+    method Phrase($/) {
+        make $<Symbol>.join(' ')
     }
 
     method Scenario($/) {
-        #TODO:  Class name should come off of file name
-        my $class_name = normalized-name-CSharp($<String>) ~ '_generated';
-        make "public class $class_name \{\n"
-            ~ [~] $<Section>.map({.made})
-            ~ "}\n"
-    }
-
-    sub normalized-name-CSharp(@words) {
-        join '', @words.map({.wordcase})
+        make "Scenario:  $<String>\n" ~ [~] $<Section>.map({.made})
     }
 
     method Section($/) {
@@ -90,18 +74,8 @@ class Target-Testopia {
             ~ "\n"
     }
 
-    method Step($match) {
-        my $sourceLocation = '"SampleScenario.scn:1"'; #HACK: sourceLocation
-
-        my ($success, $fixtureCall) = $!Context.GetFixtureCall($match);
-        if $success {
-            my $quotedCommand = '@"' ~ (S:g / '"' /""/) ~ '"';
-            $match.make( "Do( () =>    $_,    $sourceLocation, $quotedCommand );" );
-        }
-        else {
-            my $stepText = ~$match;
-            $match.make( "Unfound(     \"$stepText\",    $sourceLocation )");
-        }
+    method Step($/) {
+        make "$<OptQ>$<Symbol>".trim
     }
 
     method Symbol($/) {
@@ -138,4 +112,5 @@ class Target-Testopia {
     method Term($/) {
         make $<Date> || $<Number> || $<String> || $<ID>
     }
+
 }

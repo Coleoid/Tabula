@@ -1,7 +1,7 @@
 use Test;
 use Tabula::Tabula-Grammar;
-use Tabula::Generate-Tabula;
-use Tabula::Generate-CSharp;
+use Tabula::Target-Tabula;
+use Tabula::Target-Testopia;
 use Tabula::Build-Context;
 
 module Grammar-Testing {
@@ -10,10 +10,10 @@ module Grammar-Testing {
 
     multi sub skip( $desc, &code ) is export { skip $desc }
 
-    sub curry-parser-for( $rule ) is export {
+    sub curry-parser-emitting-Tabula( $rule ) is export {
         use Test;
         state $grammar = Tabula-Grammar.new;
-        state $actions = Generate-Tabula.new;
+        state $actions = Target-Tabula.new;
 
         return sub ( $label, $input ) {
             my $out = $grammar.parse( $input, :rule($rule), :actions($actions) );
@@ -25,10 +25,10 @@ module Grammar-Testing {
         }
     }
 
-    sub curry-csharp-parser-for( $rule ) is export {
+    sub curry-parser-emitting-Testopia( $rule ) is export {
         use Test;
         state $grammar = Tabula-Grammar.new;
-        state $actions = Generate-CSharp.new;
+        state $actions = Target-Testopia.new;
         once { $CSharp-Context = $actions.Context; }
 
         return sub ( $label, $input ) {

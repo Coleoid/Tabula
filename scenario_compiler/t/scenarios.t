@@ -1,7 +1,7 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my &parser = curry-parser-for( "Scenario" );
+my &parser = curry-parser-emitting-Tabula( "Scenario" );
 say "\n";
 
 if False

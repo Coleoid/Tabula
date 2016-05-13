@@ -5,7 +5,7 @@ say "\n";
 
 #if False
 {   diag "Section tests";
-    my &parser = curry-parser-for( 'Scenario' );
+    my &parser = curry-parser-emitting-Tabula( 'Scenario' );
 
     my $parse = parser( 'two Paragraph Scenario', q:to/EOS/ );
     Scenario:  "A Tale of two Paras"
@@ -24,7 +24,7 @@ say "\n";
 
 #if False
 {   diag "Command tests";
-    my &parser = curry-parser-for( 'Command' );
+    my &parser = curry-parser-emitting-Tabula( 'Command' );
     my $parse;
 
 #    $parse = parser( 'use', ">use: Mail Server" );
@@ -35,7 +35,7 @@ say "\n";
 
 #if False
 {   diag "Parameterized Step tests";
-    my &parser = curry-parser-for( 'Step' );
+    my &parser = curry-parser-emitting-Tabula( 'Step' );
 
     my $step = 'Give me 4 things like "Bill" got on #day';
     my $parse = parser( 'parameterized', $step );
@@ -57,7 +57,7 @@ say "\n";
 
 #if False
 {   diag "Statement tests -- Note that Statements are newline terminated.";
-    my &parser = curry-parser-for( "Statement" );
+    my &parser = curry-parser-emitting-Tabula( "Statement" );
 
     my $parse = parser( "simple step", "do a thing\n" );
     $parse = parser( "standard punctuation in step", "'Twas better than half-baked\n" );
@@ -69,7 +69,7 @@ say "\n";
 
 #if False
 {   diag "Block tests";
-    my &parser = curry-parser-for( "Block" );
+    my &parser = curry-parser-emitting-Tabula( "Block" );
 
     my $block-as-statement = q:to/EOB/;
         "Blocky string"...
@@ -85,14 +85,14 @@ say "\n";
     is ~$parse<String>, '"Blocky string"', "Catch the String header";
     is $parse<Section>.elems, 1, "Catch the single Section";
 
-    my &statement-parser = curry-parser-for( "Statement" );
+    my &statement-parser = curry-parser-emitting-Tabula( "Statement" );
     $parse = statement-parser( "block as statement", $block-as-statement );
 }
 
 
 #if False
 {   diag "Table-Cells tests";
-    my &parser = curry-parser-for( 'Table-Cells' );
+    my &parser = curry-parser-emitting-Tabula( 'Table-Cells' );
 
     my $table-cells = "Sinister | Dexter | Dorsal | Ventral";
 
@@ -102,7 +102,7 @@ say "\n";
 
 #if False
 {   diag "Table tests";
-    my &parser = curry-parser-for( 'Table' );
+    my &parser = curry-parser-emitting-Tabula( 'Table' );
 
     my $table = q:to/EOT/;
         ===   Chirality Today   ===
@@ -138,7 +138,7 @@ say "\n";
 
 #if False
 {   diag "Troublesome Table tests";
-    my &parser = curry-parser-for( 'Table' );
+    my &parser = curry-parser-emitting-Tabula( 'Table' );
 
     my $table = q:to/EOT/;
         [ Supervisors ]
@@ -151,7 +151,7 @@ say "\n";
 
 #if False
 {   diag "Paragraph tests";
-    my &parser = curry-parser-for( 'Paragraph' );
+    my &parser = curry-parser-emitting-Tabula( 'Paragraph' );
 
     # TODO:30 Statement parsing which catches indentation so that the actions class can re-emit it.
     my $paragraph = q:to/EOP/;
@@ -169,7 +169,7 @@ say "\n";
 
 #if False
 {   diag "Scenario tests";
-    my &parser = curry-parser-for( 'Scenario' );
+    my &parser = curry-parser-emitting-Tabula( 'Scenario' );
 
     my $scenario = q:to/EOS/;
         Scenario:  "Eat the music"

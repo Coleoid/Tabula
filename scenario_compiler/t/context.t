@@ -16,7 +16,7 @@ use Tabula::Grammar-Testing;
     # A ton of this happens at startup time
     $context.RegisterLibrary($lib);
 
-    my &parser = curry-csharp-parser-for("Step");
+    my &parser = curry-parser-emitting-Testopia("Step");
     my $match = parser("Basic step found in library", "this is A STEP");
 
     my ($success, $call) = $context.GetFixtureCall($match);

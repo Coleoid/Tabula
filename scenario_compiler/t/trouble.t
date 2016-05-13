@@ -6,7 +6,7 @@ say "\n";
 
 #if False
 {   diag "Troublesome Table tests";
-    my &parser = curry-parser-for( 'Table' );
+    my &parser = curry-parser-emitting-Tabula( 'Table' );
 
     my $table = q:to/EOT/;
         [ Supervisors ]

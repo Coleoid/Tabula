@@ -1,7 +1,7 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my &parser = curry-csharp-parser-for( "Step" );
+my &parser = curry-parser-emitting-Testopia( "Step" );
 say "\n";
 
 if False
