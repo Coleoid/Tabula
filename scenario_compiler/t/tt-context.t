@@ -4,19 +4,18 @@ use Tabula::Grammar-Testing;
 #if False
 {   diag "A Build-Context will fetch steps from libraries in scope";
 
-    my $context = Build-Context.new;
+    my (&parser, $context) = curry-parser-emitting-Testopia("Step");
 
-    ok $context, "get a context via construction";
+    ok $context, "get a context from Target-Testopia";
     is $context.scopes.elems, 1, "start with one scope";
 
     # Phony up a library for testing
-    my $lib = StepLibrary.new(name => "AdviceWorkflow");
+    my $lib = StepLibrary.new(class-name => "AdviceWorkflow");
     $lib.steps{'notthis'} = "Not_This";
 
     # A ton of this happens at startup time
     $context.RegisterLibrary($lib);
 
-    my &parser = curry-parser-emitting-Testopia("Step");
     my $match = parser("Basic step found in library", "this is A STEP");
 
     my ($success, $call) = $context.GetFixtureCall($match);

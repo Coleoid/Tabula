@@ -6,8 +6,6 @@ use Tabula::Build-Context;
 
 module Grammar-Testing {
 
-    our $CSharp-Context is export;
-
     multi sub skip( $desc, &code ) is export { skip $desc }
 
     sub curry-parser-emitting-Tabula( $rule ) is export {
@@ -29,14 +27,17 @@ module Grammar-Testing {
         use Test;
         state $grammar = Tabula-Grammar.new;
         state $actions = Target-Testopia.new;
-        once { $CSharp-Context = $actions.Context; }
 
-        return sub ( $label, $input ) {
-            my $out = $grammar.parse( $input, :rule($rule), :actions($actions) );
-            ok $out, "[$label] $rule parses";
-            return unless $out ~~ Match;
-
-            return $out;
-        }
+        return (
+            sub ( $label, $input ) {
+                my $out = $grammar.parse( $input, :rule($rule), :actions($actions) );
+                if $out !~~ Match {
+                    ok $out, "[$label] $rule parses";
+                    return;
+                }
+                return $out;
+            },
+            $actions.Context
+        );
     }
 }

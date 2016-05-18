@@ -1,7 +1,7 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my &parser = curry-parser-emitting-Testopia( "Step" );
+my (&parser, $context) = curry-parser-emitting-Testopia( "Step" );
 say "\n";
 
 if False
@@ -33,11 +33,11 @@ if False
 {   diag "Finding calls matching step text";
     my $lib = StepLibrary.new(name => 'Advice');
     $lib.steps{'thisisastep'} = 'This_is_a_step';
-    $CSharp-Context.RegisterLibrary($lib);
-    $CSharp-Context.AddLibraryToScope($lib);
+    $context.RegisterLibrary($lib);
+    $context.AddLibraryToScope($lib);
 
     my $parse = parser( "find method with no args", 'this is a step' );
-    is $parse.made, 'Do( () =>    Advice.This_is_a_step(),    "SampleTabulaScenario.scn:1", @"Advice.This_is_a_step()" );',
+    is $parse.made, 'Do(() =>     Advice.This_is_a_step(),    "SampleScenario.scn:1", @"Advice.This_is_a_step()" );',
         "outputs the expected line for one step";
 
 }

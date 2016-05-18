@@ -1,12 +1,14 @@
 
 class StepLibrary {
-    has Str $.name;
-    has $.flatName;
+    has Str $.class-name;
+    has Str $.instance-name;
+    has Str $.flat-name;
 
     has %.steps;
 
-    submethod BUILD(:$!name) {
-        $!flatName = $!name.lc.subst(' ', '');
+    submethod BUILD(:$!class-name is required, :$!instance-name = "") {
+
+        $!flat-name = $!class-name.lc.subst('workflow', '');
     }
 }
 
@@ -18,44 +20,54 @@ class Scope {
     submethod BUILD(:$!name, :$!parent) {
     }
 
-    method AddLibrary($name) {
-        @!libraries.push($name);
+    method AddLibrary($library) {
+        @!libraries.push($library) unless (@!libraries.first: * == $library);
     }
 }
 
 class Build-Context {
-    has $.fileName;
+    has $.file-name;
     has Scope @.scopes;
-    has %.allLibraries;
-    has Scope $!currentScope;
+    has Scope $.current-scope;
+    has %.registered-libraries;
+    has @.Problems;
 
     submethod BUILD {
         self.BeginScope("Outer scenario scope");
     }
 
     method BeginScope($name) {
-        $!currentScope = Scope.new(
+        $!current-scope = Scope.new(
             name => ($name // 'unnamed block'),
-            parent => $!currentScope );
-        @!scopes.push($!currentScope);
+            parent => $!current-scope
+        );
+        @!scopes.push($!current-scope);
     }
 
     method EndScope() {
-        $!currentScope // fail "trying to end a scope where there is none.";
+        $!current-scope // fail "trying to end a scope where there is none.";
 
         @!scopes.pop();
-        $!currentScope = $!currentScope.parent;
+        $!current-scope = $!current-scope.parent;
     }
 
     method RegisterLibrary($lib) {
-        %!allLibraries{$lib.flatName} = $lib;
+        %!registered-libraries{$lib.flat-name} = $lib;
     }
 
-    method AddLibraryToScope(StepLibrary $library) {
-        my $flatName = $library.name.lc.subst(' ', '');
-        if %!allLibraries{$flatName} :exists {
-            $!currentScope.AddLibrary($library);
+    multi method AddLibraryToScope(Str $phrase) {
+        my $flatName = $phrase.lc.subst(' ', '').subst('workflow', '');
+        my $library = %!registered-libraries{$flatName} // 0;
+        if  $library {
+            self.AddLibraryToScope($library);
         }
+        else {
+            @!Problems.push( "Did not find library <<$flatName>> to add to scope." );
+        }
+    }
+
+    multi method AddLibraryToScope(StepLibrary $library) {
+        $!current-scope.AddLibrary($library);
     }
 
     method GetFixtureCall($match) {
@@ -83,10 +95,10 @@ class Build-Context {
 
     method !findStepMethod($flatName) {
 
-        for $!currentScope.libraries {
+        for $!current-scope.libraries {
             if .steps{$flatName}:exists {
                 my $foundMethod = .steps{$flatName};
-                return True, .name ~ "." ~ $foundMethod;
+                return True, .class-name ~ "." ~ $foundMethod;
             }
         }
 

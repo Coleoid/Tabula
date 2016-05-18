@@ -45,17 +45,27 @@ class Target-Testopia {
     }
 
     method Command-Use($/) {
-        for $<Phrases> {
-            $!Context.AddLibraryToScope($_);
+        for $<Phrases><Phrase> {
+            $!Context.AddLibraryToScope(~$_);
         }
     }
 
+    sub line-of-match-start($match) {
+        1 + ($match.prematch.comb: /\n/)
+    }
+
+    sub lines-in-match($match) {
+        1 + ($match.comb: /\n/)
+    }
+
     method Paragraph($/) {
-        #TODO:  Line number counting
+        my $start-line = line-of-match-start($/);
+        my $end-line = $start-line + lines-in-match($/) - 2;
+        my $range-suffix = sprintf("_from_%03d_to_%03d", $start-line, $end-line);
         make
-            "\tpublic void paragraph_01()\n\{"
-            ~ [~] $<Statement>.map({ "\t\t" ~ .made})
-            ~ "\}\n\n"
+            "    public void paragraph" ~ $range-suffix ~ "()\n    \{\n "
+            ~ [~] $<Statement>.map({ "   " ~ .made})
+            ~ "    \}\n"
     }
 
     method Phrase($/) {
@@ -67,7 +77,7 @@ class Target-Testopia {
     }
 
     method Scenario($/) {
-        #TODO:  Class name should come off of file name
+        #TODO:  Class name should be built from file name
         my $class_name = normalized-name-CSharp($<String>) ~ '_generated';
         make "public class $class_name \{\n"
             ~ [~] $<Section>.map({.made})
@@ -91,16 +101,16 @@ class Target-Testopia {
     }
 
     method Step($match) {
-        my $sourceLocation = '"SampleScenario.scn:1"'; #HACK: sourceLocation
+        my $sourceLocation = '"SampleScenario.scn:' ~ line-of-match-start($match) ~ '"'; #HACK: sourceLocation
 
         my ($success, $fixtureCall) = $!Context.GetFixtureCall($match);
         if $success {
-            my $quotedCommand = '@"' ~ (S:g / '"' /""/) ~ '"';
-            $match.make( "Do( () =>    $_,    $sourceLocation, $quotedCommand );" );
+            my $quotedCommand = '@"' ~ $fixtureCall.subst('"', '\"') ~ '"';
+            $match.make( "Do(() =>     $fixtureCall,     $sourceLocation, $quotedCommand );" );
         }
         else {
             my $stepText = ~$match;
-            $match.make( "Unfound(     \"$stepText\",    $sourceLocation )");
+            $match.make( "Unfound(     \"$stepText\",     $sourceLocation );");
         }
     }
 
