@@ -101,16 +101,16 @@ class Target-Testopia {
     }
 
     method Step($match) {
-        my $sourceLocation = '"SampleScenario.scn:' ~ line-of-match-start($match) ~ '"'; #HACK: sourceLocation
+        my $source-location = '"SampleScenario.scn:' ~ line-of-match-start($match) ~ '"'; #HACK: source file name
 
-        my ($success, $fixtureCall) = $!Context.GetFixtureCall($match);
-        if $success {
-            my $quotedCommand = '@"' ~ $fixtureCall.subst('"', '\"') ~ '"';
-            $match.make( "Do(() =>     $fixtureCall,     $sourceLocation, $quotedCommand );" );
+        my $result = $!Context.GetFixtureCall($match, $source-location.subst('"', '', :g));
+        if $result {
+            my $quotedCommand = '@"' ~ $result.subst('"', '\"') ~ '"';
+            $match.make( "Do(() =>     $result,     $source-location, $quotedCommand );" );
         }
         else {
             my $stepText = ~$match;
-            $match.make( "Unfound(     \"$stepText\",     $sourceLocation );");
+            $match.make( "Unfound(     \"$stepText\",     $source-location );");
         }
     }
 

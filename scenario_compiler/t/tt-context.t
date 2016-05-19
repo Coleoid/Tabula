@@ -18,20 +18,20 @@ use Tabula::Grammar-Testing;
 
     my $match = parser("Basic step found in library", "this is A STEP");
 
-    my ($success, $call) = $context.GetFixtureCall($match);
-    nok $success, "With no libraries in scope, we find no method";
-    is $call, "this is A STEP", "failure returns original step text";
+    my $result = $context.GetFixtureCall($match, "myfile.scn:28");
+    nok $result, "With no libraries in scope, we find no method";
+    is $result.exception.message, "myfile.scn:28:  Did not find step to match 'this is A STEP' in libraries in scope.", "...and get a sensible error";
 
     # This happens when we encounter a ">use: advice workflow" command
     $context.AddLibraryToScope($lib);
 
-    ($success, $call) = $context.GetFixtureCall($match);
-    nok $success, "With libraries in scope but no matching method, we find no method";
+    $result = $context.GetFixtureCall($match, "myfile.scn:28");
+    nok $result, "With libraries in scope but no matching method, we find no method";
 
     # This would not normally happen in mid-run, but it's useful to do now for testing
     $lib.steps{'thisisastep'} = "This_is_a_step";
 
-    ($success, $call) = $context.GetFixtureCall($match);
-    ok $success, "When method matches in workflow in context, it is found";
-    is $call, "AdviceWorkflow.This_is_a_step()", "Class, method, and args are presented";
+    $result = $context.GetFixtureCall($match, "myfile.scn:28");
+    ok $result, "When method matches in workflow in context, it is found";
+    is $result, "AdviceWorkflow.This_is_a_step()", "Class, method, and args are presented";
 }

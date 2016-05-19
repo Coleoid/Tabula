@@ -7,13 +7,13 @@ say "\n";
 #if False
 {   diag "Basic Paragraph output";
 
-    my $lib = StepLibrary.new(name => "Advice");
+    my $lib = StepLibrary.new(class-name => "AdviceWorkflow", instance-name => "Advice");
     $lib.steps{'something'} = "Some_Thing";
     $lib.steps{'thisisastep'} = "This_is_a_step";
     $context.RegisterLibrary($lib);
     $context.AddLibraryToScope($lib);
 
-    my $check-lib = StepLibrary.new(name => "Check");
+    my $check-lib = StepLibrary.new(class-name => "CheckWorkflow");
     $check-lib.steps{'amidone'} = "Am_I_Done";
     $context.RegisterLibrary($check-lib);
 
@@ -32,8 +32,12 @@ say "\n";
             }
         EO_testo
 
+    is $context.problems.elems, 1, "unfound step is a problem";
+    is $context.problems[0], "SampleScenario.scn:2:  Did not find step to match '? Am I done' in libraries in scope.", "...with a sensible message";
+
+
     $context.AddLibraryToScope($check-lib);
-    my $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( "Paragraph", $paragraph-source );
 
     is $parse.made, q:to/EO_testo/, "workflow methods found when library added to scope";
             public void paragraph_from_001_to_002()

@@ -7,8 +7,11 @@ class StepLibrary {
     has %.steps;
 
     submethod BUILD(:$!class-name is required, :$!instance-name = "") {
-
-        $!flat-name = $!class-name.lc.subst('workflow', '');
+        my $short-name = $!class-name.subst('Workflow', '');
+        $!flat-name = $short-name.lc;
+        if $!instance-name eq "" {
+            $!instance-name = $short-name;
+        }
     }
 }
 
@@ -20,8 +23,14 @@ class Scope {
     submethod BUILD(:$!name, :$!parent) {
     }
 
-    method AddLibrary($library) {
-        @!libraries.push($library) unless (@!libraries.first: * == $library);
+    method AddLibrary(StepLibrary $library) {
+        for @!libraries {
+            if $_ ~~ $library {
+                fail "Tried to add duplicate library <<$($library.flat-name)>>.";
+            }
+        }
+        @!libraries.push($library);
+        return True;
     }
 }
 
@@ -30,7 +39,7 @@ class Build-Context {
     has Scope @.scopes;
     has Scope $.current-scope;
     has %.registered-libraries;
-    has @.Problems;
+    has @.problems;
 
     submethod BUILD {
         self.BeginScope("Outer scenario scope");
@@ -56,30 +65,35 @@ class Build-Context {
     }
 
     multi method AddLibraryToScope(Str $phrase) {
-        my $flatName = $phrase.lc.subst(' ', '').subst('workflow', '');
+        my $flatName = $phrase.lc.subst(' ', '', :g).subst('workflow', '');
         my $library = %!registered-libraries{$flatName} // 0;
         if  $library {
             self.AddLibraryToScope($library);
         }
         else {
-            @!Problems.push( "Did not find library <<$flatName>> to add to scope." );
+            @!problems.push( "Did not find library <<$flatName>> to add to scope." );
         }
     }
 
     multi method AddLibraryToScope(StepLibrary $library) {
-        $!current-scope.AddLibrary($library);
+        my $result = $!current-scope.AddLibrary($library);
+        if not $result {
+            @!problems.push( $result.exception.message );
+        }
     }
 
-    method GetFixtureCall($match) {
-        my ($found, $methodName) = self!getMethodName($match);
+    method GetFixtureCall($match, $location) {
+        my $result = self!getMethodName($match);
 
-        if $found {
+        if $result {
             my $argsText = getArgsText($match);
-            return True, $methodName ~ "($argsText)";
+            return $result ~ "($argsText)";
         }
         else {
-            return False, ~$match;
-            #TODO: Text::Levenshtein::Damerau
+            #TODO:  Text::Levenshtein::Damerau to find close misses
+            my $message = $location ~ ':  ' ~ $result.exception.message ~ " '" ~ ~$match ~ "' in libraries in scope.";
+            @!problems.push( $message );
+            fail $message;
         }
     }
 
@@ -94,22 +108,22 @@ class Build-Context {
     }
 
     method !findStepMethod($flatName) {
-
+        #TODO:  Loop upward through parent scopes seeking step in libraries
         for $!current-scope.libraries {
             if .steps{$flatName}:exists {
                 my $foundMethod = .steps{$flatName};
-                return True, .class-name ~ "." ~ $foundMethod;
+                return .instance-name ~ "." ~ $foundMethod;
             }
         }
 
-        return False, "No such method in scope";
+        fail "Did not find step to match";
     }
 
     sub getArgsText($match) {
         my @args = gather {
             for $match<Symbol> {
                 when .<Term> {
-                    #TODO: handle target param types other than string
+                    #TODO:  Handle target param types other than string
                     when .<Term><String> {take .<Term>.made};
                     when .<Term><Number> {take '"' ~ .<Term>.made ~ '"'};
                     when .<Term><Date>   {take '"' ~ .<Term>.made ~ '"'};

@@ -24,15 +24,17 @@ say "\n";
     $parse = parser( "another workflow", ">use: Check workflow" );
     is $context.current-scope.libraries.elems, 2, "a different use command will add another library to scope";
 
-    is $context.Problems.elems, 0, "neither success case is a problem";
+    is $context.problems.elems, 0, "neither success case is a problem";
 
 
     $parse = parser( "duplicate workflow", ">use: Advice workflow" );
     is $context.current-scope.libraries.elems, 2, "a duplicate use command does not add library again";
-    is $context.Problems.elems, 1, "a use command with a duplicate workflow will mark a problem";
+    is $context.problems.elems, 1, "a use command with a duplicate workflow will mark a problem";
+    is $context.problems[0], "Tried to add duplicate library <<advice>>.", "...with a sensible message";
 
     $parse = parser( "unfound workflow", ">use: No Such workflow" );
     is $context.current-scope.libraries.elems, 2, "a use command not finding a workflow will (le duh) not add one";
-    is $context.Problems.elems, 1, "a use command not finding a workflow will mark a problem";
+    is $context.problems.elems, 2, "a use command not finding a workflow will mark a problem";
+    is $context.problems[1], "Did not find library <<nosuch>> to add to scope.", "...with a sensible message";
 
 }

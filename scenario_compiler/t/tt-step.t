@@ -4,15 +4,30 @@ use Tabula::Grammar-Testing;
 my (&parser, $context) = curry-parser-emitting-Testopia( "Step" );
 say "\n";
 
-if False
+my $lib = StepLibrary.new(class-name => 'AdviceWorkflow');
+$lib.steps{'thisisastep'} = 'This_is_a_step';
+$lib.steps{'pleasedontthe'} = 'Please_dont__the__';
+$context.RegisterLibrary($lib);
+$context.AddLibraryToScope($lib);
+
+#if False
+{   diag "Finding calls matching step text";
+    my $parse = parser( "find method with no args", 'this is a step' );
+    is $parse.made, 'Do(() =>     Advice.This_is_a_step(),     "SampleScenario.scn:1", @"Advice.This_is_a_step()" );',
+        "outputs the expected line for one step";
+}
+
+#if False
 {   diag "Emitting arguments into fixture calls";
-    #TODO: Prep a repo of methods via hard-coding Advice Workflow and its method.
 
     my $parse = parser( "Step with simple args", 'please don\'t "kick" the "alligators"' );
     is $parse.made, 'Do( () =>    Advice.Please_dont__the__("kick", "alligators"),    "SampleTabulaScenario.scn:1", @"Advice.Please_dont__the__(""kick"", ""alligators"")" );',
         "outputs the expected line for one step";
+}
 
-    $parse = parser( "Same step, different args", 'please don\'t "feed" the "trolls"' );
+if False    #   this will be unified with the above block when it passes
+{
+    my $parse = parser( "Same step, different args", 'please don\'t "feed" the "trolls"' );
     is $parse.made, 'Do( () =>    Advice.Please_dont__the__("feed", "trolls"),    "SampleTabulaScenario.scn:1", @"Advice.Please_dont__the__(""feed"", ""trolls"")" );',
         "outputs the expected args when changed";
 
@@ -29,19 +44,6 @@ if False
         "dereferences variable without further cast when signature takes string";
 }
 
-#if False
-{   diag "Finding calls matching step text";
-    my $lib = StepLibrary.new(name => 'Advice');
-    $lib.steps{'thisisastep'} = 'This_is_a_step';
-    $context.RegisterLibrary($lib);
-    $context.AddLibraryToScope($lib);
-
-    my $parse = parser( "find method with no args", 'this is a step' );
-    is $parse.made, 'Do(() =>     Advice.This_is_a_step(),    "SampleScenario.scn:1", @"Advice.This_is_a_step()" );',
-        "outputs the expected line for one step";
-
-}
-
 
 if False
 {   diag "Emitting arguments into Tabula blocks"
@@ -54,3 +56,5 @@ if False
         #   One where the step has a variable
         #       And then where the v
 }
+
+say $context.problems;
