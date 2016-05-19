@@ -33,5 +33,5 @@ use Tabula::Grammar-Testing;
 
     $result = $context.GetFixtureCall($match, "myfile.scn:28");
     ok $result, "When method matches in workflow in context, it is found";
-    is $result, "AdviceWorkflow.This_is_a_step()", "Class, method, and args are presented";
+    is $result, "Advice.This_is_a_step()", "Class, method, and args are presented";
 }
