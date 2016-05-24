@@ -11,10 +11,12 @@ use Tabula::Grammar-Testing;
 
     # Phony up a library for testing
     my $lib = StepLibrary.new(class-name => "AdviceWorkflow");
-    $lib.steps{'notthis'} = "Not_This";
+    $lib.steps{'notthis'} = ("Not_This", ());
 
+    nok $context.lib-declarations.defined, "starting with no libraries declared";
     # A ton of this happens at startup time
     $context.RegisterLibrary($lib);
+    is $context.lib-declarations, "        public AdviceWorkflow Advice = new AdviceWorkflow();\n", "registering a library gets it declared and initialized";
 
     my $match = parser("Basic step found in library", "this is A STEP");
 
@@ -29,7 +31,7 @@ use Tabula::Grammar-Testing;
     nok $result, "With libraries in scope but no matching method, we find no method";
 
     # This would not normally happen in mid-run, but it's useful to do now for testing
-    $lib.steps{'thisisastep'} = "This_is_a_step";
+    $lib.steps{'thisisastep'} = ("This_is_a_step", ());
 
     $result = $context.GetFixtureCall($match, "myfile.scn:28");
     ok $result, "When method matches in workflow in context, it is found";

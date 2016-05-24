@@ -105,11 +105,11 @@ class Target-Testopia {
 
         my $result = $!Context.GetFixtureCall($match, $source-location.subst('"', '', :g));
         if $result {
-            my $quotedCommand = '@"' ~ $result.subst('"', '\"') ~ '"';
+            my $quotedCommand = '@"' ~ $result.subst('"', '""', :g) ~ '"';
             $match.make( "Do(() =>     $result,     $source-location, $quotedCommand );" );
         }
         else {
-            my $stepText = ~$match;
+            my $stepText = $match.subst('"', '\"', :g);
             $match.make( "Unfound(     \"$stepText\",     $source-location );");
         }
     }

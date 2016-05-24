@@ -5,8 +5,9 @@ my (&parser, $context) = curry-parser-emitting-Testopia( "Step" );
 say "\n";
 
 my $lib = StepLibrary.new(class-name => 'AdviceWorkflow');
-$lib.steps{'thisisastep'} = 'This_is_a_step';
-$lib.steps{'pleasedontthe'} = 'Please_dont__the__';
+$lib.steps{'thisisastep'} = ('This_is_a_step', ());
+$lib.steps{'pleasedontthe'} = ('Please_dont__the__', (Str, Str));
+
 $context.RegisterLibrary($lib);
 $context.AddLibraryToScope($lib);
 
@@ -21,29 +22,35 @@ $context.AddLibraryToScope($lib);
 {   diag "Emitting arguments into fixture calls";
 
     my $parse = parser( "Step with simple args", 'please don\'t "kick" the "alligators"' );
-    is $parse.made, 'Do( () =>    Advice.Please_dont__the__("kick", "alligators"),    "SampleTabulaScenario.scn:1", @"Advice.Please_dont__the__(""kick"", ""alligators"")" );',
+    is $parse.made, 'Do(() =>     Advice.Please_dont__the__("kick", "alligators"),     "SampleScenario.scn:1", @"Advice.Please_dont__the__(""kick"", ""alligators"")" );',
         "outputs the expected line for one step";
 }
 
-if False    #   this will be unified with the above block when it passes
+#if False    #   this will be unified with the above block when it passes
 {
     my $parse = parser( "Same step, different args", 'please don\'t "feed" the "trolls"' );
-    is $parse.made, 'Do( () =>    Advice.Please_dont__the__("feed", "trolls"),    "SampleTabulaScenario.scn:1", @"Advice.Please_dont__the__(""feed"", ""trolls"")" );',
+    is $parse.made, 'Do(() =>     Advice.Please_dont__the__("feed", "trolls"),     "SampleScenario.scn:1", @"Advice.Please_dont__the__(""feed"", ""trolls"")" );',
         "outputs the expected args when changed";
 
     $parse = parser( "Quoting a numeric arg", 'please don\'t "disrespect" the 42' );
-    is $parse.made, 'Do( () =>    Advice.Please_dont__the__("disrespect", "42"),    "SampleTabulaScenario.scn:1", @"Advice.Please_dont__the__(""disrespect"", ""42"")" );',
+    is $parse.made, 'Do(() =>     Advice.Please_dont__the__("disrespect", "42"),     "SampleScenario.scn:1", @"Advice.Please_dont__the__(""disrespect"", ""42"")" );',
         "quotes numeric arg when signature takes string";
 
     $parse = parser( "Quoting a date arg", 'please don\'t "forget" the 9/11/2001' );
-    is $parse.made, 'Do( () =>    Advice.Please_dont__the__("forget", "9/11/2001"),    "SampleTabulaScenario.scn:1", @"Advice.Please_dont__the__(""forget"", ""9/11/2001"")" );',
+    is $parse.made, 'Do(() =>     Advice.Please_dont__the__("forget", "9/11/2001"),     "SampleScenario.scn:1", @"Advice.Please_dont__the__(""forget"", ""9/11/2001"")" );',
         "quotes date arg when signature takes string";
 
     $parse = parser( "Interpreting a variable arg", 'please don\'t "hassle" the #Hoff' );
-    is $parse.made, 'Do( () =>    Advice.Please_dont__the__("hassle", val["Hoff"]),    "SampleTabulaScenario.scn:1", @"Advice.Please_dont__the__(""hassle"", val[""Hoff""])" );',
+    is $parse.made, 'Do(() =>     Advice.Please_dont__the__("hassle", val["Hoff"]),     "SampleScenario.scn:1", @"Advice.Please_dont__the__(""hassle"", val[""Hoff""])" );',
         "dereferences variable without further cast when signature takes string";
 }
 
+#if False
+{   diag "Not finding calls when the arguments don't match";
+    my $parse = parser( "find method with no args", 'this is a step "which should not be found"' );
+    is $parse.made, 'Unfound(     "this is a step \"which should not be found\"",     "SampleScenario.scn:1" );',
+        "should not find a method when the step usage does not match the method signature";
+}
 
 if False
 {   diag "Emitting arguments into Tabula blocks"
@@ -51,7 +58,9 @@ if False
 
 if False
 {   diag "Finding calls matching step args"
-        #TODO:10 New test cases for argument interpretation
+
+
+        #TODO: New test cases for argument interpretation
         #   One where we have a string where the signature takes an int, testing that it's cast properly
         #   One where the step has a variable
         #       And then where the v

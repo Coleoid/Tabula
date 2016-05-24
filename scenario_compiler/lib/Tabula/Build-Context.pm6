@@ -5,6 +5,7 @@ class StepLibrary {
     has Str $.flat-name;
 
     has %.steps;
+    has %.args;
 
     submethod BUILD(:$!class-name is required, :$!instance-name = "") {
         my $short-name = $!class-name.subst('Workflow', '');
@@ -34,12 +35,15 @@ class Scope {
     }
 }
 
+#   ===================================
 class Build-Context {
     has $.file-name;
     has Scope @.scopes;
     has Scope $.current-scope;
-    has %.registered-libraries;
+    has %.registry;
+    has %.yet-initialized;
     has @.problems;
+    has $.lib-declarations;
 
     submethod BUILD {
         self.BeginScope("Outer scenario scope");
@@ -61,12 +65,16 @@ class Build-Context {
     }
 
     method RegisterLibrary($lib) {
-        %!registered-libraries{$lib.flat-name} = $lib;
+        if not %!registry{$lib.flat-name} {
+            %!registry{$lib.flat-name} = $lib;
+            $!lib-declarations ~= "        public " ~ $lib.class-name ~ " "
+                ~ $lib.instance-name ~ " = new " ~ $lib.class-name ~ "();\n";
+        }
     }
 
     multi method AddLibraryToScope(Str $phrase) {
         my $flatName = $phrase.lc.subst(' ', '', :g).subst('workflow', '');
-        my $library = %!registered-libraries{$flatName} // 0;
+        my $library = %!registry{$flatName} // 0;
         if  $library {
             self.AddLibraryToScope($library);
         }
@@ -98,20 +106,22 @@ class Build-Context {
     }
 
     method !getMethodName($match) {
+        my $arg-count = 0;
         my @words = gather {
             for $match<Symbol> {
-                when .<Word> {take .<Word>.lc}
+                when .<Word> {take .<Word>.lc.subst("'", '', :g)}
+                when .<Term> {$arg-count++}
             }
         }
         my $flatName = join "", @words;
-        return self!findStepMethod($flatName);
+        return self!findStepMethod($flatName, $arg-count);
     }
 
-    method !findStepMethod($flatName) {
+    method !findStepMethod($flatName, $arg-count) {
         #TODO:  Loop upward through parent scopes seeking step in libraries
         for $!current-scope.libraries {
-            if .steps{$flatName}:exists {
-                my $foundMethod = .steps{$flatName};
+            if .steps{$flatName}:exists && .steps{$flatName}[1] == $arg-count {
+                my $foundMethod = .steps{$flatName}[0];
                 return .instance-name ~ "." ~ $foundMethod;
             }
         }

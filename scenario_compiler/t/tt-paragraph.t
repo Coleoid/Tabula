@@ -8,13 +8,13 @@ say "\n";
 {   diag "Basic Paragraph output";
 
     my $lib = StepLibrary.new(class-name => "AdviceWorkflow", instance-name => "Advice");
-    $lib.steps{'something'} = "Some_Thing";
-    $lib.steps{'thisisastep'} = "This_is_a_step";
+    $lib.steps{'something'} = ("Some_Thing", ());
+    $lib.steps{'thisisastep'} = ("This_is_a_step", ());
     $context.RegisterLibrary($lib);
     $context.AddLibraryToScope($lib);
 
     my $check-lib = StepLibrary.new(class-name => "CheckWorkflow");
-    $check-lib.steps{'amidone'} = "Am_I_Done";
+    $check-lib.steps{'amidone'} = ("Am_I_Done", ());
     $context.RegisterLibrary($check-lib);
 
     my $paragraph-source = q:to/EOP/;
