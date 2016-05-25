@@ -7,9 +7,30 @@ class Target-Testopia {
         $!Context = Build-Context.new();
     }
 
-    method TOP($/) {
-        make $<Scenario>.made
+
+
+    sub line-of-match-start($match) {
+        1 + ($match.prematch.comb: /\n/)
     }
+
+    sub lines-in-match($match) {
+        1 + ($match.comb: /\n/)
+    }
+
+    sub normalized-name-CSharp(@words) {
+        join '', @words.map({.wordcase})
+    }
+
+    sub get-Do-statement( $code, $source-location ) {
+        my $quoted-code = '@"' ~ $code.subst('"', '""', :g) ~ '"';
+
+        'Do(() =>     ' ~ $code
+            ~ ',     "' ~ $source-location ~ '", ' ~ $quoted-code ~ ' );';
+    }
+
+
+    ##################################################################
+    ### Grammar methods, alphabetically (which puts TOP at the bottom)
 
     method Action($/) {
         make ($<Step> || $<Block> || $<Command>).made
@@ -35,7 +56,9 @@ class Target-Testopia {
     }
 
     method Command-Alias($/) {
-        make ">alias: $<Step> => $<Action>"
+        my $label = $<Word>;
+        my $value = $<Term>;
+        make get-Do-statement( 'alias["this"] = "that"', "SampleScenario.scn:1" );
     }
 
     method Command-Tag($/) {
@@ -48,14 +71,6 @@ class Target-Testopia {
         for $<Phrases><Phrase> {
             $!Context.AddLibraryToScope(~$_);
         }
-    }
-
-    sub line-of-match-start($match) {
-        1 + ($match.prematch.comb: /\n/)
-    }
-
-    sub lines-in-match($match) {
-        1 + ($match.comb: /\n/)
     }
 
     method Paragraph($/) {
@@ -77,15 +92,11 @@ class Target-Testopia {
     }
 
     method Scenario($/) {
-        #TODO:  Class name should be built from file name
+        #TODO:  Build class name from file name
         my $class_name = normalized-name-CSharp($<String>) ~ '_generated';
         make "public class $class_name \{\n"
             ~ [~] $<Section>.map({.made})
             ~ "}\n"
-    }
-
-    sub normalized-name-CSharp(@words) {
-        join '', @words.map({.wordcase})
     }
 
     method Section($/) {
@@ -101,16 +112,15 @@ class Target-Testopia {
     }
 
     method Step($match) {
-        my $source-location = '"SampleScenario.scn:' ~ line-of-match-start($match) ~ '"'; #HACK: source file name
+        my $source-location = 'SampleScenario.scn:' ~ line-of-match-start($match); #HACK: source file name
 
-        my $result = $!Context.GetFixtureCall($match, $source-location.subst('"', '', :g));
+        my $result = $!Context.GetFixtureCall($match, $source-location);
         if $result {
-            my $quotedCommand = '@"' ~ $result.subst('"', '""', :g) ~ '"';
-            $match.make( "Do(() =>     $result,     $source-location, $quotedCommand );" );
+            $match.make( get-Do-statement( $result, $source-location ) );
         }
         else {
             my $stepText = $match.subst('"', '\"', :g);
-            $match.make( "Unfound(     \"$stepText\",     $source-location );");
+            $match.make( 'Unfound(     "' ~ $stepText ~ '",     "' ~ $source-location ~ '" );' );
         }
     }
 
@@ -147,5 +157,9 @@ class Target-Testopia {
 
     method Term($/) {
         make $<Date> || $<Number> || $<String> || $<ID>
+    }
+
+    method TOP($/) {
+        make $<Scenario>.made
     }
 }

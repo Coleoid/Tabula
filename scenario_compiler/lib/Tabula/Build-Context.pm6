@@ -129,18 +129,28 @@ class Build-Context {
         fail "Did not find step to match";
     }
 
+    sub get-Term-string($term) {
+        given $term {
+            when .<String> {return .made};
+            when .<Number> {return '"' ~ .made ~ '"'};
+            when .<Date>   {return '"' ~ .made ~ '"'};
+            when .<ID>     {return 'alias["' ~ .<ID><Word> ~ '"]'};
+            default {fail "Unknown Term type"};
+        }
+    }
+
     sub getArgsText($match) {
         my @args = gather {
-            for $match<Symbol> {
-                when .<Term> {
-                    #TODO:  Handle target param types other than string
-                    when .<Term><String> {take .<Term>.made};
-                    when .<Term><Number> {take '"' ~ .<Term>.made ~ '"'};
-                    when .<Term><Date>   {take '"' ~ .<Term>.made ~ '"'};
-                    when .<Term><ID>     {take 'val["' ~ .<Term><ID><Word> ~ '"]'};
-                    default {fail "Unknown Term type"};
-                }
-            }
+
+            $match<Symbol>
+                .grep({.<Term>})
+                .map({take get-Term-string(.<Term>)});
+
+#            for $match<Symbol> {
+#                when .<Term> {
+#                    take get-Term-string( .<Term> )
+#                }
+#            }
         }
         return join ', ', @args;
     }
