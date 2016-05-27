@@ -21,11 +21,16 @@ class Target-Tabula {
     }
 
     method Command($/) {
-        make ($<Command-Use> || $<Command-Tag> || $<Command-Alias>).made
+        make ($<Command-Use> || $<Command-Tag> || $<Command-Alias> || $<Command-Step>).made
     }
 
     method Command-Alias($/) {
-        make ">alias: $<Step> => $<Action>"
+        my $lhs = $<Word> || $<ID>;
+        make ">alias: $lhs => $<Term>"
+    }
+
+    method Command-Step($/) {
+        make ">step: $<Phrase> => $<Action>"
     }
 
     method Command-Tag($/) {

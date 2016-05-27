@@ -14,17 +14,16 @@ grammar Tabula-Grammar {
         token Table-Row    { <Indentation> '|' <Table-Cells> '|' \h* \n }
         token Table-Cells  { <Table-Cell>+ % '|' }
         token Table-Cell   { [\h* <Phrases> \h*] || <Empty-Cell> }
-            token Phrases    { <Phrase>+ % ',' }
-            token Phrase     { \h* <Symbol>+ % \h* }
             token Empty-Cell { \h+ }
 
     token Statement { <Indentation> <Action> \h* <Comment>? \n }
     token Action { <Block> || <Step> || <Command> }
-    token Step { $<OptQ> = '? '? \h* <Symbol>+ % \h+ }
-    token Command { <Command-Use> || <Command-Alias> || <Command-Tag> }
+    token Step { $<OptQ> = '? '? \h* <Symbol>+ % \h+ } #TODO: replace body of Step with Phrase
+    token Command { <Command-Use> || <Command-Alias> || <Command-Tag> || <Command-Step> }
         token Command-Use   { '>' use ':' \h* <Phrases> \h* }
         token Command-Tag   { '>' tags? ':' \h* <Phrases> \h* }
-        token Command-Alias { '>' alias ':' \h* <Step> \h* '=>' \h* <Action> }
+        token Command-Alias { '>' alias ':' \h* [ <Word> || <ID> ] \h* '=>' \h* <Term> }
+        token Command-Step  { '>' step ':' \h* <Phrase> \h* '=>' \h* <Action> }
     token Block { <String>? \h* <Block-Begin> \h* \n <Section>+ <Block-End> }
         token Block-Begin { '...' }
         token Block-End { <Indentation> '.' }
@@ -33,9 +32,11 @@ grammar Tabula-Grammar {
     token Indentation { \h* }
     token Comment { '//' \N* }
 
-    token Symbol { <Word> || <Term> }
-    token Word { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }   # using just \w+, numbers were words.
-    token Term { [ <Date> || <Number> || <String> || <ID> ] }
+    token Phrases { <Phrase>+ % ',' }
+    token Phrase  { \h* <Symbol>+ % \h* }
+    token Symbol  { <Word> || <Term> }
+    token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }   # using just \w+, numbers were words.
+    token Term    { [ <Date> || <Number> || <String> || <ID> ] }
 
     token Number { \d+ }
     token String { '"' <-["]>* '"' }

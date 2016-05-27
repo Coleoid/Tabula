@@ -91,7 +91,7 @@ class Build-Context {
     }
 
     method GetFixtureCall($match, $location) {
-        my $result = self!getMethodName($match);
+        my $result = self!get-method-name($match);
 
         if $result {
             my $argsText = getArgsText($match);
@@ -99,13 +99,14 @@ class Build-Context {
         }
         else {
             #TODO:  Text::Levenshtein::Damerau to find close misses
-            my $message = $location ~ ':  ' ~ $result.exception.message ~ " '" ~ ~$match ~ "' in libraries in scope.";
+            my $message = $location ~ ':  ' ~ $result.exception.message
+                ~ " '" ~ ~$match ~ "' in libraries in scope.";
             @!problems.push( $message );
             fail $message;
         }
     }
 
-    method !getMethodName($match) {
+    method !get-method-name($match) {
         my $arg-count = 0;
         my @words = gather {
             for $match<Symbol> {
@@ -114,10 +115,10 @@ class Build-Context {
             }
         }
         my $flatName = join "", @words;
-        return self!findStepMethod($flatName, $arg-count);
+        return self!find-step-method($flatName, $arg-count);
     }
 
-    method !findStepMethod($flatName, $arg-count) {
+    method !find-step-method($flatName, $arg-count) {
         #TODO:  Loop upward through parent scopes seeking step in libraries
         for $!current-scope.libraries {
             if .steps{$flatName}:exists && .steps{$flatName}[1] == $arg-count {
@@ -135,23 +136,15 @@ class Build-Context {
             when .<Number> {return '"' ~ .made ~ '"'};
             when .<Date>   {return '"' ~ .made ~ '"'};
             when .<ID>     {return 'alias["' ~ .<ID><Word> ~ '"]'};
-            default {fail "Unknown Term type"};
+            default        {fail "Unknown Term type"};
         }
     }
 
     sub getArgsText($match) {
-        my @args = gather {
+        my @args = $match<Symbol>
+            .grep({.<Term>})
+            .map({get-Term-string(.<Term>)});
 
-            $match<Symbol>
-                .grep({.<Term>})
-                .map({take get-Term-string(.<Term>)});
-
-#            for $match<Symbol> {
-#                when .<Term> {
-#                    take get-Term-string( .<Term> )
-#                }
-#            }
-        }
         return join ', ', @args;
     }
 

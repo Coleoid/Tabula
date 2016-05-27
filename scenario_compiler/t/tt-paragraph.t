@@ -48,3 +48,5 @@ say "\n";
         EO_testo
 
 }
+
+done-testing;

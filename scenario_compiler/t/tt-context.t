@@ -37,3 +37,5 @@ use Tabula::Grammar-Testing;
     ok $result, "When method matches in workflow in context, it is found";
     is $result, "Advice.This_is_a_step()", "Class, method, and args are presented";
 }
+
+done-testing;

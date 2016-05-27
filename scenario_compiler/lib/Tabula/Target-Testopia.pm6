@@ -56,9 +56,12 @@ class Target-Testopia {
     }
 
     method Command-Alias($/) {
-        my $label = $<Word>;
-        my $value = $<Term>;
-        make get-Do-statement( 'alias["this"] = "that"', "SampleScenario.scn:1" );
+        my $lhs = $<Word>
+            ?? '"' ~ $<Word>.lc ~ '"'
+            !! $<ID>.made;
+        my $rhs = $<Term>.made;
+
+        make get-Do-statement( 'alias[' ~ $lhs ~ '] = ' ~ $rhs , "SampleScenario.scn:1" );
     }
 
     method Command-Tag($/) {
@@ -71,6 +74,10 @@ class Target-Testopia {
         for $<Phrases><Phrase> {
             $!Context.AddLibraryToScope(~$_);
         }
+    }
+
+    method ID($/) {
+        make 'alias["' ~ $<Word>.lc ~ '"]';
     }
 
     method Paragraph($/) {
@@ -156,7 +163,7 @@ class Target-Testopia {
     }
 
     method Term($/) {
-        make $<Date> || $<Number> || $<String> || $<ID>
+        make $<Date> || $<Number> || $<String> || $<ID>.made
     }
 
     method TOP($/) {

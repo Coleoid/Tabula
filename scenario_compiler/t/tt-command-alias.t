@@ -17,4 +17,10 @@ say "\n";
     is $parse.made, 'Do(() =>     alias["other"] = "another",     "SampleScenario.scn:1", @"alias[""other""] = ""another""" );',
         "resulting alias uses supplied values";
 
+    $parse = parser( "aliases on each side", '>alias: #nickname => #fullName' );
+    is $parse.made, 'Do(() =>     alias[alias["nickname"]] = alias["fullname"],     "SampleScenario.scn:1", @"alias[alias[""nickname""]] = alias[""fullname""]" );',
+        "evaluating references";
+
 }
+
+done-testing;

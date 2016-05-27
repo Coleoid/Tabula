@@ -27,9 +27,9 @@ say "\n";
     my &parser = curry-parser-emitting-Tabula( 'Command' );
     my $parse;
 
-#    $parse = parser( 'use', ">use: Mail Server" );
-#    $parse = parser( 'tags', ">tags: Housing, Person Search, AC-20341" );
-    $parse = parser( 'simple alias', '>alias: crush #victim => crush #victim without "mercy"' );
+    $parse = parser( 'use', ">use: Mail Server" );
+    $parse = parser( 'tags', ">tags: Housing, Person Search, AC-20341" );
+    $parse = parser( 'simple alias', '>alias: JR => "Jackie Robinson"' );
 }
 
 
@@ -184,3 +184,5 @@ say "\n";
     ok $parse<Section>[0]<Break-Line>, "First a Break-Line";
     ok $parse<Section>[1]<Paragraph>, "Then a Paragraph";
 }
+
+done-testing;

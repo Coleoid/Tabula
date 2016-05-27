@@ -126,7 +126,7 @@ if False
         | #Mimi    | #OA      | Instructor | Reserve  | Part Time | 8/15/2012  |
     .
 
-    >alias: "Add employment actions for #employeeName at #orgName" => ...
+    >step: "Add employment actions for #employeeName at #orgName" => ...
         >use: Employment Action Edit
 
         Browse to Add Employment Action for #employeeName at #orgName
@@ -238,3 +238,5 @@ if False
     EOS
 
 }
+
+done-testing;

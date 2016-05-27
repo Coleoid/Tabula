@@ -38,3 +38,5 @@ say "\n";
     is $context.problems[1], "Did not find library <<nosuch>> to add to scope.", "...with a sensible message";
 
 }
+
+done-testing;
