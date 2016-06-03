@@ -8,12 +8,12 @@ say "\n";
 {   diag "A use command adds a library to the current scope";
 
     my $lib = StepLibrary.new(instance-name => "Advice", class-name => "AdviceWorkflow");
-    $lib.steps{'something'} = "Some_Thing";
-    $lib.steps{'thisisastep'} = "This_is_a_step";
+    $lib.steps{'something'} = ("Some_Thing", ());
+    $lib.steps{'thisisastep'} = ("This_is_a_step", ());
     $context.RegisterLibrary($lib);
 
     my $check-lib = StepLibrary.new(instance-name => "Check", class-name => "CheckWorkflow");
-    $check-lib.steps{'amidone'} = "Am_I_Done";
+    $check-lib.steps{'amidone'} = ("Am_I_Done", ());
     $context.RegisterLibrary($check-lib);
 
     is $context.current-scope.libraries.elems, 0, "begin with no libraries in scope";

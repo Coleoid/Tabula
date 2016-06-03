@@ -64,6 +64,10 @@ class Target-Testopia {
         make get-Do-statement( 'alias[' ~ $lhs ~ '] = ' ~ $rhs , "SampleScenario.scn:1" );
     }
 
+    method Command-Step($/) {
+
+    }
+
     method Command-Tag($/) {
 
         my $cmd = $<PhraseList>.elems == 1 ?? 'tag' !! 'tags';

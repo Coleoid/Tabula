@@ -47,7 +47,7 @@ $context.AddLibraryToScope($lib);
 
 #if False
 {   diag "discriminate on method signature";
-    my $parse = parser( "find method with no args", 'this is a step "which should not be found"' );
+    my $parse = parser( "fail to find method", 'this is a step "which should not be found"' );
     is $parse.made, 'Unfound(     "this is a step \"which should not be found\"",     "SampleScenario.scn:1" );',
         "should not find a method when the step usage does not match the method signature";
 }

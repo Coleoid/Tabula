@@ -80,7 +80,7 @@ class Target-Tabula {
     }
 
     method Step($/) {
-        make "$<OptQ>$<Symbol>".trim
+        make "$<OptQ>$<Phrase>".trim
     }
 
     method Symbol($/) {

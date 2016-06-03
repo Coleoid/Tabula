@@ -40,7 +40,7 @@ say "\n";
     my $step = 'Give me 4 things like "Bill" got on #day';
     my $parse = parser( 'parameterized', $step );
 
-    my $symbols = $parse<Symbol>;
+    my $symbols = $parse<Phrase><Symbol>;
     ok $symbols[2]<Term><Number>, "Number in Step parses as a Term";
     is $symbols[2], 4, "Expected value comes through for Number";
 
@@ -113,7 +113,7 @@ say "\n";
         EOT
 
     my $parse = parser( 'small full', $table );
-    is $parse<Table-Label><Step>, "Chirality Today", "Get the label";
+    is $parse<Table-Label><Phrase>.made, "Chirality Today", "Get the label";
     is $parse<Table-Header><Table-Cells><Table-Cell>.elems, 2, "Find two columns in the header";
     is $parse<Table-Row>.elems, 3, "Found two rows";
 

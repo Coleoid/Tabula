@@ -109,7 +109,7 @@ class Build-Context {
     method !get-method-name($match) {
         my $arg-count = 0;
         my @words = gather {
-            for $match<Symbol> {
+            for $match<Phrase><Symbol> {
                 when .<Word> {take .<Word>.lc.subst("'", '', :g)}
                 when .<Term> {$arg-count++}
             }
