@@ -1,10 +1,76 @@
 use Tabula::Build-Context;
 
+class CSharpScribe {
+
+    sub get-class-prefix() {
+        q:to/END/;
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+
+        namespace Tabula
+        {
+        END
+    }
+
+    sub get-class-name($file-name) {
+        $file-name.subst('.scn', '') ~ '_generated';
+    }
+
+    sub get-class-declaration($class-name) {
+'    public class ' ~ $class-name ~ '
+        : GeneratedScenarioBase, IGeneratedScenario
+    {
+';
+    }
+
+    sub get-class-scenario-name($file-name, $scenario-label) {
+'        ScenarioName = "' ~ $file-name ~ ':  This and That";
+';
+    }
+
+    sub get-class-constructor($class-name) {
+'        public ' ~ $class-name ~ '(TabulaStepRunner runner)
+            : base(runner)
+        { }
+';
+    }
+
+    sub get-class-execute-scenario() {
+'        public void ExecuteScenario()
+        {
+        }
+';
+    }
+
+    sub get-class-suffix() {
+'    }
+}
+';
+    }
+
+    method Assemble($file-name, $scenario-name) {
+        my $class-name = get-class-name($file-name);
+
+        get-class-prefix() ~
+        get-class-declaration($class-name) ~
+        get-class-scenario-name($file-name, $scenario-name) ~
+        "\n" ~
+        get-class-constructor($class-name) ~
+        "\n" ~
+        get-class-execute-scenario() ~
+        get-class-suffix();
+    }
+
+}
+
 class Target-Testopia {
     has $.Context;
+    has $.Scribe;
 
     submethod BUILD {
         $!Context = Build-Context.new();
+        $!Scribe = CSharpScribe.new();
     }
 
 
@@ -102,65 +168,8 @@ class Target-Testopia {
         $!Context.file-name.subst('.scn', '')
     }
 
-    sub get-class-prefix() {
-        q:to/END/;
-        using System;
-        using System.Collections.Generic;
-        using System.Linq;
-
-        namespace Tabula
-        {
-        END
-    }
-
-    sub get-class-name($file-name) {
-        $file-name.subst('.scn', '') ~ '_generated';
-    }
-
-    sub get-class-declaration($class-name) {
-'    public class ' ~ $class-name ~ '
-        : GeneratedScenarioBase, IGeneratedScenario
-    {
-';
-    }
-
-    sub get-class-scenario-name($file-name, $scenario-label) {
-'        ScenarioName = "' ~ $file-name ~ ':  This and That";
-';
-    }
-
-    sub get-class-constructor($class-name) {
-'        public ' ~ $class-name ~ '(TabulaStepRunner runner)
-            : base(runner)
-        { }
-';
-    }
-
-    sub get-class-execute-scenario() {
-'        public void ExecuteScenario()
-        {
-        }
-';
-    }
-
-    sub get-class-suffix() {
-'    }
-}
-';
-    }
-
     method Scenario($/) {
-        my $class-name = get-class-name($!Context.file-name);
-
-        make
-            get-class-prefix() ~
-            get-class-declaration($class-name) ~
-            get-class-scenario-name($!Context.file-name, $<String>) ~
-            "\n" ~
-            get-class-constructor($class-name) ~
-            "\n" ~
-            get-class-execute-scenario() ~
-            get-class-suffix();
+        make $!Scribe.Assemble();
     }
 
     method Section($/) {

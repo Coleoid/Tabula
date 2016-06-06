@@ -66,6 +66,5 @@ if False
         #       And then where the v
 }
 
-say $context.problems;
-
 done-testing;
+diag $context.problems;
