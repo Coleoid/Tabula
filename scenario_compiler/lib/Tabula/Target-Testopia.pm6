@@ -169,7 +169,7 @@ class Target-Testopia {
     }
 
     method Scenario($/) {
-        make $!Scribe.Assemble();
+        make $!Scribe.Assemble($!Context.file-name, $<String>);
     }
 
     method Section($/) {
@@ -185,7 +185,7 @@ class Target-Testopia {
     }
 
     method Step($match) {
-        my $source-location = 'SampleScenario.scn:' ~ line-of-match-start($match); #HACK: source file name
+        my $source-location = $!Context.file-name ~ ':' ~ line-of-match-start($match);
 
         my $result = $!Context.GetFixtureCall($match, $source-location);
         if $result {

@@ -8,6 +8,7 @@ my $lib = StepLibrary.new(class-name => 'AdviceWorkflow');
 $lib.steps{'thisisastep'} = ('This_is_a_step', ());
 $lib.steps{'pleasedontthe'} = ('Please_dont__the__', (Str, Str));
 
+$context.file-name = "SampleScenario.scn";
 $context.RegisterLibrary($lib);
 $context.AddLibraryToScope($lib);
 

@@ -8,6 +8,7 @@ use Tabula::Grammar-Testing;
 
     ok $context, "get a context from Target-Testopia";
     is $context.scopes.elems, 1, "start with one scope";
+    $context.file-name = "myfile.scn";
 
     # Phony up a library for testing
     my $lib = StepLibrary.new(class-name => "AdviceWorkflow");

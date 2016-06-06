@@ -10,6 +10,7 @@ say "\n";
     my $lib = StepLibrary.new(class-name => "AdviceWorkflow", instance-name => "Advice");
     $lib.steps{'something'} = ("Some_Thing", ());
     $lib.steps{'thisisastep'} = ("This_is_a_step", ());
+    $context.file-name = "SampleScenario.scn";
     $context.RegisterLibrary($lib);
     $context.AddLibraryToScope($lib);
 
