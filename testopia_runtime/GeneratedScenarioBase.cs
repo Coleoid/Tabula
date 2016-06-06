@@ -13,6 +13,7 @@ namespace Tabula
         public List<List<string>> Data;
     }
 
+
     public class GeneratedScenarioBase
     {
         public ScenarioContext Context { get; set; }
@@ -29,7 +30,12 @@ namespace Tabula
             Runner.Do(step, sourceLocation, stepText);
         }
 
-        public void TableOverParagraph(Table table, Action paragraph)
+        public void Unfound(string stepText, string sourceLocation)
+        {
+            Runner.Unfound(stepText, sourceLocation);
+        }
+
+        public void ActOnTable(Action paragraph, Table table)
         {
             foreach (var row in table.Rows)
             {
@@ -41,7 +47,7 @@ namespace Tabula
 
     }
 
-    public class ScenarioContext 
+    public class ScenarioContext
     {
         public void Push(Row row)
         {}

@@ -107,7 +107,7 @@ class Target-Tabula {
     }
 
     method Table-Label($/) {
-        make "$<Indentation>=== $<Step> ===\n"
+        make "$<Indentation>=== $<Phrase> ===\n"
     }
 
     method Table-Row($/) {

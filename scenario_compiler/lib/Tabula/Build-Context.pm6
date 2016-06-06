@@ -37,7 +37,7 @@ class Scope {
 
 #   ===================================
 class Build-Context {
-    has $.file-name;
+    has Str $.file-name is rw;
     has Scope @.scopes;
     has Scope $.current-scope;
     has %.registry;
@@ -141,7 +141,7 @@ class Build-Context {
     }
 
     sub getArgsText($match) {
-        my @args = $match<Symbol>
+        my @args = $match<Phrase><Symbol>
             .grep({.<Term>})
             .map({get-Term-string(.<Term>)});
 

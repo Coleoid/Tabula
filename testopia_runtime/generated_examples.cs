@@ -4,7 +4,8 @@ using System.Linq;
 
 namespace Tabula
 {
-    public class paragraphAndTable_generated : GeneratedScenarioBase
+    public class paragraphAndTable_generated
+        : GeneratedScenarioBase, IGeneratedScenario
     {
         public FunkyWorkflow Funky;
         public EvaluateResultsWorkflow EvaluateResults;
@@ -15,14 +16,14 @@ namespace Tabula
             : base(runner)
         { }
 
-        public void MainScenario()
+        public void ExecuteScenario()
         {
             Funky = new FunkyWorkflow(Context);
             EvaluateResults = new EvaluateResultsWorkflow(Context);
 
             table_from_007_to_009 = new Table {
                 Header = new List<string>     { "Things"    , "Stuff"     },
-                Data = new List<List<string>> { 
+                Data = new List<List<string>> {
                     new List<string>          { "email"     , "paperwork" },
                     new List<string>          { "groceries" , "dinner"    }
                 }
@@ -41,7 +42,7 @@ namespace Tabula
 
 
         //  For sake of this example, this text is found in the file paragraphAndTable.scn
-        public string scenarioText = 
+        public string scenarioText =
 @"Scenario: ""This and That""
 >use: Funky Workflow, EvaluateResultsWorkflow
 

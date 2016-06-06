@@ -4,7 +4,7 @@ grammar Tabula-Grammar {
     rule TOP { <Scenario> }
     # TODO:70 rule Module { [Scenario || Library] + }
 
-    token Scenario { <Indentation> [:i scenario] <.ws> ':' <.ws> <String> \h* \n <Section>+ }
+    token Scenario { <Indentation> [:i scenario] <.ws> ':' <.ws> <String> \h* \n <Section>* }
     token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
 
     token Break-Line { ^^ \h* \n }

@@ -60,7 +60,8 @@ say "\n";
     my &parser = curry-parser-emitting-Tabula( "Statement" );
 
     my $parse = parser( "simple step", "do a thing\n" );
-    $parse = parser( "standard punctuation in step", "'Twas better than half-baked\n" );
+    #TODO: invalidate this test when I expand strings to be single-quote delimitable
+    $parse = parser( "standard punctuation in step", "'Twas better than half-baked, n'est-ce pas?\n" );
     $parse = parser( "Use Command", ">use: Floor Wax\n" );
     $parse = parser( "commented", "Thing  // the suchness of thing-nature\n" );
     is $parse<Comment>, '// the suchness of thing-nature', "Catch the optional comment";
