@@ -4,7 +4,8 @@ use Tabula::Grammar-Testing;
 #if False
 {   diag "A Build-Context will fetch steps from libraries in scope";
 
-    my (&parser, $context) = curry-parser-emitting-Testopia("Step");
+    my (&parser, $actions) = curry-parser-emitting-Testopia("Step");
+    my $context = $actions.Context;
 
     ok $context, "get a context from Target-Testopia";
     is $context.scopes.elems, 1, "start with one scope";

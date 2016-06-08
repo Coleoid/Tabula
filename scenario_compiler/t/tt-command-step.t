@@ -1,7 +1,8 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my (&parser, $context) = curry-parser-emitting-Testopia( "Action" );
+my (&parser, $actions) = curry-parser-emitting-Testopia( "Action" );
+my $context = $actions.Context;
 say "\n";
 
 #TODO:  Think!  How should step and libraries interact?

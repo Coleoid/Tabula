@@ -1,7 +1,8 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my (&parser, $context) = curry-parser-emitting-Testopia( "Step" );
+my (&parser, $actions) = curry-parser-emitting-Testopia( "Step" );
+my $context = $actions.Context;
 say "\n";
 
 my $lib = StepLibrary.new(class-name => 'AdviceWorkflow');

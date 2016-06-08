@@ -1,7 +1,7 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my (&parser, $context) = curry-parser-emitting-Testopia( "Command" );
+my (&parser, $actions) = curry-parser-emitting-Testopia( "Command" );
 say "\n";
 
 #TODO:  Think!  How should aliases and libraries interact?

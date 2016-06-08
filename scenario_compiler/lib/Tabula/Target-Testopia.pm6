@@ -1,68 +1,5 @@
 use Tabula::Build-Context;
-
-class CSharpScribe {
-
-    sub get-class-prefix() {
-        q:to/END/;
-        using System;
-        using System.Collections.Generic;
-        using System.Linq;
-
-        namespace Tabula
-        {
-        END
-    }
-
-    sub get-class-name($file-name) {
-        $file-name.subst('.scn', '') ~ '_generated';
-    }
-
-    sub get-class-declaration($class-name) {
-'    public class ' ~ $class-name ~ '
-        : GeneratedScenarioBase, IGeneratedScenario
-    {
-';
-    }
-
-    sub get-class-scenario-name($file-name, $scenario-label) {
-'        ScenarioName = "' ~ $file-name ~ ':  This and That";
-';
-    }
-
-    sub get-class-constructor($class-name) {
-'        public ' ~ $class-name ~ '(TabulaStepRunner runner)
-            : base(runner)
-        { }
-';
-    }
-
-    sub get-class-execute-scenario() {
-'        public void ExecuteScenario()
-        {
-        }
-';
-    }
-
-    sub get-class-suffix() {
-'    }
-}
-';
-    }
-
-    method Assemble($file-name, $scenario-name) {
-        my $class-name = get-class-name($file-name);
-
-        get-class-prefix() ~
-        get-class-declaration($class-name) ~
-        get-class-scenario-name($file-name, $scenario-name) ~
-        "\n" ~
-        get-class-constructor($class-name) ~
-        "\n" ~
-        get-class-execute-scenario() ~
-        get-class-suffix();
-    }
-
-}
+use Tabula::CSharp-Scribe;
 
 class Target-Testopia {
     has $.Context;
@@ -70,7 +7,7 @@ class Target-Testopia {
 
     submethod BUILD {
         $!Context = Build-Context.new();
-        $!Scribe = CSharpScribe.new();
+        $!Scribe = CSharp-Scribe.new();
     }
 
 
@@ -131,7 +68,6 @@ class Target-Testopia {
     }
 
     method Command-Tag($/) {
-
         my $cmd = $<PhraseList>.elems == 1 ?? 'tag' !! 'tags';
         make ">$cmd: $<Phrases>"
     }
@@ -149,11 +85,16 @@ class Target-Testopia {
     method Paragraph($/) {
         my $start-line = line-of-match-start($/);
         my $end-line = $start-line + lines-in-match($/) - 2;
-        my $range-suffix = sprintf("_from_%03d_to_%03d", $start-line, $end-line);
-        make
-            "    public void paragraph" ~ $range-suffix ~ "()\n    \{\n "
+
+        my $name = sprintf("paragraph_from_%03d_to_%03d", $start-line, $end-line);
+        my $para = "    public void " ~ $name ~ "()\n    \{\n "
             ~ [~] $<Statement>.map({ "   " ~ .made})
-            ~ "    \}\n"
+            ~ "    \}\n";
+
+        $!Scribe.add-para-to-scenario($name);
+        $!Scribe.declare-paragraph($para);
+
+        make $para;  # this only supports unit tests, yet pays off until UT rewrite, at least.
     }
 
     method Phrase($/) {
@@ -169,7 +110,10 @@ class Target-Testopia {
     }
 
     method Scenario($/) {
-        make $!Scribe.Assemble($!Context.file-name, $<String>);
+        $!Scribe.scenario-title = $<String>;
+        $!Scribe.file-name = $!Context.file-name;
+
+        make $!Scribe.Assemble();
     }
 
     method Section($/) {

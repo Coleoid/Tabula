@@ -1,7 +1,8 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my (&parser, $context) = curry-parser-emitting-Testopia( "Command" );
+my (&parser, $actions) = curry-parser-emitting-Testopia( "Command" );
+my $context = $actions.Context;
 say "\n";
 
 #if False

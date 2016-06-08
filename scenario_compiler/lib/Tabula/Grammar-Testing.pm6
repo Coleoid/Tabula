@@ -37,7 +37,7 @@ module Grammar-Testing {
                 }
                 return $out;
             },
-            $actions.Context
+            $actions
         );
     }
 }
