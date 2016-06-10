@@ -87,9 +87,9 @@ class Target-Testopia {
         my $end-line = $start-line + lines-in-match($/) - 2;
 
         my $name = sprintf("paragraph_from_%03d_to_%03d", $start-line, $end-line);
-        my $para = "    public void " ~ $name ~ "()\n    \{\n "
-            ~ [~] $<Statement>.map({ "   " ~ .made})
-            ~ "    \}\n";
+        my $para = "        public void " ~ $name ~ "()\n        \{\n "
+            ~ [~] $<Statement>.map({ "           " ~ .made})
+            ~ "        \}\n";
 
         $!Scribe.add-para-to-scenario($name);
         $!Scribe.declare-paragraph($para);

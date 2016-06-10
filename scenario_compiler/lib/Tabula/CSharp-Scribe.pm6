@@ -4,7 +4,8 @@ class CSharp-Scribe {
     has $!class-name;
 
     my $execute-body = "\n        ";
-    my @paragraph-declarations;
+    my @section-declarations;
+    my @table-declarations;
 
     method get-class-prefix() {
         q:to/END/;
@@ -46,6 +47,11 @@ class CSharp-Scribe {
 ';
     }
 
+    method get-section-declarations() {
+        return "" if @section-declarations.elems == 0;
+        return "\n" ~ (join "\n", @section-declarations);
+    }
+
     method get-class-suffix() {
 '    }
 }
@@ -57,8 +63,8 @@ class CSharp-Scribe {
         $execute-body ~= '    ' ~ $name ~ "();\n        ";
     }
 
-    method declare-paragraph( $para ) {
-        @paragraph-declarations.push( $para );
+    method declare-section( $section ) {
+        @section-declarations.push( $section );
     }
 
     method Assemble() {
@@ -71,6 +77,7 @@ class CSharp-Scribe {
         self.get-class-constructor() ~
         "\n" ~
         self.get-class-execute-scenario() ~
+        self.get-section-declarations() ~
         self.get-class-suffix();
     }
 

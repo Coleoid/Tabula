@@ -44,7 +44,7 @@ $context.file-name = "ScenarioFilename.scn";
 }
 
 #if False
-{   diag "The ExecuteScenario method contains calls to paragraphs";
+{   diag "The ExecuteScenario method calls a lone paragraph";
 
     my $scribe = $actions.Scribe;
     my $scenario = q:to/EOS/;
@@ -54,18 +54,61 @@ $context.file-name = "ScenarioFilename.scn";
     do another thing
     EOS
 
-    my $expected-output = q:to/EOC/;
+    my $parse = parser( "single para", $scenario );
+
+
+    my $expected = q:to/EOC/;
             public void ExecuteScenario()
             {
                 paragraph_from_003_to_004();
             }
     EOC
 
-    my $parse = parser( "empty scenario", $scenario );
+    my $output-method = $scribe.get-class-execute-scenario();
+    is $output-method, $expected, "Scenario with one paragraph calls it in ExecuteScenario";
+
+    $expected = q:to/EOP/;
+
+            public void paragraph_from_003_to_004()
+            {
+                Unfound(     "do a thing",     "ScenarioFilename.scn:3" );
+                Unfound(     "do another thing",     "ScenarioFilename.scn:4" );
+            }
+    EOP
+
+    my $output-paragraphs = $scribe.get-paragraph-methods();
+    is $output-paragraphs, $expected, "Scenario with one paragraph declares it";
+
+}
+
+#if False
+{   diag "The ExecuteScenario method runs a paragraph across all rows of a following table";
+
+    my $scribe = $actions.Scribe;
+    my $scenario = q:to/EOS/;
+    Scenario:  "This and That"
+
+    do a thing with #lhs
+    do another thing with #rhs
+
+    [ lhs | rhs ]
+    | abc | xyz |
+    | 012 | 789 |
+    EOS
+
+    my $parse = parser( "table following para", $scenario );
+
+
+    my $expected = q:to/EOC/;
+            public void ExecuteScenario()
+            {
+                Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_009 );
+            }
+    EOC
 
     my $output-method = $scribe.get-class-execute-scenario();
+    is $output-method, $expected, "Scenario with one paragraph-table pair runs para for each row";
 
-    is $output-method, $expected-output, "Scenario with one paragraph calls it in ExecuteScenario";
 }
 
 

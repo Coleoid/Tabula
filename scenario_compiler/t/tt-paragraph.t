@@ -20,8 +20,8 @@ say "\n";
     $context.RegisterLibrary($check-lib);
 
     my $paragraph-source = q:to/EOP/;
-        this is a step
-        ? Am I done
+    this is a step
+    ? Am I done
     EOP
     my $parse = parser( "Paragraph", $paragraph-source );
 
@@ -32,9 +32,9 @@ say "\n";
                 Do(() =>     Advice.This_is_a_step(),     "SampleScenario.scn:1", @"Advice.This_is_a_step()" );
                 Unfound(     "? Am I done",     "SampleScenario.scn:2" );
             }
-        EO_testo
+    EO_testo
 
-    is $context.problems.elems, 1, "unfound step is a problem";
+    is $context.problems.elems, 1, "unfound step is listed in \@problems";
     is $context.problems[0], "SampleScenario.scn:2:  Did not find step to match '? Am I done' in libraries in scope.", "...with a sensible message";
 
 
@@ -47,7 +47,7 @@ say "\n";
                 Do(() =>     Advice.This_is_a_step(),     "SampleScenario.scn:1", @"Advice.This_is_a_step()" );
                 Do(() =>     Check.Am_I_Done(),     "SampleScenario.scn:2", @"Check.Am_I_Done()" );
             }
-        EO_testo
+    EO_testo
 
 }
 
