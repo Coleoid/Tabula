@@ -6,7 +6,7 @@ my (&parser, $actions) = curry-parser-emitting-Testopia("Scenario");
 my $context = $actions.Context;
 $context.file-name = "ScenarioFilename.scn";
 
-#if False
+if False
 {   diag "We emit a C# class corresponding to our scenario";
 
     my $scenario = q:to/EOS/;
@@ -43,7 +43,7 @@ $context.file-name = "ScenarioFilename.scn";
     is $output-class, $expected-class-output, "empty scenario creates compilable empty class";
 }
 
-#if False
+if False
 {   diag "The ExecuteScenario method calls a lone paragraph";
 
     my $scribe = $actions.Scribe;
@@ -76,7 +76,7 @@ $context.file-name = "ScenarioFilename.scn";
             }
     EOP
 
-    my $output-paragraphs = $scribe.get-paragraph-methods();
+    my $output-paragraphs = $scribe.get-section-declarations();
     is $output-paragraphs, $expected, "Scenario with one paragraph declares it";
 
 }
@@ -102,7 +102,7 @@ $context.file-name = "ScenarioFilename.scn";
     my $expected = q:to/EOC/;
             public void ExecuteScenario()
             {
-                Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_009 );
+                Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_008 );
             }
     EOC
 

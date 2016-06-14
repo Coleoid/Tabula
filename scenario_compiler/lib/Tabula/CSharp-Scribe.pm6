@@ -58,9 +58,27 @@ class CSharp-Scribe {
 ';
     }
 
-    #TODO: calling the paragraph only via tables
-    method add-para-to-scenario( $name ) {
-        $execute-body ~= '    ' ~ $name ~ "();\n        ";
+    method add-section-to-scenario( $name ) {
+        state $prior-paragraph = "";
+        state $paragraph-used = True;
+
+        if $name ~~ /^paragraph/ {
+            if not $paragraph-used {
+                $execute-body ~= '    ' ~ $prior-paragraph ~ "();\n        ";
+            }
+            $prior-paragraph = $name;
+            $paragraph-used = False;
+        }
+        elsif $name ~~ /^table/ {
+            $execute-body ~= '    Run_para_over_table( ' ~ $prior-paragraph ~ ', ' ~ $name ~ " );\n        ";
+            $paragraph-used = True;
+        }
+        elsif $name eq '' {
+            if not $paragraph-used {
+                $execute-body ~= '    ' ~ $prior-paragraph ~ "();\n        ";
+            }
+        }
+        else { die "what is this name [$name]?" }
     }
 
     method declare-section( $section ) {

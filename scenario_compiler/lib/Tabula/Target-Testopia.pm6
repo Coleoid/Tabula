@@ -29,7 +29,7 @@ class Target-Testopia {
 
 
     ##################################################################
-    ### Grammar methods, alphabetically (which puts TOP at the bottom)
+    ### Grammar methods, alphabetically (putting TOP at the bottom :)
 
     method Action($/) {
         make ($<Step> || $<Block> || $<Command>).made
@@ -91,8 +91,8 @@ class Target-Testopia {
             ~ [~] $<Statement>.map({ "           " ~ .made})
             ~ "        \}\n";
 
-        $!Scribe.add-para-to-scenario($name);
-        $!Scribe.declare-paragraph($para);
+        $!Scribe.add-section-to-scenario($name);
+        $!Scribe.declare-section($para);
 
         make $para;  # this only supports unit tests, yet pays off until UT rewrite, at least.
     }
@@ -146,10 +146,21 @@ class Target-Testopia {
     }
 
     method Table($/) {
-        make
-            ($<Table-Label> || "")
-            ~ ($<Table-Header> || "")
-            ~ [~] $<Table-Row>.map({.made})
+        my $start-line = line-of-match-start($/);
+        my $end-line = $start-line + lines-in-match($/) - 2;
+
+        my $name = sprintf("table_from_%03d_to_%03d", $start-line, $end-line);
+
+        my $table = '        var ' ~ $name ~ " = new Table \{
+            Header = new List<string>     \{ \"Things\"    , \"Stuff\"     \},
+            Data = new List<List<string>> \{
+                new List<string>          \{ \"email\"     , \"paperwork\" \},
+                new List<string>          \{ \"groceries\" , \"dinner\"    \}
+            \}
+};\n";
+
+        $!Scribe.add-section-to-scenario( $name );
+        $!Scribe.declare-section( $table );
     }
 
     method Table-Cell($/) {
