@@ -43,7 +43,7 @@ if False
     is $output-class, $expected-class-output, "empty scenario creates compilable empty class";
 }
 
-if False
+#if False
 {   diag "The ExecuteScenario method calls a lone paragraph";
 
     my $scribe = $actions.Scribe;
@@ -78,7 +78,7 @@ if False
 
     my $output-paragraphs = $scribe.get-section-declarations();
     is $output-paragraphs, $expected, "Scenario with one paragraph declares it";
-
+    $scribe.finish-scenario();
 }
 
 #if False
