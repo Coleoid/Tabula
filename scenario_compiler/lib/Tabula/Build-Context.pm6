@@ -121,6 +121,7 @@ class Build-Context {
     method !find-step-method($flatName, $arg-count) {
         #TODO:  Loop upward through parent scopes seeking step in libraries
         for $!current-scope.libraries {
+            #TODO:  Distinguish among overloaded methods
             if .steps{$flatName}:exists && .steps{$flatName}[1] == $arg-count {
                 my $foundMethod = .steps{$flatName}[0];
                 return .instance-name ~ "." ~ $foundMethod;
@@ -130,6 +131,7 @@ class Build-Context {
         fail "Did not find step to match";
     }
 
+    #TODO:  Evaluate terms as number and date types
     sub get-Term-string($term) {
         given $term {
             when .<String> {return .made};
@@ -147,6 +149,5 @@ class Build-Context {
 
         return join ', ', @args;
     }
-
 
 }
