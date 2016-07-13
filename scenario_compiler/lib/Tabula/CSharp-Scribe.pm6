@@ -52,28 +52,39 @@ class CSharp-Scribe {
     }
 
     method get-class-declaration() {
-'    public class ' ~ $!class-name ~ '
-        : GeneratedScenarioBase, IGeneratedScenario
-    {
-';
+        qq:to/END/;
+            public class $!class-name
+                : GeneratedScenarioBase, IGeneratedScenario
+            \{
+        END
     }
 
     method get-class-scenario-label() {
-'        public string ScenarioLabel = "' ~ $!file-name ~ ':  ' ~ $!scenario-title ~ '";
-';
+        qq:to/END/;
+                public string ScenarioLabel = "$!file-name:  $!scenario-title";
+        END
     }
 
     method get-class-constructor() {
-'        public ' ~ $!class-name ~ '(TabulaStepRunner runner)
-            : base(runner)
-        { }
-';
+        qq:to/END/;
+                public $!class-name\(TabulaStepRunner runner)
+                    : base(runner)
+                \{ \}
+        END
     }
 
+    has $.class-ExecuteScenario;
+
     method get-class-execute-scenario() {
-'        public void ExecuteScenario()
-        {' ~ $execute-body ~ '}
-';
+        # no further sections on the way, so add any unused paragraph to body.
+        self.add-section-to-scenario('');
+
+        $!class-ExecuteScenario = qq:to/END/;
+                public void ExecuteScenario()
+                \{$execute-body\}
+        END
+
+        return $!class-ExecuteScenario;
     }
 
     method get-section-declarations() {
@@ -86,14 +97,15 @@ class CSharp-Scribe {
 }
 ';
     }
-    method finish-scenario() {
+
+    method clear-scenario() {
         $prior-paragraph = "";
         $paragraph-used = True;
+        $execute-body = "\n        ";
     }
 
     method Assemble() {
         $!class-name = self.get-class-name();
-        self.add-section-to-scenario("");
 
         self.get-class-prefix() ~
         self.get-class-declaration() ~
@@ -104,7 +116,6 @@ class CSharp-Scribe {
         self.get-class-execute-scenario() ~
         self.get-section-declarations() ~
         self.get-class-suffix();
-        self.finish-scenario();
     }
 
 }

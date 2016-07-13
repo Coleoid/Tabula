@@ -47,6 +47,7 @@ if False
 {   diag "The ExecuteScenario method calls a lone paragraph";
 
     my $scribe = $actions.Scribe;
+
     my $scenario = q:to/EOS/;
     Scenario:  "This and That"
 
@@ -54,8 +55,8 @@ if False
     do another thing
     EOS
 
+    $scribe.clear-scenario();
     my $parse = parser( "single para", $scenario );
-
 
     my $expected = q:to/EOC/;
             public void ExecuteScenario()
@@ -64,7 +65,7 @@ if False
             }
     EOC
 
-    my $output-method = $scribe.get-class-execute-scenario();
+    my $output-method = $scribe.class-ExecuteScenario;
     is $output-method, $expected, "Scenario with one paragraph calls it in ExecuteScenario";
 
     $expected = q:to/EOP/;
@@ -78,7 +79,6 @@ if False
 
     my $output-paragraphs = $scribe.get-section-declarations();
     is $output-paragraphs, $expected, "Scenario with one paragraph declares it";
-    $scribe.finish-scenario();
 }
 
 #if False
@@ -96,8 +96,8 @@ if False
     | 012 | 789 |
     EOS
 
+    $scribe.clear-scenario();
     my $parse = parser( "table following para", $scenario );
-
 
     my $expected = q:to/EOC/;
             public void ExecuteScenario()
