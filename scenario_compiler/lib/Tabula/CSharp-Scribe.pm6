@@ -2,6 +2,8 @@ class CSharp-Scribe {
     has $.scenario-title is rw;
     has $.file-name is rw;
     has $!class-name;
+    has $.generated-ExecuteScenario;
+    has $.generated-SectionDeclarations;
 
     my $execute-body = "\n        ";
     my @section-declarations;
@@ -73,23 +75,24 @@ class CSharp-Scribe {
         END
     }
 
-    has $.class-ExecuteScenario;
-
     method get-class-execute-scenario() {
-        # no further sections on the way, so add any unused paragraph to body.
+        # no further sections on the way, so flush any unused paragraph to body.
         self.add-section-to-scenario('');
 
-        $!class-ExecuteScenario = qq:to/END/;
+        $!generated-ExecuteScenario = qq:to/END/;
                 public void ExecuteScenario()
                 \{$execute-body\}
         END
 
-        return $!class-ExecuteScenario;
+        return $!generated-ExecuteScenario;
     }
 
     method get-section-declarations() {
-        return "" if @section-declarations.elems == 0;
-        return "\n" ~ (join "\n", @section-declarations);
+        $!generated-SectionDeclarations = (@section-declarations.elems == 0)
+            ?? ''
+            !! "\n" ~ (join "\n", @section-declarations);
+
+        return $!generated-SectionDeclarations;
     }
 
     method get-class-suffix() {
