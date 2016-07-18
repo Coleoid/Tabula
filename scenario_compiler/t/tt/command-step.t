@@ -7,7 +7,7 @@ say "\n";
 
 #TODO:  Think!  How should step and libraries interact?
 
-if False
+if False  # Fantasy/Hypothetical code
 {  diag "A step command creates a callable equivalent to other code";
 
     my $lib = StepLibrary.new(instance-name => "Advice", class-name => "AdviceWorkflow");

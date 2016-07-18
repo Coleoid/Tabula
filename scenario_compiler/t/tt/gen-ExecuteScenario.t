@@ -6,20 +6,14 @@ my $context = $actions.Context;
 $context.file-name = "ScenarioFilename.scn";
 
 
-sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES, $expected-SDs = '') {
+sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
     my $expectation = "ExecuteScenario for $sequence has $outcome";
-    #diag "\n$sequence";
 
     my $scribe = $actions.Scribe;
     $scribe.clear-scenario();
     my $parse = parser( $sequence, $scenario );
 
-    my $resulting-code = $scribe.generated-ExecuteScenario;
-    is $resulting-code, $expected-ES, $expectation;
-
-    if $expected-SDs {
-        is $scribe.generated-SectionDeclarations, $expected-SDs, "correct Section Declarations for $sequence";
-    }
+    is $scribe.generated-ExecuteScenario, $expected-ES, $expectation;
 }
 
 
@@ -39,16 +33,7 @@ sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES, $expected-S
             }
     EOC
 
-    my $expected-SDs = q:to/EOP/;
-
-            public void paragraph_from_003_to_004()
-            {
-                Unfound(     "do a thing",     "ScenarioFilename.scn:3" );
-                Unfound(     "do another thing",     "ScenarioFilename.scn:4" );
-            }
-    EOP
-
-    is-ExecuteScenario( '(para)', 'single paragraph', $scenario, $expected-ES, $expected-SDs );
+    is-ExecuteScenario( '(para)', 'single paragraph', $scenario, $expected-ES );
 }
 
 #if False
