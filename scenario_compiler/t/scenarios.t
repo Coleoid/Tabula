@@ -4,7 +4,7 @@ use Tabula::Grammar-Testing;
 my &parser = curry-parser-emitting-Tabula( "Scenario" );
 say "\n";
 
-if False
+#if False
 {   diag "Paragraph touching Table";
 
     my $parse = parser( "Paragraph touching Table", q:to/EOS/ );
@@ -24,7 +24,7 @@ if False
     ok $parse<Section>[2]<Table>, "Third section is a Table";
 }
 
-if False
+#if False
 {   diag "Indentation is not semantic, newlines are.";
 
     my $parse = parser( "Indented scenario", q:to/EOS/ );
