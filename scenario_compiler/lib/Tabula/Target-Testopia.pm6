@@ -98,11 +98,13 @@ class Target-Testopia {
     }
 
     method Phrase($/) {
-        make $<Symbol>.join(' ');
+        make '"' ~ $<Symbol>.join(' ') ~ '"';
     }
 
     method Phrases($/) {
-        make $<Phrase>.join(', ');
+        #make $<Phrase>.map({ '"' ~ .made ~ '"' }).join(', ');
+        make $<Phrase>[0].made;
+        #make "-phrases-"
     }
 
     method normalized-name-CSharp() {
@@ -152,27 +154,28 @@ class Target-Testopia {
         my $name = sprintf("table_from_%03d_to_%03d", $start-line, $end-line);
 
         my $table = '        var ' ~ $name ~ " = new Table \{
-            Header = new List<string>     \{ \"Things\"    , \"Stuff\"     \},
-            Data = new List<List<string>> \{
-                new List<string>          \{ \"email\"     , \"paperwork\" \},
-                new List<string>          \{ \"groceries\" , \"dinner\"    \}
-            \}
-};\n";
+            Header = new List<string>     " ~ $<Table-Header>.ast;
+
+#            Data = new List<List<string>> \{
+#                new List<string>          \{ \"email\"     , \"paperwork\" \},
+#                new List<string>          \{ \"groceries\" , \"dinner\"    \}
+#            \}
+#};\n";
 
         $!Scribe.add-section-to-scenario( $name );
         $!Scribe.declare-section( $table );
     }
 
     method Table-Cell($/) {
-        make ($<Phrases> || $<Empty-Cell>).made
+        make ($<Phrases> ?? $<Phrases>.made !! $<Empty-Cell>)
     }
 
     method Table-Cells($/) {
-        make $<Table-Cell>.join('|')
+        make $<Table-Cell>.map({.made}).join(', ')
     }
 
     method Table-Header($/) {
-        make $<Indentation> ~ "[ $<Table-Cells>]\n"
+        make $<Indentation> ~ '{' ~ $<Table-Cells>.made ~ " \} \n"
     }
 
     method Table-Label($/) {

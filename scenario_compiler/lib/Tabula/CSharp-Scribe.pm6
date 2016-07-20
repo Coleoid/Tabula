@@ -105,6 +105,7 @@ class CSharp-Scribe {
         $prior-paragraph = "";
         $paragraph-used = True;
         $execute-body = "\n        ";
+        @section-declarations = ();
     }
 
     method Assemble() {

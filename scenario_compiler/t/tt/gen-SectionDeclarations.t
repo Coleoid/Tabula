@@ -13,7 +13,7 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     $scribe.clear-scenario();
     my $parse = parser( $sequence, $scenario );
 
-    is $scribe.generated-SectionDeclarations, $expected-SDs, "correct Section Declarations for $sequence";
+    is $scribe.generated-SectionDeclarations, $expected-SDs, $expectation;
 }
 
 
@@ -36,4 +36,29 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     EOP
 
     are-SectionDeclarations( '(para)', 'single paragraph', $scenario, $expected-SDs );
+}
+
+#if False
+{
+    my $scenario = q:to/EOS/;
+    Scenario:  "This and That"
+
+    [ this   | that ]
+    | near   | far  |
+    | hither | yon  |
+    EOS
+
+    my $expected-SDs = q:to/EOP/;
+
+            table_from_003_to_005 = new Table {
+                Header = new List<string>     { "this"    , "that" },
+                Data = new List<List<string>> {
+                    new List<string>          { "near"    , "far"  },
+                    new List<string>          { "hither"  , "yon"  }
+                }
+            };
+
+    EOP
+
+    are-SectionDeclarations( '(para)', 'single table', $scenario, $expected-SDs );
 }
