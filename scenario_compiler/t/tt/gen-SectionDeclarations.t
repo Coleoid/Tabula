@@ -39,22 +39,22 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 }
 
 #if False
-{
+{  #  Note that the spacing in the tables will be handled via a different test
     my $scenario = q:to/EOS/;
     Scenario:  "This and That"
 
-    [ this   | that ]
-    | near   | far  |
-    | hither | yon  |
+    [ this | that ]
+    | near | far |
+    | hither | yon |
     EOS
 
     my $expected-SDs = q:to/EOP/;
 
             table_from_003_to_005 = new Table {
-                Header = new List<string>     { "this"    , "that" },
+                Header = new List<string>     { "this", "that" },
                 Data = new List<List<string>> {
-                    new List<string>          { "near"    , "far"  },
-                    new List<string>          { "hither"  , "yon"  }
+                    new List<string>          { "near", "far" },
+                    new List<string>          { "hither", "yon" }
                 }
             };
 
