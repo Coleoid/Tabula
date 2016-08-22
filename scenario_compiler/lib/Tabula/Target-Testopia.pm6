@@ -153,14 +153,21 @@ class Target-Testopia {
 
         my $name = sprintf("table_from_%03d_to_%03d", $start-line, $end-line);
 
-        my $table = '        var ' ~ $name ~ " = new Table \{
-            Header = new List<string>     " ~ $<Table-Header>.ast;
+        my $table = '        ' ~ $name ~ " = new Table \{
+            Header = new List<string>     " ~ $<Table-Header>.ast.chomp ~ ',';
 
-#            Data = new List<List<string>> \{
-#                new List<string>          \{ \"email\"     , \"paperwork\" \},
-#                new List<string>          \{ \"groceries\" , \"dinner\"    \}
-#            \}
-#};\n";
+        $table ~= '
+            Data = new List<List<string>> {';
+
+        for $<Table-Row> {
+            $table ~= '
+                new List<string>          ' ~ $_.ast.chomp ~ ',';
+        }
+
+        $table ~= '
+            }
+        };
+';
 
         $!Scribe.add-section-to-scenario( $name );
         $!Scribe.declare-section( $table );
@@ -175,7 +182,7 @@ class Target-Testopia {
     }
 
     method Table-Header($/) {
-        make $<Indentation> ~ '{' ~ $<Table-Cells>.made ~ " \} \n"
+        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
     }
 
     method Table-Label($/) {
@@ -183,7 +190,7 @@ class Target-Testopia {
     }
 
     method Table-Row($/) {
-        make "$<Indentation>|$<Table-Cells>|\n"
+        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
     }
 
     method Term($/) {
