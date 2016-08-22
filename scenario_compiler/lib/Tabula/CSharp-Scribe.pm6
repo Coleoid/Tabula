@@ -2,8 +2,6 @@ class CSharp-Scribe {
     has $.scenario-title is rw;
     has $.file-name is rw;
     has $!class-name;
-    has $.generated-ExecuteScenario;
-    has $.generated-SectionDeclarations;
 
     my $execute-body = "\n        ";
     my @section-declarations;
@@ -11,6 +9,13 @@ class CSharp-Scribe {
 
     my $prior-paragraph = "";
     my $paragraph-used = True;
+
+    method start-class() {
+        $prior-paragraph = True;
+        $paragraph-used = "";
+        $!generated-SectionDeclarations = "";
+        @section-declarations = ();
+    }
 
     method add-section-to-scenario( $name ) {
 
@@ -54,42 +59,35 @@ class CSharp-Scribe {
     }
 
     method get-class-declaration() {
-        qq:to/END/;
-            public class $!class-name
-                : GeneratedScenarioBase, IGeneratedScenario
-            \{
-        END
+'    public class ' ~ $!class-name ~ '
+        : GeneratedScenarioBase, IGeneratedScenario
+    {
+';
     }
 
     method get-class-scenario-label() {
-        qq:to/END/;
-                public string ScenarioLabel = "$!file-name:  $!scenario-title";
-        END
+'        public string ScenarioLabel = "' ~ $!file-name ~ ':  ' ~ $!scenario-title ~ '";
+';
     }
 
     method get-class-constructor() {
-        qq:to/END/;
-                public $!class-name\(TabulaStepRunner runner)
-                    : base(runner)
-                \{ \}
-        END
+'        public ' ~ $!class-name ~ '(TabulaStepRunner runner)
+            : base(runner)
+        { }
+';
     }
 
     method get-class-execute-scenario() {
-        # no further sections on the way, so flush any unused paragraph to body.
-        self.add-section-to-scenario('');
-
-        $!generated-ExecuteScenario = qq:to/END/;
-                public void ExecuteScenario()
-                \{$execute-body\}
-        END
-
-        return $!generated-ExecuteScenario;
+'        public void ExecuteScenario()
+        {' ~ $execute-body ~ '}
+';
     }
 
+    has $.generated-SectionDeclarations;
+
     method get-section-declarations() {
-        $!generated-SectionDeclarations = (@section-declarations.elems == 0)
-            ?? ''
+        $!generated-SectionDeclarations = @section-declarations.elems == 0
+            ?? ""
             !! "\n" ~ (join "\n", @section-declarations);
 
         return $!generated-SectionDeclarations;
@@ -100,16 +98,14 @@ class CSharp-Scribe {
 }
 ';
     }
-
-    method clear-scenario() {
+    method finish-scenario() {
         $prior-paragraph = "";
         $paragraph-used = True;
-        $execute-body = "\n        ";
-        @section-declarations = ();
     }
 
     method Assemble() {
         $!class-name = self.get-class-name();
+        self.add-section-to-scenario("");
 
         self.get-class-prefix() ~
         self.get-class-declaration() ~
@@ -120,6 +116,7 @@ class CSharp-Scribe {
         self.get-class-execute-scenario() ~
         self.get-section-declarations() ~
         self.get-class-suffix();
+        self.finish-scenario();
     }
 
 }

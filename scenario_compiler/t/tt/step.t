@@ -69,4 +69,4 @@ if False
 }
 
 done-testing;
-diag $context.problems;
+# diag $context.problems;  # contains text which can be mistaken for a test failure
