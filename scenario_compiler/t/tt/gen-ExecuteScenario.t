@@ -10,7 +10,7 @@ sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
     my $expectation = "ExecuteScenario for $sequence has $outcome";
 
     my $scribe = $actions.Scribe;
-    $scribe.clear-scenario();
+    $scribe.start-class();
     my $parse = parser( $sequence, $scenario );
 
     is $scribe.generated-ExecuteScenario, $expected-ES, $expectation;

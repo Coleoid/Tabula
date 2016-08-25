@@ -20,7 +20,7 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 #if False
 {
     my $scenario = q:to/EOS/;
-    Scenario:  "This and That"
+    Scenario:  "Doing things"
 
     do a thing
     do another thing
@@ -39,7 +39,7 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 }
 
 #if False
-{  #  Note that the spacing in the tables will be handled via a different test
+{  #TODO:  Space-aligning the generated code to match input scenario
     my $scenario = q:to/EOS/;
     Scenario:  "This and That"
 
@@ -82,6 +82,26 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     EOP
 
     are-SectionDeclarations( '(para)', 'tiny table', $scenario, $expected-SDs );
+}
+
+#if False
+{
+    my $scenario = q:to/EOS/;
+    Scenario:  "This"
+
+    [ this ]
+    EOS
+
+    my $expected-SDs = q:to/EOP/;
+
+            table_from_003_to_003 = new Table {
+                Header = new List<string>     { "this" },
+                Data = new List<List<string>> {
+                }
+            };
+    EOP
+
+    are-SectionDeclarations( '(para)', 'empty table', $scenario, $expected-SDs );
 }
 
 

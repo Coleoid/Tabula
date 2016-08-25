@@ -11,8 +11,8 @@ class CSharp-Scribe {
     my $paragraph-used = True;
 
     method start-class() {
-        $prior-paragraph = True;
-        $paragraph-used = "";
+        $prior-paragraph = "";
+        $paragraph-used = True;
         $!generated-SectionDeclarations = "";
         @section-declarations = ();
     }
@@ -77,14 +77,17 @@ class CSharp-Scribe {
 ';
     }
 
+    has $.generated-ExecuteScenario;
     method get-class-execute-scenario() {
+        $!generated-ExecuteScenario =
 '        public void ExecuteScenario()
         {' ~ $execute-body ~ '}
 ';
+
+        return $!generated-ExecuteScenario;
     }
 
     has $.generated-SectionDeclarations;
-
     method get-section-declarations() {
         $!generated-SectionDeclarations = @section-declarations.elems == 0
             ?? ""
@@ -98,25 +101,29 @@ class CSharp-Scribe {
 }
 ';
     }
+
     method finish-scenario() {
         $prior-paragraph = "";
         $paragraph-used = True;
+        $execute-body = "\n        ";
     }
 
     method Assemble() {
         $!class-name = self.get-class-name();
         self.add-section-to-scenario("");
 
-        self.get-class-prefix() ~
-        self.get-class-declaration() ~
-        self.get-class-scenario-label() ~
-        "\n" ~
-        self.get-class-constructor() ~
-        "\n" ~
-        self.get-class-execute-scenario() ~
-        self.get-section-declarations() ~
-        self.get-class-suffix();
+        my $result = self.get-class-prefix() ~
+          self.get-class-declaration() ~
+          self.get-class-scenario-label() ~
+          "\n" ~
+          self.get-class-constructor() ~
+          "\n" ~
+          self.get-class-execute-scenario() ~
+          self.get-section-declarations() ~
+          self.get-class-suffix();
+
         self.finish-scenario();
+        return $result;
     }
 
 }
