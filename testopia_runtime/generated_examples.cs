@@ -21,28 +21,29 @@ namespace Tabula
             Funky = new FunkyWorkflow(Context);
             EvaluateResults = new EvaluateResultsWorkflow(Context);
 
-            table_from_007_to_009 = new Table {
-                Header = new List<string>     { "Things"    , "Stuff"     },
-                Data = new List<List<string>> {
-                    new List<string>          { "email"     , "paperwork" },
-                    new List<string>          { "groceries" , "dinner"    }
-                }
-            };
-
             TableOverParagraph(table_from_007_to_009, paragraph_from_004_to_006);
         }
 
         public void paragraph_from_004_to_006()
         {
-            //? I'm putting the filename:line in literally as dev breadcrumbs
+            //? The filename:line is a combined literal for dev-searchability
             Do(() =>    Funky.I_do__( val["things"] ),    "paragraphAndTable.scn:4", "Funky.I_do__( val[\"things\"] )");
             Do(() =>    Funky.Then_I_create__( val["stuff"] ),    "paragraphAndTable.scn:5", "Funky.Then_I_create__( val[\"stuff\"] )");
             Do(() =>    EvaluateResults.Both__and__should_show__results( val["things"], val["stuff"], "good" ),    "paragraphAndTable.scn:6", "EvaluateResults.Both__and__should_show__results( val[\"things\"], val[\"stuff\"], \"good\" )");
         }
 
+        table_from_007_to_009 = new Table {
+            Header = new List<string>     { "Things"    , "Stuff"     },
+            Data = new List<List<string>> {
+                new List<string>          { "email"     , "paperwork" },
+                new List<string>          { "groceries" , "dinner"    }
+            }
+        };
+    }
 
-        //  For sake of this example, this text is found in the file paragraphAndTable.scn
-        public string scenarioText =
+
+            //  For sake of this example, this text is found in the file paragraphAndTable.scn
+    public const string scenarioText =
 @"Scenario: ""This and That""
 >use: Funky Workflow, EvaluateResultsWorkflow
 
@@ -53,6 +54,4 @@ Then I create #stuff
 | email     | paperwork |
 | groceries | dinner    |
 ";
-
-    }
 }

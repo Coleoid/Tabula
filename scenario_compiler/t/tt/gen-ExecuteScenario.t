@@ -6,12 +6,12 @@ my $context = $actions.Context;
 $context.file-name = "ScenarioFilename.scn";
 
 
-sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
-    my $expectation = "ExecuteScenario for $sequence has $outcome";
+sub does-scenario-contain($scenario, $expected-ES, $outcome) {
+    my $expectation = "ExecuteScenario contains $outcome";
 
     my $scribe = $actions.Scribe;
-    $scribe.clear-scenario();
-    my $parse = parser( $sequence, $scenario );
+    $scribe.start-class();
+    my $parse = parser( $outcome, $scenario );
 
     is $scribe.generated-ExecuteScenario, $expected-ES, $expectation;
 }
@@ -33,7 +33,7 @@ sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
             }
     EOC
 
-    is-ExecuteScenario( '(para)', 'single paragraph', $scenario, $expected-ES );
+    does-scenario-contain( $scenario, $expected-ES, 'single paragraph' );
 }
 
 #if False
@@ -56,7 +56,7 @@ sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
             }
     EOC
 
-    is-ExecuteScenario( '(para, para)', 'each paragraph once', $scenario, $expected-code );
+    does-scenario-contain( $scenario, $expected-code, 'each paragraph once' );
 }
 
 
@@ -80,7 +80,7 @@ sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
             }
     EOC
 
-    is-ExecuteScenario( '(para, table)', 'paragraph run over table', $scenario, $expected-code );
+    does-scenario-contain( $scenario, $expected-code, 'paragraph run over table' );
 }
 
 #if False
@@ -110,7 +110,7 @@ sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
             }
     EOC
 
-    is-ExecuteScenario( '(para, table, table)', 'paragraph run over each table', $scenario, $expected-code );
+    does-scenario-contain( $scenario, $expected-code, 'paragraph run over each table' );
 }
 
 #if False
@@ -137,7 +137,7 @@ sub is-ExecuteScenario($sequence, $outcome, $scenario, $expected-ES) {
             }
     EOC
 
-    is-ExecuteScenario( '(para1, para2, table)', 'para1 alone and para2 over table', $scenario, $expected-code );
+    does-scenario-contain( $scenario, $expected-code, 'para1 alone and para2 over table' );
 }
 
 
