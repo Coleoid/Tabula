@@ -3,18 +3,23 @@ class CSharp-Scribe {
     has $.file-name is rw;
     has $!class-name;
 
-    my $execute-body = "\n        ";
+    my $execute-body;
     my @section-declarations;
     my @table-declarations;
 
-    my $prior-paragraph = "";
-    my $paragraph-used = True;
+    my $prior-paragraph;
+    my $paragraph-used;
 
     method start-class() {
+        #$execute-body = "\n        ";
         $prior-paragraph = "";
         $paragraph-used = True;
         $!generated-SectionDeclarations = "";
         @section-declarations = ();
+    }
+
+    submethod BUILD {
+        self.start-class();
     }
 
     method add-section-to-scenario( $name ) {
@@ -83,8 +88,12 @@ class CSharp-Scribe {
 '        public void ExecuteScenario()
         {' ~ $execute-body ~ '}
 ';
+<<<<<<< HEAD
 
         return $!generated-ExecuteScenario;
+=======
+        $!generated-ExecuteScenario
+>>>>>>> c75610803fc31488edc2d3c5f1cb9ccfc4432c3f
     }
 
     has $.generated-SectionDeclarations;
@@ -101,17 +110,21 @@ class CSharp-Scribe {
 }
 ';
     }
+<<<<<<< HEAD
 
     method finish-scenario() {
         $prior-paragraph = "";
         $paragraph-used = True;
         $execute-body = "\n        ";
     }
+=======
+>>>>>>> c75610803fc31488edc2d3c5f1cb9ccfc4432c3f
 
     method Assemble() {
         $!class-name = self.get-class-name();
         self.add-section-to-scenario("");
 
+<<<<<<< HEAD
         my $result = self.get-class-prefix() ~
           self.get-class-declaration() ~
           self.get-class-scenario-label() ~
@@ -124,6 +137,17 @@ class CSharp-Scribe {
 
         self.finish-scenario();
         return $result;
+=======
+        self.get-class-prefix() ~
+        self.get-class-declaration() ~
+        self.get-class-scenario-label() ~
+        "\n" ~
+        self.get-class-constructor() ~
+        "\n" ~
+        self.get-class-execute-scenario() ~
+        self.get-section-declarations() ~
+        self.get-class-suffix();
+>>>>>>> c75610803fc31488edc2d3c5f1cb9ccfc4432c3f
     }
 
 }
