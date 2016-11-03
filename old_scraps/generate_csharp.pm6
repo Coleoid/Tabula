@@ -9,7 +9,7 @@ class Generate-CSharp {
     }
 
     method Scenario($/) {
-        #TODO: scenario class naming
+        # no do: scenario class naming
         make "public class $<String>_generated \{\n"
         ~ [~] $<Section>.map({.made})
     }
@@ -19,7 +19,7 @@ class Generate-CSharp {
     }
 
     method Paragraph($/) {
-        #TODO: paragraph naming
+        # no do: paragraph naming
         make
             "\tpublic method paragraph_01()\n\{"
             ~ [~] $<Statement>.map({ "\t\t" ~ .made})

@@ -88,12 +88,8 @@ class CSharp-Scribe {
 '        public void ExecuteScenario()
         {' ~ $execute-body ~ '}
 ';
-<<<<<<< HEAD
 
-        return $!generated-ExecuteScenario;
-=======
         $!generated-ExecuteScenario
->>>>>>> c75610803fc31488edc2d3c5f1cb9ccfc4432c3f
     }
 
     has $.generated-SectionDeclarations;
@@ -110,44 +106,30 @@ class CSharp-Scribe {
 }
 ';
     }
-<<<<<<< HEAD
 
     method finish-scenario() {
         $prior-paragraph = "";
         $paragraph-used = True;
         $execute-body = "\n        ";
     }
-=======
->>>>>>> c75610803fc31488edc2d3c5f1cb9ccfc4432c3f
 
     method Assemble() {
         $!class-name = self.get-class-name();
         self.add-section-to-scenario("");
 
-<<<<<<< HEAD
-        my $result = self.get-class-prefix() ~
-          self.get-class-declaration() ~
-          self.get-class-scenario-label() ~
-          "\n" ~
-          self.get-class-constructor() ~
-          "\n" ~
-          self.get-class-execute-scenario() ~
-          self.get-section-declarations() ~
-          self.get-class-suffix();
+        my $result =
+            self.get-class-prefix() ~
+            self.get-class-declaration() ~
+            self.get-class-scenario-label() ~ "\n" ~
+
+            self.get-class-constructor() ~ "\n" ~
+
+            self.get-class-execute-scenario() ~
+            self.get-section-declarations() ~
+            self.get-class-suffix();
 
         self.finish-scenario();
         return $result;
-=======
-        self.get-class-prefix() ~
-        self.get-class-declaration() ~
-        self.get-class-scenario-label() ~
-        "\n" ~
-        self.get-class-constructor() ~
-        "\n" ~
-        self.get-class-execute-scenario() ~
-        self.get-section-declarations() ~
-        self.get-class-suffix();
->>>>>>> c75610803fc31488edc2d3c5f1cb9ccfc4432c3f
     }
 
 }
