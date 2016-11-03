@@ -95,12 +95,18 @@ class Fixture-Binder-f {
 }
 
 
-#  Writes the code which implements the Tabula scenario.
+#  Final composition of section pieces into a C# class
 class Code-Scribe-f {
-    method declare-section( $section ) { ... }
-    method add-section-to-scenario( $name ) { ... }
-    method Assemble() { ... }
+    #  A section is the C# implementation a paragraph or a table
 
+    #  Each section must be declared once
+    method declare-section( $section ) { ... }
+
+    #  How a section is evaluated depends on the context
+    method use-section-in-scenario( $name ) { ... }
+
+    #  Returns the full source file--includes, namespace, class.
+    method compose() { ... }
 }
 
 #   ===================================
