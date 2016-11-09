@@ -25,14 +25,20 @@ class Target-Testopia {
             ~ ',     "' ~ $source-location ~ '", ' ~ $quoted-code ~ ' );';
     }
 
+    method normalized-name-CSharp() {
+        $!Context.file-name.subst('.scn', '')
+    }
+
 
     ##################################################################
     ### Grammar methods, alphabetically (putting TOP at the bottom :)
 
+    #ok
     method Action($/) {
         make ($<Step> || $<Block> || $<Command>).made
     }
 
+    #C#
     method Block($/) {
         $!Context.open-scope($<String>);
 
@@ -44,14 +50,17 @@ class Target-Testopia {
         $!Context.close-scope();
     }
 
+    #tb
     method Break-Line($/) {
         make "\n"
     }
 
+    #ok
     method Command($/) {
         make ($<Command-Use> || $<Command-Tag> || $<Command-Alias>).made
     }
 
+    #C#
     method Command-Alias($/) {
         my $lhs = $<Word>
             ?? '"' ~ $<Word>.lc ~ '"'
@@ -61,25 +70,30 @@ class Target-Testopia {
         make get-Do-statement( 'alias[' ~ $lhs ~ '] = ' ~ $rhs , "SampleScenario.scn:1" );
     }
 
+    #--
     method Command-Step($/) {
 
     }
 
+    #tb
     method Command-Tag($/) {
         my $cmd = $<PhraseList>.elems == 1 ?? 'tag' !! 'tags';
         make ">$cmd: $<Phrases>"
     }
 
+    #ok
     method Command-Use($/) {
         for $<Phrases><Phrase> {
             $!Context.AddLibraryToScope(~$_);
         }
     }
-
+s
+    #C#
     method ID($/) {
         make 'alias["' ~ $<Word>.lc ~ '"]';
     }
 
+    #C#
     method name-paragraph($/) {
         my $start-line = line-of-match-start($/);
         my $end-line = $start-line + lines-in-match($/) - 2;
@@ -105,20 +119,19 @@ class Target-Testopia {
         make $para;  # just to support unit tests, right now
     }
 
+    #tb
     method Phrase($/) {
         make '"' ~ $<Symbol>.join(' ') ~ '"';
     }
 
+    #ok
     method Phrases($/) {
         #make $<Phrase>.map({ '"' ~ .made ~ '"' }).join(', ');
         make $<Phrase>[0].made;
         #make "-phrases-"
     }
 
-    method normalized-name-CSharp() {
-        $!Context.file-name.subst('.scn', '')
-    }
-
+    #ok
     method Scenario($/) {
         $!Scribe.scenario-title = $<String>;
         $!Scribe.file-name = $!Context.file-name;
@@ -126,10 +139,12 @@ class Target-Testopia {
         make $!Scribe.Assemble();
     }
 
+    #ok
     method Section($/) {
         make ($<Paragraph> || $<Table> || $<Document> || $<Break-Line>).made
     }
 
+    #tb
     method Statement($/) {
         make
             ($<Indentation> // "")
@@ -138,6 +153,7 @@ class Target-Testopia {
             ~ "\n"
     }
 
+    #C#
     method Step($match) {
         my $source-location = $!Context.file-name ~ ':' ~ line-of-match-start($match);
 
@@ -151,10 +167,12 @@ class Target-Testopia {
         }
     }
 
+    #tb
     method Symbol($/) {
         make ($<Word> || $<Term>.made) ~ ' '
     }
 
+    #C#
     method Table($/) {
         my $start-line = line-of-match-start($/);
         my $end-line = $start-line + lines-in-match($/) - 2;
@@ -181,30 +199,37 @@ class Target-Testopia {
         $!Scribe.declare-section( $table );
     }
 
+    #tb
     method Table-Cell($/) {
         make ($<Phrases> ?? $<Phrases>.made !! $<Empty-Cell>)
     }
 
+    #tb
     method Table-Cells($/) {
         make $<Table-Cell>.map({.made}).join(', ')
     }
 
+    #C#
     method Table-Header($/) {
         make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
     }
 
+    #tb
     method Table-Label($/) {
         make "$<Indentation>=== $<Step> ===\n"
     }
 
+    #C#
     method Table-Row($/) {
         make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
     }
 
+    #ok
     method Term($/) {
         make $<Date> || $<Number> || $<String> || $<ID>.made
     }
 
+    #ok
     method TOP($/) {
         make $<Scenario>.made
     }
