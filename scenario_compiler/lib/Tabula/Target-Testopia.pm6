@@ -1,16 +1,14 @@
-use Tabula::Build-Context;
-use Tabula::CSharp-Scribe;
+use Tabula::Execution-Context;
+use Tabula::Code-Scribe;
 
 class Target-Testopia {
     has $.Context;
     has $.Scribe;
 
     submethod BUILD {
-        $!Context = Build-Context.new();
-        $!Scribe = CSharp-Scribe.new();
+        $!Context = Execution-Context.new();
+        $!Scribe = Code-Scribe.new();
     }
-
-
 
     sub line-of-match-start($match) {
         1 + ($match.prematch.comb: /\n/)
@@ -36,14 +34,14 @@ class Target-Testopia {
     }
 
     method Block($/) {
-        $!Context.BeginScope($<String>);
+        $!Context.open-scope($<String>);
 
         make
             '{  //  ' ~ ($<String> // "unnamed block") ~ "\n"
             ~ ($<Section> ?? [~] $<Section>.map({.made}) !! "")
             ~ $<Block-End><Indentation> ~ "\}\n";
 
-        $!Context.EndScope();
+        $!Context.close-scope();
     }
 
     method Break-Line($/) {
@@ -82,19 +80,29 @@ class Target-Testopia {
         make 'alias["' ~ $<Word>.lc ~ '"]';
     }
 
-    method Paragraph($/) {
+    method name-paragraph($/) {
         my $start-line = line-of-match-start($/);
         my $end-line = $start-line + lines-in-match($/) - 2;
 
-        my $name = sprintf("paragraph_from_%03d_to_%03d", $start-line, $end-line);
+        sprintf("paragraph_from_%03d_to_%03d", $start-line, $end-line);
+    }
+
+    method compose-paragraph($/, $name) {
         my $para = "        public void " ~ $name ~ "()\n        \{\n "
             ~ [~] $<Statement>.map({ "           " ~ .made})
             ~ "        \}\n";
 
-        $!Scribe.add-section-to-scenario($name);
-        $!Scribe.declare-section($para);
+        return $para;
+    }
 
-        make $para;  # this only supports unit tests, yet pays off until UT rewrite, at least.
+    method Paragraph($/) {
+        my $name = self.name-paragraph($/);
+        my $para = self.compose-paragraph($/, $name);
+
+        $!Scribe.declare-section($para);
+        $!Scribe.use-section-in-scenario($name);
+
+        make $para;  # just to support unit tests, right now
     }
 
     method Phrase($/) {
@@ -133,7 +141,7 @@ class Target-Testopia {
     method Step($match) {
         my $source-location = $!Context.file-name ~ ':' ~ line-of-match-start($match);
 
-        my $result = $!Context.GetFixtureCall($match, $source-location);
+        my $result = $!Context.resolve-action($match);
         if $result {
             $match.make( get-Do-statement( $result, $source-location ) );
         }

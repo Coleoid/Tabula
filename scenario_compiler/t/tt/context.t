@@ -2,20 +2,22 @@ use Test;
 use Tabula::Grammar-Testing;
 
 #if False
-{   diag "A Build-Context will fetch steps from libraries in scope";
+{   diag "An Execution-Context will fetch steps from libraries in scope";
 
     my (&parser, $actions) = curry-parser-emitting-Testopia("Step");
     my $context = $actions.Context;
 
     ok $context, "get a context from Target-Testopia";
-    is $context.scopes.elems, 1, "start with one scope";
+
+    ok $context.current-scope, "start with one scope";
+    nok $context.current-scope.parent, "start with ONLY one scope";
     $context.file-name = "myfile.scn";
 
     # Phony up a library for testing
-    my $lib = StepLibrary.new(class-name => "AdviceWorkflow");
-    $lib.steps{'notthis'} = ("Not_This", ());
+    my $lib = Fixture.new(class-name => "AdviceWorkflow");
+    $lib.methods{'notthis'} = ("Not_This", ());
 
-    nok $context.lib-declarations.defined, "starting with no libraries declared";
+    nok $context.current-scope.fixtures.defined, "starting with no libraries declared";
     # A ton of this happens at startup time
     $context.RegisterLibrary($lib);
     is $context.lib-declarations, "        public AdviceWorkflow Advice = new AdviceWorkflow();\n", "registering a library gets it declared and initialized";

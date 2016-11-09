@@ -2,7 +2,7 @@ use Test;
 use Tabula::Tabula-Grammar;
 use Tabula::Target-Tabula;
 use Tabula::Target-Testopia;
-use Tabula::Build-Context;
+use Tabula::Execution-Context;
 
 module Grammar-Testing {
 
