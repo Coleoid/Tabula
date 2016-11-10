@@ -1,5 +1,6 @@
 use Test;
 use Tabula::Grammar-Testing;
+use Tabula::Fixture-Binder;
 
 #if False
 {   diag "An Execution-Context will fetch steps from libraries in scope";
@@ -18,8 +19,13 @@ use Tabula::Grammar-Testing;
     $lib.methods{'notthis'} = ("Not_This", ());
 
     nok $context.current-scope.fixtures.defined, "starting with no libraries declared";
+
+    my $binder = Fixture-Binder.new();
+
     # A ton of this happens at startup time
     $context.RegisterLibrary($lib);
+
+
     is $context.lib-declarations, "        public AdviceWorkflow Advice = new AdviceWorkflow();\n", "registering a library gets it declared and initialized";
 
     my $match = parser("Basic step found in library", "this is A STEP");

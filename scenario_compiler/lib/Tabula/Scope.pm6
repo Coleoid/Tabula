@@ -24,6 +24,21 @@ class Scope {
     #  Arguments, table values, any other symbolic reference
     has %.labels;
     method add-label($label, $value) { ... }
+
+    method find-step-method($flatName, $arg-count) {
+        for .fixtures {
+            #WHARGARBRGL
+        }
+    }
+
+    method resolve-step($step) {
+        my $method-call = .find-step-method($step);
+
+        return $method-call || .parent
+            ?? .parent.resolve-step($step)
+            !! fail "No method matching ($step) found in scope.";
+    }
+
 }
 
 #   ===================================

@@ -2,20 +2,12 @@ use Tabula::Execution-Context;
 use Tabula::Code-Scribe;
 
 class Target-Testopia {
-    has $.Context;
-    has $.Scribe;
+    has Execution-Context $.Context;
+    has Code-Scribe $.Scribe;
 
     submethod BUILD {
         $!Context = Execution-Context.new();
         $!Scribe = Code-Scribe.new();
-    }
-
-    sub line-of-match-start($match) {
-        1 + ($match.prematch.comb: /\n/)
-    }
-
-    sub lines-in-match($match) {
-        1 + ($match.comb: /\n/)
     }
 
     sub get-Do-statement( $code, $source-location ) {
@@ -50,10 +42,10 @@ class Target-Testopia {
         $!Context.close-scope();
     }
 
-    #tb
-    method Break-Line($/) {
-        make "\n"
-    }
+    #scribe: no need
+    # method Break-Line($/) {
+    #     make "\n"
+    # }
 
     #ok
     method Command($/) {
@@ -87,36 +79,15 @@ class Target-Testopia {
             $!Context.AddLibraryToScope(~$_);
         }
     }
-s
+
     #C#
     method ID($/) {
         make 'alias["' ~ $<Word>.lc ~ '"]';
     }
 
-    #C#
-    method name-paragraph($/) {
-        my $start-line = line-of-match-start($/);
-        my $end-line = $start-line + lines-in-match($/) - 2;
-
-        sprintf("paragraph_from_%03d_to_%03d", $start-line, $end-line);
-    }
-
-    method compose-paragraph($/, $name) {
-        my $para = "        public void " ~ $name ~ "()\n        \{\n "
-            ~ [~] $<Statement>.map({ "           " ~ .made})
-            ~ "        \}\n";
-
-        return $para;
-    }
-
+    #scribe
     method Paragraph($/) {
-        my $name = self.name-paragraph($/);
-        my $para = self.compose-paragraph($/, $name);
-
-        $!Scribe.declare-section($para);
-        $!Scribe.use-section-in-scenario($name);
-
-        make $para;  # just to support unit tests, right now
+        make $!Scribe.compose-paragraph($/);
     }
 
     #tb
@@ -131,7 +102,7 @@ s
         #make "-phrases-"
     }
 
-    #ok
+    #scribe
     method Scenario($/) {
         $!Scribe.scenario-title = $<String>;
         $!Scribe.file-name = $!Context.file-name;
@@ -155,7 +126,8 @@ s
 
     #C#
     method Step($match) {
-        my $source-location = $!Context.file-name ~ ':' ~ line-of-match-start($match);
+        #my $source-location = $!Context.file-name ~ ':' ~ line-of-match-start($match);
+        my $source-location = $!Context.source-location($match);
 
         my $result = $!Context.resolve-action($match);
         if $result {
@@ -172,31 +144,9 @@ s
         make ($<Word> || $<Term>.made) ~ ' '
     }
 
-    #C#
+    #scribe
     method Table($/) {
-        my $start-line = line-of-match-start($/);
-        my $end-line = $start-line + lines-in-match($/) - 2;
-
-        my $name = sprintf("table_from_%03d_to_%03d", $start-line, $end-line);
-
-        my $table = '        ' ~ $name ~ " = new Table \{
-            Header = new List<string>     " ~ $<Table-Header>.ast.chomp ~ ',';
-
-        $table ~= '
-            Data = new List<List<string>> {';
-
-        for $<Table-Row> {
-            $table ~= '
-                new List<string>          ' ~ $_.ast.chomp ~ ',';
-        }
-
-        $table ~= '
-            }
-        };
-';
-
-        $!Scribe.add-section-to-scenario( $name );
-        $!Scribe.declare-section( $table );
+        make $!Scribe.compose-table($/);
     }
 
     #tb

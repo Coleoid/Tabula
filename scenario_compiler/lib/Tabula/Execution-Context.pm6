@@ -1,8 +1,9 @@
 use v6;
 use Tabula::Scope;
+use Tabula::Match-Helper;
 
-class Execution-Context {
-    has Str $.file-name is rw;
+class Execution-Context does Match-Helper {
+    has str $.file-name is rw;
 
     submethod BUILD {
         self.open-scope("Outer scenario scope");
@@ -20,17 +21,21 @@ class Execution-Context {
         $!current-scope = $!current-scope.parent;
     }
 
-    #  Delegates to current-scope?
+    #  Delegate more directly to current-scope?
     method add-fixture($fixture) {
         $!current-scope.add-fixture($fixture);
     }
-    method add-alias($alias, $value) { ... }
-    method add-label($label, $value) { ... }
+    method add-alias($alias, $value) {
+        $!current-scope.add-alias($alias, $value);
+    }
+    method add-label($label, $value) {
+        $!current-scope.add-label($label, $value);
+    }
 
     #  Given an action match, finds step method it fits, and
     # resolve any labels in its arguments.
     #  Begins in current scope, stops when it finds a step method.
-    method resolve-action($action) { ... }
+    method resolve-step($step) { ... }
     #  ?:  Should we scan each fixture only once during each resolution?
 
     #  Determine how an argument should be shown in source.
@@ -40,7 +45,12 @@ class Execution-Context {
     #  Fetch the value of a label
     method resolve-label($label) { ... }
     #  Label values which include other labels resolve backward only,
-    # with the intention (and hope) that this prevents any loops.
+    # with the intent (and hope) to prevent any loops.
+
+
+    ##################################################################
+    #
+
 }
 
 #   ===================================
