@@ -1,20 +1,19 @@
 use Test;
 use Tabula::Grammar-Testing;
+use Tabula::Fixture;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia( "Action" );
 my $context = $actions.Context;
 say "\n";
 
-#TODO:  Think!  How should step and libraries interact?
-
 if False  # Fantasy/Hypothetical code
 {  diag "A step command creates a callable equivalent to other code";
 
-    my $lib = StepLibrary.new(instance-name => "Advice", class-name => "AdviceWorkflow");
-    $lib.steps{'something'} = "Some_Thing";
-    $lib.steps{'thisisastep'} = "This_is_a_step";
-    $context.RegisterLibrary($lib);
-    $context.AddLibraryToScope($lib);
+    my $fixture = Fixture.new(instance-name => "Advice", class-name => "AdviceWorkflow");
+    $fixture.steps{'something'} = "Some_Thing";
+    $fixture.steps{'thisisastep'} = "This_is_a_step";
+    $context.RegisterLibrary($fixture);
+    $context.AddLibraryToScope($fixture);
 
     my $parse = parser( "simple step definition", '>step: foo => this is a step' );
 

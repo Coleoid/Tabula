@@ -1,17 +1,18 @@
 use Test;
 use Tabula::Grammar-Testing;
+use Tabula::Fixture;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia( "Step" );
 my $context = $actions.Context;
 say "\n";
 
-my $lib = StepLibrary.new(class-name => 'AdviceWorkflow');
-$lib.steps{'thisisastep'} = ('This_is_a_step', ());
-$lib.steps{'pleasedontthe'} = ('Please_dont__the__', (Str, Str));
+my $fixture = Fixture.new(class-name => 'AdviceWorkflow');
+$fixture.add-method('This_is_a_step()');
+$fixture.add-method('Please_dont__the__(Str verb, Str noun)');
+say "ut add-method";
 
 $context.file-name = "SampleScenario.scn";
-$context.RegisterLibrary($lib);
-$context.AddLibraryToScope($lib);
+$context.add-fixture($fixture);
 
 #if False
 {   diag "Finding calls matching step text";
