@@ -21,16 +21,16 @@ class Method-Location {
             die "I didn't understand the argument list:  $!args";
         }
 
-        my $type-squib = '';
+        #  The args key encodes the method arg types.  For example,
+        # "(sdi)" for (String, DateTime, int).  To differentiate
+        # between overloads while being good for approximate matching.
+        my $type-brief = '';
         for $<arg> -> $arg {
-            $type-squib ~= ~$arg<t1>.lc;
+            $type-brief ~= ~$arg<t1>.lc;
         }
-        $!args-key = "($type-squib)";
+        $!args-key = "($type-brief)";
     }
 
-    #  The args key encodes the method arg types.  For example, "(sdi)"
-    # for (String, DateTime, int).  Good for approximate matching and
-    # differentiating between overloads.
     method key() { $!name-key ~ $!args-key }
 }
 
