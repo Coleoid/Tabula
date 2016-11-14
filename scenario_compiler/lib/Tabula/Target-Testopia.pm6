@@ -1,3 +1,4 @@
+use v6;
 use Tabula::Execution-Context;
 use Tabula::Code-Scribe;
 
@@ -41,11 +42,6 @@ class Target-Testopia {
 
         $!Context.close-scope();
     }
-
-    #scribe: no need
-    # method Break-Line($/) {
-    #     make "\n"
-    # }
 
     #ok
     method Command($/) {
@@ -107,7 +103,7 @@ class Target-Testopia {
         $!Scribe.scenario-title = $<String>;
         $!Scribe.file-name = $!Context.file-name;
 
-        make $!Scribe.Assemble();
+        make $!Scribe.compose-file();
     }
 
     #ok

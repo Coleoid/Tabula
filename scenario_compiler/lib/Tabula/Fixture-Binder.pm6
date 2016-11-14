@@ -1,14 +1,14 @@
 use v6;
-use Tabula::Fixture;
+use Tabula::Fixture-Book;
 
-#  Loads fixtures from disk, parses methods and arguments, holds results
+#  Loads fixtures from disk, binds them into books, shelves results
 class Fixture-Binder {
-    has %.fixtures;
+    has %.shelf;
 
     #  Main responsibilities
     method load-fixtures($folder) { ... }
     method parse-source($source) { ... }
-    method get-fixture($name) { ... }
+    method pull-fixture($name) { ... }
 
     method canonicalize-fixture-name($name) { ... }
     method canonicalize-method-name($name) { ... }

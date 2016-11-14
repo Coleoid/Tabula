@@ -36,33 +36,33 @@ role CSharp-Writer {
     }
 
     method class-name() {
-        .file-name.subst('.scn', '') ~ '_generated';
+        self.file-name.subst('.scn', '') ~ '_generated';
     }
 
     method class-declaration() {
-'    public class ' ~ .class-name ~ '
+'    public class ' ~ self.class-name ~ '
         : GeneratedScenarioBase, IGeneratedScenario
     {
 ';
     }
 
     method class-scenario-label() {
-'        public string ScenarioLabel = "' ~ .file-name ~ ':  ' ~ .scenario-title ~ '";
+'        public string ScenarioLabel = "' ~ self.file-name ~ ':  ' ~ self.scenario-title ~ '";
 ';
     }
 
     method class-constructor() {
-'        public ' ~ .class-name ~ '(TabulaStepRunner runner)
+'        public ' ~ self.class-name ~ '(TabulaStepRunner runner)
             : base(runner)
         { }
 ';
     }
 
     method get-class-header() {
-        .class-prefix ~
-        .class-declaration ~
-        .class-scenario-label ~ "\n"
-        .class-constructor ~ "\n";
+        self.class-prefix ~
+        self.class-declaration ~
+        self.class-scenario-label ~ "\n" ~
+        self.class-constructor ~ "\n";
     }
 
     method get-class-footer() {

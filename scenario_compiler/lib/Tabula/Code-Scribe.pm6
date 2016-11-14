@@ -46,20 +46,20 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
     }
 
     method flush-pending-paragraph() {
-        .add-paragraph-call($!staged-paragraph) if $!paragraph-pending;
+        self.add-paragraph-call($!staged-paragraph) if $!paragraph-pending;
         $!paragraph-pending = False;
     }
 
     method stage-paragraph($name) {
-        .flush-pending-paragraph();
+        self.flush-pending-paragraph();
         $!staged-paragraph = $name;
         $!paragraph-pending = True;
     }
 
     method use-section-in-scenario($name) {
-        if $name ~~ /^paragraph/ { .stage-paragraph($name); }
-        elsif $name ~~ /^table/  { .add-table-call($name); }
-        elsif $name eq ''        { .flush-pending-paragraph; }
+        if $name ~~ /^paragraph/ { self.stage-paragraph($name); }
+        elsif $name ~~ /^table/  { self.add-table-call($name); }
+        elsif $name eq ''        { self.flush-pending-paragraph; }
         else { die "I do not know how to use a section named [$name]." }
     }
 
@@ -74,8 +74,8 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
             ~ [~] $<Statement>.map({ "           " ~ .made})
             ~ "        \}\n";
 
-        .declare-section($para);
-        .use-section-in-scenario($name);
+        self.declare-section($para);
+        self.use-section-in-scenario($name);
         return $para;
     }
 
@@ -97,14 +97,14 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
         };
 ';
 
-        .declare-section($table);
-        .use-section-in-scenario($name);
+        self.declare-section($table);
+        self.use-section-in-scenario($name);
         return $table;
     }
 
     # The scenario at the table/paragraph granularity
     method compose-method-ExecuteScenario() {
-        .flush-pending-paragraph();
+        self.flush-pending-paragraph();
 '        public void ExecuteScenario()
         {' ~ $!execute-body-text ~ '}
 ';
@@ -121,12 +121,12 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
     has str $.full-source-file;
     method compose-file() {
         $!full-source-file =
-            .get-class-header() ~
-            .compose-method-ExecuteScenario() ~
-            .compose-section-declarations() ~
-            .get-class-footer();
+            self.get-class-header() ~
+            self.compose-method-ExecuteScenario() ~
+            self.compose-section-declarations() ~
+            self.get-class-footer();
 
-        .clear-work();
+        self.clear-work();
         return $!full-source-file;
     }
 
