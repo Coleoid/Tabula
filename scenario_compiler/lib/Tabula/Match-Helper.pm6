@@ -11,12 +11,12 @@ role Match-Helper {
     }
 
     method source-location($match) {
-        .file-name ~ ':' ~ .line-of-match-start($match);
+        self.file-name ~ ':' ~ self.line-of-match-start($match);
     }
 
     method name-section($section-shape, $/) {
-        my $start-line = .line-of-match-start($/);
-        my $end-line = $start-line + .lines-in-match($/) - 2;
+        my $start-line = self.line-of-match-start($/);
+        my $end-line = $start-line + self.lines-in-match($/) - 2;
 
         sprintf("%s_from_%03d_to_%03d", $section-shape, $start-line, $end-line);
     }

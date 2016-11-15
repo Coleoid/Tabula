@@ -10,10 +10,10 @@ sub does-scenario-contain($scenario, $expected-ES, $outcome) {
     my $expectation = "ExecuteScenario contains $outcome";
 
     my $scribe = $actions.Scribe;
-    $scribe.start-class();
+    $scribe.clear-work();
     my $parse = parser( $outcome, $scenario );
 
-    is $scribe.generated-ExecuteScenario, $expected-ES, $expectation;
+    is $scribe.execute-body-text, $expected-ES, $expectation;
 }
 
 

@@ -2,7 +2,8 @@ use v6;
 use Tabula::Scope;
 use Tabula::Match-Helper;
 
-class Execution-Context does Match-Helper {
+class Execution-Context
+    does Match-Helper {
     has str $.file-name is rw;
 
     submethod BUILD {

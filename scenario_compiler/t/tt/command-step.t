@@ -1,6 +1,6 @@
 use Test;
 use Tabula::Grammar-Testing;
-use Tabula::Fixture;
+use Tabula::Fixture-Book;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia( "Action" );
 my $context = $actions.Context;
@@ -9,9 +9,9 @@ say "\n";
 if False  # Fantasy/Hypothetical code
 {  diag "A step command creates a callable equivalent to other code";
 
-    my $fixture = Fixture.new(instance-name => "Advice", class-name => "AdviceWorkflow");
-    $fixture.steps{'something'} = "Some_Thing";
-    $fixture.steps{'thisisastep'} = "This_is_a_step";
+    my $fixture = Fixture-Book.new(instance-name => "Advice", class-name => "AdviceWorkflow");
+    $fixture.steps{'something()'} = "Some_Thing()";
+    $fixture.steps{'thisisastep()'} = "This_is_a_step()";
     $context.RegisterLibrary($fixture);
     $context.AddLibraryToScope($fixture);
 

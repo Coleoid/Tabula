@@ -2,14 +2,16 @@ use v6;
 use Tabula::Match-Helper;
 
 #  Composition of a Tabula scenario into a C# class
-class Code-Scribe does Match-Helper does CSharp-Writer {
+class Code-Scribe
+    does Match-Helper
+    does CSharp-Writer {
     has $.scenario-title is rw;
     has $.file-name is rw;
 
     ##################################################################
     #  Sections (tables and paragraphs) are added by declare-section()
-    has str @.section-declarations;
-    has str $.section-declaration-text;
+    has Str @.section-declarations;
+    has Str $.section-declaration-text;
     method declare-section( $section ) {
         @!section-declarations.push( $section );
     }
@@ -17,7 +19,7 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
     #  Create one instance of each fixture class used in a scenario.
     #  Seems fine for now.  Later complexities may prove me wrong.
     has %.declared-fixtures;
-    has str $.fixture-declaration-text;
+    has Str $.fixture-declaration-text;
     method declare-fixture($fixture) {
         if not %!declared-fixtures{$fixture.flat-name} {
             %!declared-fixtures{$fixture.flat-name} = $fixture;
@@ -28,12 +30,12 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
 
 
     ##################################################################
-    #  Our execution plan is built by use-section-in-scenario()
-    has str $.execute-body-text;
+    #  Our ExecuteScenario text, built by use-section-in-scenario()
+    has Str $.execute-body-text;
 
     #  A paragraph may run directly, or per-row of tables below it,
     # so we stage each paragraph until we know what comes after it.
-    has str $.staged-paragraph;
+    has Str $.staged-paragraph;
     has Bool $.paragraph-pending;
 
     method add-paragraph-call($paragraph-name) {
@@ -68,7 +70,7 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
     #  Composing scenario sections of the scenario class
 
     method compose-paragraph($/) {
-        my $name = .name-section('paragraph', $/);
+        my $name = self.name-section('paragraph', $/);
 
         my $para = "        public void " ~ $name ~ "()\n        \{\n "
             ~ [~] $<Statement>.map({ "           " ~ .made})
@@ -80,7 +82,7 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
     }
 
     method compose-table($/) {
-        my $name = .name-section('table', $/);
+        my $name = self.name-section('table', $/);
 
         my $table = '        ' ~ $name ~ " = new Table \{
             Header = new List<string>     " ~ $<Table-Header>.ast.chomp ~ ',';
@@ -118,7 +120,7 @@ class Code-Scribe does Match-Helper does CSharp-Writer {
     }
 
     #  Returns the full source file--includes, namespace, class.
-    has str $.full-source-file;
+    has Str $.full-source-file;
     method compose-file() {
         $!full-source-file =
             self.get-class-header() ~

@@ -9,16 +9,16 @@ say "\n";
 {   diag "Basic Paragraph output";
     $context.file-name = "SampleScenario.scn";
 
-    my $advice-fixture = Fixture.new(class-name => "AdviceWorkflow", instance-name => "Advice");
-    $advice-fixture.add-method("Some_Thing");
-    $advice-fixture.add-method("This_is_a_step");
+    my $advice-fixture = Fixture-Book.new(class-name => "AdviceWorkflow", instance-name => "Advice");
+    $advice-fixture.add-method("Some_Thing()");
+    $advice-fixture.add-method("This_is_a_step()");
 
     # $context.RegisterLibrary($advice-fixture);
     $context.add-fixture($advice-fixture);
 
 
-    my $check-fixture = Fixture.new(class-name => "CheckWorkflow");
-    $check-fixture.add-method("Am_I_Done");
+    my $check-fixture = Fixture-Book.new(class-name => "CheckWorkflow");
+    $check-fixture.add-method("Am_I_Done()");
     # $context.RegisterLibrary($check-fixture);
 
     my $paragraph-source = q:to/EOP/;

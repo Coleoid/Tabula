@@ -1,6 +1,6 @@
 use v6;
 
-class Method-Book {
+class Method-Page {
     has Str $.definition is rw;
     has Str $.name;
     has $.args;
@@ -55,9 +55,9 @@ class Fixture-Book {
         $!key = $short-name.lc;
     }
 
-    has Method-Book %.methods;
+    has Method-Page %.methods;
     method add-method($definition) {
-        my $method = Method-Book.new(:definition($definition));
+        my $method = Method-Page.new(:definition($definition));
         %!methods{$method.key} = $method;
     }
 }

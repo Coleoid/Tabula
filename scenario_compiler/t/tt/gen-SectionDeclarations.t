@@ -10,10 +10,10 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     my $expectation = "SectionDeclarations for $sequence have $outcome";
 
     my $scribe = $actions.Scribe;
-    $scribe.start-class();
+    $scribe.clear-work();
     my $parse = parser( $sequence, $scenario );
 
-    is $scribe.generated-SectionDeclarations, $expected-SDs, $expectation;
+    is $scribe.section-declaration-text, $expected-SDs, $expectation;
 }
 
 

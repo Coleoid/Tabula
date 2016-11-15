@@ -125,7 +125,7 @@ class Target-Testopia {
         #my $source-location = $!Context.file-name ~ ':' ~ line-of-match-start($match);
         my $source-location = $!Context.source-location($match);
 
-        my $result = $!Context.resolve-action($match);
+        my $result = $!Context.resolve-step($match);
         if $result {
             $match.make( get-Do-statement( $result, $source-location ) );
         }
