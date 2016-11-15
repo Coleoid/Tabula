@@ -5,8 +5,8 @@ using System.Linq;
 
 namespace Tabula
 {
-   
-    public class TabulaStepRunner
+
+    public class TabulaScenarioAndStepRunner
     {
         Stack<string> CallStack;
         List<RunResult> RunResults;
@@ -28,15 +28,15 @@ namespace Tabula
             };
             RunResults.Add(Result);
 
+            if (SkipRemainder)
+            {
+                SetResultSkipped();
+                return;
+            }
+
             var stopwatch = new Stopwatch();
             try
             {
-                if (SkipRemainder)
-                {
-                    SetResultSkipped();
-                    return;
-                }
-
                 try
                 {
                     stopwatch.Start();
