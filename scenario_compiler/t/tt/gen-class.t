@@ -28,7 +28,8 @@ $context.file-name = "ScenarioFilename.scn";
 
             public ScenarioFilename_generated(TabulaStepRunner runner)
                 : base(runner)
-            { }
+            {
+            }
 
             public void ExecuteScenario()
             {

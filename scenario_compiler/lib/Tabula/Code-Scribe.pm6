@@ -1,7 +1,8 @@
 use v6;
+use Tabula::CSharp-Writer;
 use Tabula::Match-Helper;
 
-#  Composition of a Tabula scenario into a C# class
+#  Composes a Tabula scenario into a C# class
 class Code-Scribe
     does Match-Helper
     does CSharp-Writer {
@@ -16,34 +17,44 @@ class Code-Scribe
         @!section-declarations.push( $section );
     }
 
-    #  Create one instance of each fixture class used in a scenario.
-    #  Seems fine for now.  Later complexities may prove me wrong.
     has %.declared-fixtures;
     has Str $.fixture-declaration-text;
     method declare-fixture($fixture) {
         if not %!declared-fixtures{$fixture.flat-name} {
             %!declared-fixtures{$fixture.flat-name} = $fixture;
             $!fixture-declaration-text ~= "        public " ~ $fixture.class-name ~ " "
-                ~ $fixture.instance-name ~ " = new " ~ $fixture.class-name ~ "();\n";
+                ~ $fixture.instance-name ~ ";\n";
+        }
+    }
+
+    #  The scenario constructor instantiates the fixtures.
+    has %.instantiated-fixtures;
+    has Str $.fixture-instantiation-text;
+    method instantiate-fixture($fixture) {
+        if not %!instantiated-fixtures{$fixture.flat-name} {
+            %!instantiated-fixtures{$fixture.flat-name} = $fixture;
+            $!fixture-instantiation-text ~= "            " ~
+                $fixture.instance-name ~ " = new " ~ $fixture.class-name ~ "();\n";
         }
     }
 
 
     ##################################################################
-    #  Our ExecuteScenario text, built by use-section-in-scenario()
+    #  Our ExecuteScenario text, built by add-next-section()
     has Str $.execute-body-text;
 
+    #  Tabula scenario flow:
     #  A paragraph may run directly, or per-row of tables below it,
     # so we stage each paragraph until we know what comes after it.
     has Str $.staged-paragraph;
     has Bool $.paragraph-pending;
 
     method add-paragraph-call($paragraph-name) {
-        $!execute-body-text ~= '    ' ~ $paragraph-name ~ "();\n        ";
+        $!execute-body-text ~= '            ' ~ $paragraph-name ~ "();\n";
     }
 
     method add-table-call($table-name) {
-        $!execute-body-text ~= '    Run_para_over_table( ' ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );\n        ";
+        $!execute-body-text ~= '            Run_para_over_table( ' ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );\n";
         $!paragraph-pending = False;
     }
 
@@ -58,16 +69,17 @@ class Code-Scribe
         $!paragraph-pending = True;
     }
 
-    method use-section-in-scenario($name) {
+    method add-next-section($name) {
         if $name ~~ /^paragraph/ { self.stage-paragraph($name); }
         elsif $name ~~ /^table/  { self.add-table-call($name); }
         elsif $name eq ''        { self.flush-pending-paragraph; }
-        else { die "I do not know how to use a section named [$name]." }
+        else { die "I do not know how to add a section named [$name]." }
     }
 
 
     ##################################################################
-    #  Composing scenario sections of the scenario class
+    #  Composing code for paragraphs and tables of the scenario class,
+    # and adding them to the ExecuteScenario() plan.
 
     method compose-paragraph($/) {
         my $name = self.name-section('paragraph', $/);
@@ -77,15 +89,18 @@ class Code-Scribe
             ~ "        \}\n";
 
         self.declare-section($para);
-        self.use-section-in-scenario($name);
+        self.add-next-section($name);
         return $para;
     }
 
     method compose-table($/) {
         my $name = self.name-section('table', $/);
 
-        my $table = '        ' ~ $name ~ " = new Table \{
-            Header = new List<string>     " ~ $<Table-Header>.ast.chomp ~ ',';
+        #TODO: Row hashes
+        my $table = '        public Table ' ~ $name ~ '()
+        {
+            return new Table {
+            Header = new List<string>     ' ~ $<Table-Header>.ast.chomp ~ ',';
             ~ '
             Data = new List<List<string>> {';
 
@@ -100,19 +115,33 @@ class Code-Scribe
 ';
 
         self.declare-section($table);
-        self.use-section-in-scenario($name);
+        self.add-next-section($name);
         return $table;
     }
 
-    # The scenario at the table/paragraph granularity
-    method compose-method-ExecuteScenario() {
-        self.flush-pending-paragraph();
-'        public void ExecuteScenario()
-        {' ~ $!execute-body-text ~ '}
+
+    ##################################################################
+    #  Composing portions of the scenario class file
+
+    method compose-constructor() {
+'        public ' ~ self.class-name ~ '(TabulaStepRunner runner)
+            : base(runner)
+        {
+'       ~ $!fixture-instantiation-text ~ '        }
 ';
     }
 
-    # Paragraph methods and table List declarations
+    #  ExecuteScenario() runs the scenario as it was sequenced, at the
+    # paragraph granularity.
+    method compose-method-ExecuteScenario() {
+        self.flush-pending-paragraph();
+'        public void ExecuteScenario()
+        {
+' ~ $!execute-body-text ~ '        }
+';
+    }
+
+    # Paragraph and Table method declarations
     method compose-section-declarations() {
         $!section-declaration-text = @!section-declarations.elems == 0
             ?? ""
@@ -120,16 +149,15 @@ class Code-Scribe
     }
 
     #  Returns the full source file--includes, namespace, class.
-    has Str $.full-source-file;
     method compose-file() {
-        $!full-source-file =
+        my $full-source-file =
             self.get-class-header() ~
+            self.compose-constructor() ~ "\n" ~
             self.compose-method-ExecuteScenario() ~
             self.compose-section-declarations() ~
             self.get-class-footer();
 
-        self.clear-work();
-        return $!full-source-file;
+        return $full-source-file;
     }
 
 
@@ -137,12 +165,13 @@ class Code-Scribe
     #  Initialization
 
     method clear-work() {
-        $!staged-paragraph = "";
+        $!staged-paragraph = '';
         $!paragraph-pending = False;
 
         @!section-declarations = Empty;
         $!section-declaration-text = '';
-        $!execute-body-text = "\n        ";
+        $!fixture-instantiation-text = '';
+        $!execute-body-text = '';
     }
 
     submethod BUILD {

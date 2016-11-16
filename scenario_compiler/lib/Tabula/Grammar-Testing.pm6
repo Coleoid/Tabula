@@ -1,6 +1,6 @@
 use Test;
 use Tabula::Tabula-Grammar;
-use Tabula::Target-Tabula;
+use Tabula::Target-Echo;
 use Tabula::Target-Testopia;
 use Tabula::Execution-Context;
 
@@ -11,7 +11,7 @@ module Grammar-Testing {
     sub curry-parser-emitting-Tabula( $rule ) is export {
         use Test;
         state $grammar = Tabula-Grammar.new;
-        state $actions = Target-Tabula.new;
+        state $actions = Target-Echo.new;
 
         return sub ( $label, $input ) {
             my $out = $grammar.parse( $input, :rule($rule), :actions($actions) );

@@ -6,14 +6,18 @@ my $context = $actions.Context;
 $context.file-name = "ScenarioFilename.scn";
 
 
-sub does-scenario-contain($scenario, $expected-ES, $outcome) {
+sub does-scenario-contain($scenario, $expected-code, $outcome) {
     my $expectation = "ExecuteScenario contains $outcome";
 
     my $scribe = $actions.Scribe;
-    $scribe.clear-work();
+
+    $scribe.clear-work();  # so that each parse has a clean slate.
+    #  The slate is left dirty so that teacher (the unit tests) can
+    # see the student's work.
+
     my $parse = parser( $outcome, $scenario );
 
-    is $scribe.execute-body-text, $expected-ES, $expectation;
+    is $scribe.execute-body-text, $expected-code, $expectation;
 }
 
 
@@ -26,14 +30,11 @@ sub does-scenario-contain($scenario, $expected-ES, $outcome) {
     do another thing
     EOS
 
-    my $expected-ES = q:to/EOC/;
-            public void ExecuteScenario()
-            {
+    my $expected-code = q:to/EOC/;
                 paragraph_from_003_to_004();
-            }
     EOC
 
-    does-scenario-contain( $scenario, $expected-ES, 'single paragraph' );
+    does-scenario-contain( $scenario, $expected-code, 'single paragraph' );
 }
 
 #if False
@@ -49,11 +50,8 @@ sub does-scenario-contain($scenario, $expected-ES, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-            public void ExecuteScenario()
-            {
                 paragraph_from_003_to_004();
                 paragraph_from_006_to_007();
-            }
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'each paragraph once' );
@@ -74,10 +72,7 @@ sub does-scenario-contain($scenario, $expected-ES, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-            public void ExecuteScenario()
-            {
                 Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_008 );
-            }
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'paragraph run over table' );
@@ -103,11 +98,8 @@ sub does-scenario-contain($scenario, $expected-ES, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-            public void ExecuteScenario()
-            {
                 Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_008 );
                 Run_para_over_table( paragraph_from_003_to_004, table_from_010_to_014 );
-            }
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'paragraph run over each table' );
@@ -130,11 +122,8 @@ sub does-scenario-contain($scenario, $expected-ES, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-            public void ExecuteScenario()
-            {
                 paragraph_from_003_to_004();
                 Run_para_over_table( paragraph_from_006_to_007, table_from_009_to_011 );
-            }
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'para1 alone and para2 over table' );

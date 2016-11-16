@@ -13,7 +13,7 @@ class Scope {
     # added Fixture-Book.
     has @.fixtures;
     method add-fixture(Fixture-Book $fixture) {
-        @!fixtures.push($fixture);
+        @!fixtures.unshift($fixture);
     }
 
     #  An alias value may be defined in terms of other aliases, but only
@@ -25,18 +25,55 @@ class Scope {
     has %.labels;
     method add-label($label, $value) { ... }
 
-    method find-step-method($flatName, $arg-count) {
-        for .fixtures {
-            #WHARRGARBL
+    method resolve-step($step) {
+        my $method-call = self.find-step-method($step);
+
+        return $method-call || (self.parent
+            ?? self.parent.resolve-step($step)
+            !! fail "No method matching ($step) found in scope.");
+    }
+
+    method find-step-method($match) {
+        my $key = key-from-match($match);
+        my $args = args-from-match($match);
+
+        for @!fixtures -> $fixture {
+            my Method-Page $page = $fixture.pages{$key};
+            if $page.defined {
+                my $method = $page.name;
+                return $fixture.instance-name ~ '.' ~ $method ~ '(' ~ $args ~ ')';
+            }
         }
     }
 
-    method resolve-step($step) {
-        my $method-call = .find-step-method($step);
+    sub key-from-match($match) {
+        my $arg-count = 0;
+        my $flatName = '';
+        for $match<Phrase><Symbol> {
+            when .<Word> {$flatName ~= .<Word>.lc.subst("'", '', :g)}
+            when .<Term> {$arg-count++}
+        }
 
-        return $method-call || .parent
-            ?? .parent.resolve-step($step)
-            !! fail "No method matching ($step) found in scope.";
+        #TODO: actually comprehend the argument types
+        return $flatName ~ '(' ~ 's' x $arg-count ~ ')';
     }
 
+    sub args-from-match($match) {
+        my @args = $match<Phrase><Symbol>
+            .grep({.<Term>})
+            .map({get-Term-string(.<Term>)});
+
+        return join ', ', @args;
+    }
+
+    #TODO:  Evaluate terms as number and date types
+    sub get-Term-string($term) {
+        given $term {
+            when .<String> {return .made};
+            when .<Number> {return '"' ~ .made ~ '"'};
+            when .<Date>   {return '"' ~ .made ~ '"'};
+            when .<ID>     {return 'alias["' ~ .<ID><Word> ~ '"]'};
+            default        {fail "Unknown Term type"};
+        }
+    }
 }

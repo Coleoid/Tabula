@@ -1,4 +1,4 @@
-class Target-Tabula {
+class Target-Echo {
 
     method TOP($/) {
         make $<Scenario>.made

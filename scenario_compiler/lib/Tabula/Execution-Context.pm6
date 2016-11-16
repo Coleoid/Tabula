@@ -36,7 +36,10 @@ class Execution-Context
     #  Given an action match, finds step method it fits, and
     # resolve any labels in its arguments.
     #  Begins in current scope, stops when it finds a step method.
-    method resolve-step($step) { ... }
+    method resolve-step($match) {
+        $!current-scope.resolve-step($match);
+        #return "Advice.This_is_a_step()";
+    }
     #  ?:  Should we scan each fixture only once during each resolution?
 
     #  Determine how an argument should be shown in source.
