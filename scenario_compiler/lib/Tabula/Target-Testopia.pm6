@@ -75,7 +75,11 @@ class Target-Testopia {
     method Command-Use($/) {
         for $<Phrases><Phrase> -> $fixture-label {
             my $fixture = $!Binder.pull-fixture($fixture-label);
-            if so $fixture { $!Context.add-fixture($fixture) }
+            if so $fixture {
+                $!Context.add-fixture($fixture);
+                $!Scribe.declare-fixture($fixture);
+                $!Scribe.instantiate-fixture($fixture);
+            }
             else           { } #TODO: notify on failure to find fixture
         }
     }
@@ -118,8 +122,7 @@ class Target-Testopia {
     #echo
     method Statement($/) {
         make
-            ($<Indentation> // "")
-            ~ $<Action>.made
+            $<Action>.made
             ~ ($<Comment> ?? "  " ~ $<Comment> !! "")
             ~ "\n"
     }

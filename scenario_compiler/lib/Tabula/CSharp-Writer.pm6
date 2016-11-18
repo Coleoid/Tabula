@@ -24,7 +24,7 @@ role CSharp-Writer {
     }
 
     method class-scenario-label() {
-'        public string ScenarioLabel = "' ~ self.file-name ~ ':  ' ~ self.scenario-title ~ '";
+'        public string ScenarioLabel = @"' ~ self.file-name ~ ':  "' ~ self.scenario-title ~ '"";
 ';
     }
 

@@ -20,8 +20,8 @@ class Code-Scribe
     has %.declared-fixtures;
     has Str $.fixture-declaration-text;
     method declare-fixture($fixture) {
-        if not %!declared-fixtures{$fixture.flat-name} {
-            %!declared-fixtures{$fixture.flat-name} = $fixture;
+        if not %!declared-fixtures{$fixture.key} {
+            %!declared-fixtures{$fixture.key} = $fixture;
             $!fixture-declaration-text ~= "        public " ~ $fixture.class-name ~ " "
                 ~ $fixture.instance-name ~ ";\n";
         }
@@ -31,8 +31,8 @@ class Code-Scribe
     has %.instantiated-fixtures;
     has Str $.fixture-instantiation-text;
     method instantiate-fixture($fixture) {
-        if not %!instantiated-fixtures{$fixture.flat-name} {
-            %!instantiated-fixtures{$fixture.flat-name} = $fixture;
+        if not %!instantiated-fixtures{$fixture.key} {
+            %!instantiated-fixtures{$fixture.key} = $fixture;
             $!fixture-instantiation-text ~= "            " ~
                 $fixture.instance-name ~ " = new " ~ $fixture.class-name ~ "();\n";
         }
@@ -153,6 +153,7 @@ class Code-Scribe
     method compose-file() {
         my $full-source-file =
             self.get-class-header() ~
+            $!fixture-declaration-text ~ "\n" ~
             self.compose-constructor() ~ "\n" ~
             self.compose-method-ExecuteScenario() ~
             self.compose-section-declarations() ~
@@ -171,6 +172,7 @@ class Code-Scribe
 
         @!section-declarations = Empty;
         $!section-declaration-text = '';
+        $!fixture-declaration-text = '';
         $!fixture-instantiation-text = '';
         $!execute-body-text = '';
     }

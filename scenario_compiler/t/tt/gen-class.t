@@ -4,6 +4,7 @@ use Tabula::Grammar-Testing;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia("Scenario");
 my $context = $actions.Context;
+my $binder = $actions.Binder;
 $context.file-name = "ScenarioFilename.scn";
 
 if False
@@ -46,9 +47,16 @@ if False
 
 {   diag "The class has tables, paragraphs, and and an execution plan matching the scenario";
 
+    my $book = Fixture-Book.new(class-name => 'ActionWorkflow');
+    $book.add-method("Action_one_with__argument(string flavor)");
+    $book.add-method("Action_two_with__and__(string color, string irrelevant)");
+
+    $binder.bind-fixture($book);
+
     my $scenario = q:to/EOS/;
     Scenario:  "This and That"
 
+    >use: action
     Action one with #flavor argument
     Action two with #color and #attitude
     [ flavor | color | attitude ]
@@ -67,15 +75,36 @@ if False
         public class ScenarioFilename_generated
             : GeneratedScenarioBase, IGeneratedScenario
         {
-            public string ScenarioLabel = "ScenarioFilename.scn:  "This and That"";
+            public string ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
+
+            public ActionWorkflow Action;
 
             public ScenarioFilename_generated(TabulaStepRunner runner)
                 : base(runner)
             {
+                Action = new ActionWorkflow();
             }
 
             public void ExecuteScenario()
             {
+                Run_para_over_table( paragraph_from_003_to_005, table_from_006_to_008 );
+            }
+
+            public void paragraph_from_003_to_005()
+            {
+                Do(() =>     Action.Action_one_with__argument(alias["flavor"]),     "ScenarioFilename.scn:4", @"Action.Action_one_with__argument(alias[""flavor""])" );
+                Do(() =>     Action.Action_two_with__and__(alias["color"], alias["attitude"]),     "ScenarioFilename.scn:5", @"Action.Action_two_with__and__(alias[""color""], alias[""attitude""])" );
+            }
+
+            public Table table_from_006_to_008()
+            {
+                return new Table {
+                    Header = new List<string>     { "flavor", "color", "attitude" },
+                    Data = new List<List<string>> {
+                        new List<string>          { "spicy", "red", "sassy" },
+                        new List<string>          { "zesty", "green", "lively" },
+                    }
+                };
             }
         }
     }
