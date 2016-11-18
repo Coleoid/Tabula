@@ -6,7 +6,7 @@ class Method-Page {
     has Str $.key;
 
 
-    method name-and-args-from-signature($signature) {
+    sub name-and-args-from-signature($signature) {
         unless $signature ~~ / $<name> = [ \w+ ] $<sig> = ['(' .* ')'] / {
             die "I didn't understand the method signature:  $signature";
         }
@@ -14,9 +14,9 @@ class Method-Page {
         return (~$<name>, ~$<sig>);
     }
 
-    method key-from-name-and-args($name, $args) {
+    sub key-from-name-and-args($name, $args) {
 
-        my $name-key = $name.lc.subst('_', '', :g);
+        my $name-key = $name.lc.subst('workflow', '').subst('_', '', :g);
 
         #  Future:  Optional args, args with defaults?
         unless $args ~~ / '(' $<arg> = ( \s* $<t1> = \S \S* \s+ $<argname> = [\S+] )* % ',' ')' / {
@@ -38,8 +38,8 @@ class Method-Page {
     #  Tabula presumes all methods are public void, and that this information
     # is stripped from the signature before being sent as the definition.
     submethod BUILD(:$!definition is required) {
-        my ($name, $args) = self.name-and-args-from-signature($!definition);
-        $!key = self.key-from-name-and-args($name, $args);
+        my ($name, $args) = name-and-args-from-signature($!definition);
+        $!key = key-from-name-and-args($name, $args);
         $!name = $name;
     }
 }

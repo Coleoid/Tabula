@@ -27,7 +27,7 @@ class Code-Scribe
         }
     }
 
-    #  The scenario constructor instantiates the fixtures.
+    #  The fixture instantiations go into the generated constructor.
     has %.instantiated-fixtures;
     has Str $.fixture-instantiation-text;
     method instantiate-fixture($fixture) {
@@ -100,18 +100,19 @@ class Code-Scribe
         my $table = '        public Table ' ~ $name ~ '()
         {
             return new Table {
-            Header = new List<string>     ' ~ $<Table-Header>.ast.chomp ~ ',';
+                Header = new List<string>     ' ~ $<Table-Header>.ast.chomp ~ ','
             ~ '
-            Data = new List<List<string>> {';
+                Data = new List<List<string>> {';
 
-        for $<Table-Row> {
+        for $<Table-Row> -> $row {
             $table ~= '
-                new List<string>          ' ~ $_.ast.chomp ~ ',';
+                    new List<string>          ' ~ $row.ast.chomp ~ ',';
         }
 
         $table ~= '
-            }
-        };
+                }
+            };
+        }
 ';
 
         self.declare-section($table);

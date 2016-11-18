@@ -50,13 +50,16 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 
     my $expected-SDs = q:to/EOP/;
 
-            table_from_003_to_005 = new Table {
-                Header = new List<string>     { "this", "that" },
-                Data = new List<List<string>> {
-                    new List<string>          { "near", "far" },
-                    new List<string>          { "hither", "yon" },
-                }
-            };
+            public Table table_from_003_to_005()
+            {
+                return new Table {
+                    Header = new List<string>     { "this", "that" },
+                    Data = new List<List<string>> {
+                        new List<string>          { "near", "far" },
+                        new List<string>          { "hither", "yon" },
+                    }
+                };
+            }
     EOP
 
     are-SectionDeclarations( '(para)', 'single table', $scenario, $expected-SDs );
@@ -73,12 +76,15 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 
     my $expected-SDs = q:to/EOP/;
 
-            table_from_003_to_004 = new Table {
-                Header = new List<string>     { "this" },
-                Data = new List<List<string>> {
-                    new List<string>          { "only" },
-                }
-            };
+            public Table table_from_003_to_004()
+            {
+                return new Table {
+                    Header = new List<string>     { "this" },
+                    Data = new List<List<string>> {
+                        new List<string>          { "only" },
+                    }
+                };
+            }
     EOP
 
     are-SectionDeclarations( '(para)', 'tiny table', $scenario, $expected-SDs );
@@ -94,11 +100,14 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 
     my $expected-SDs = q:to/EOP/;
 
-            table_from_003_to_003 = new Table {
-                Header = new List<string>     { "this" },
-                Data = new List<List<string>> {
-                }
-            };
+            public Table table_from_003_to_003()
+            {
+                return new Table {
+                    Header = new List<string>     { "this" },
+                    Data = new List<List<string>> {
+                    }
+                };
+            }
     EOP
 
     are-SectionDeclarations( '(para)', 'empty table', $scenario, $expected-SDs );

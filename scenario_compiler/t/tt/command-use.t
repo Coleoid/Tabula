@@ -2,46 +2,38 @@ use Test;
 use Tabula::Grammar-Testing;
 use Tabula::Fixture-Binder;
 
-my (&parser, $actions) = curry-parser-emitting-Testopia( "Command" );
-my $context = $actions.Context;
+my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
+my $context = $composer.Context;
+my $binder = $composer.Binder;
 say "\n";
 
 #if False
-{   diag "A use command adds a library to the current scope";
+{   diag "A use command adds a fixture to the current scope";
 
-    my $lib = Fixture-Binder.new(instance-name => "Advice", class-name => "AdviceWorkflow");
-    my $fixture = $lib.pull-fixture("Advice");
-    ok $fixture, "Can pull fixture by its instance-name.";
+    my $book = Fixture-Book.new(instance-name => "Advice", class-name => "AdviceWorkflow");
+    $book.add-method("Some_Thing()");
+    $book.add-method("This_is_a_step()");
 
-    $fixture.add-method("Some_Thing()");
-    $fixture.add-method("This_is_a_step()");
-    $context.RegisterLibrary($lib);
+    my $check-book = Fixture-Book.new(instance-name => "Check", class-name => "CheckWorkflow");
+    $check-book.add-method("Am_I_Done()");
 
-    my $check-lib = Fixture-Binder.new(instance-name => "Check", class-name => "CheckWorkflow");
-    $check-lib.add-fixture("Am_I_Done()");
-    $context.RegisterLibrary($check-lib);
+    $binder.bind-fixture($book);
+    $binder.bind-fixture($check-book);
 
-    is $context.current-scope.libraries.elems, 0, "begin with no libraries in scope";
+
+    is $context.current-scope.fixtures.elems, 0, "begin with no fixtures in scope";
 
     my $parse = parser( "use a workflow", ">use: Advice workflow" );
-    is $context.current-scope.libraries.elems, 1, "after a use command, library is in scope";
+    is $context.current-scope.fixtures.elems, 1, "after a use command, fixture is in scope";
 
     $parse = parser( "another workflow", ">use: Check workflow" );
-    is $context.current-scope.libraries.elems, 2, "a different use command will add another library to scope";
-
-    is $context.problems.elems, 0, "neither success case is a problem";
-
+    is $context.current-scope.fixtures.elems, 2, "a different use command will add another fixture to scope";
 
     $parse = parser( "duplicate workflow", ">use: Advice workflow" );
-    is $context.current-scope.libraries.elems, 2, "a duplicate use command does not add library again";
-    is $context.problems.elems, 1, "a use command with a duplicate workflow will mark a problem";
-    is $context.problems[0], "Tried to add duplicate library <<advice>>.", "...with a sensible message";
+    is $context.current-scope.fixtures.elems, 2, "a duplicate use command does not add fixture again";
 
     $parse = parser( "unfound workflow", ">use: No Such workflow" );
-    is $context.current-scope.libraries.elems, 2, "a use command not finding a workflow will (le duh) not add one";
-    is $context.problems.elems, 2, "a use command not finding a workflow will mark a problem";
-    is $context.problems[1], "Did not find library <<nosuch>> to add to scope.", "...with a sensible message";
-
+    is $context.current-scope.fixtures.elems, 2, "a use command not finding a workflow will (le duh) not add one";
 }
 
 done-testing;

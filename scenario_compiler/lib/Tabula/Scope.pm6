@@ -13,7 +13,9 @@ class Scope {
     # added Fixture-Book.
     has @.fixtures;
     method add-fixture(Fixture-Book $fixture) {
-        @!fixtures.unshift($fixture);
+        if (? $fixture) and ($fixture !~~ @!fixtures.any) {
+            @!fixtures.unshift($fixture);
+        }
     }
 
     #  An alias value may be defined in terms of other aliases, but only

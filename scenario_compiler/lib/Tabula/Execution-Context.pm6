@@ -38,7 +38,6 @@ class Execution-Context
     #  Begins in current scope, stops when it finds a step method.
     method resolve-step($match) {
         $!current-scope.resolve-step($match);
-        #return "Advice.This_is_a_step()";
     }
     #  ?:  Should we scan each fixture only once during each resolution?
 
@@ -50,7 +49,6 @@ class Execution-Context
     method resolve-label($label) { ... }
     #  Label values which include other labels resolve backward only,
     # with the intent (and hope) to prevent any loops.
-
 
     ##################################################################
     #

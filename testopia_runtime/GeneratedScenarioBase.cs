@@ -25,9 +25,9 @@ namespace Tabula
             Runner.Unfound(stepText, sourceLocation);
         }
 
-        public void TableOverParagraph(Action paragraph, Table table)
+        public void TableOverParagraph(Action paragraph, Func<Table> tableGenerator)
         {
-            int index = 0;
+            Table table = tableGenerator();
             foreach (var row in table.Rows)
             {
                 Context.Push(row);

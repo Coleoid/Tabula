@@ -17,14 +17,6 @@ namespace Tabula
         {
             Funky = new FunkyWorkflow(Context);
             EvaluateResults = new EvaluateResultsWorkflow(Context);
-
-            table_from_007_to_009 = new Table {
-                Header = new List<string>     { "Things"    , "Stuff"     },
-                Data = new List<List<string>> {
-                    new List<string>          { "email"     , "paperwork" },
-                    new List<string>          { "groceries" , "dinner"    }
-                }
-            };
         }
 
         public void ExecuteScenario()
@@ -39,6 +31,18 @@ namespace Tabula
             Do(() =>    Funky.Then_I_create__( val["stuff"] ),    "paragraphAndTable.scn:5", "Funky.Then_I_create__( val[\"stuff\"] )");
             Do(() =>    EvaluateResults.Both__and__should_show__results( val["things"], val["stuff"], "good" ),    "paragraphAndTable.scn:6", "EvaluateResults.Both__and__should_show__results( val[\"things\"], val[\"stuff\"], \"good\" )");
         }
+
+        public Table table_from_007_to_009()
+        {
+            return new Table {
+                Header = new List<string>     { "Things"    , "Stuff"     },
+                Data = new List<List<string>> {
+                    new List<string>          { "email"     , "paperwork" },
+                    new List<string>          { "groceries" , "dinner"    }
+                }
+            };
+        }
+
     }
 
 

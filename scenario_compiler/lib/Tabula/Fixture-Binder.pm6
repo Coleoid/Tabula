@@ -18,8 +18,19 @@ class Fixture-Binder {
             #  ignore this wrinkle and simply grab all public void methods.
 
     method parse-source($source) { ... }
-    method pull-fixture($name) { ... }
 
-    method canonicalize-fixture-name($name) { ... }
-    method canonicalize-method-name($name) { ... }
+    method bind-fixture($book) {
+        %!shelf{$book.key} = $book;
+    }
+
+    method pull-fixture($name) {
+        %!shelf{$name} || %!shelf{key-from-command-text($name)};
+    }
+
+    sub key-from-command-text($text) {
+        $text.lc
+            .subst('workflow', '')
+            .subst('_', '', :g)
+            .subst(' ', '', :g);
+    }
 }
