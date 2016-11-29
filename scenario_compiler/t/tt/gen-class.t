@@ -7,7 +7,7 @@ my $context = $actions.Context;
 my $binder = $actions.Binder;
 $context.file-name = "ScenarioFilename.scn";
 
-if False
+#if False
 {   diag "We emit a C# class corresponding to our scenario";
 
     my $scenario = q:to/EOS/;
@@ -25,7 +25,8 @@ if False
         public class ScenarioFilename_generated
             : GeneratedScenarioBase, IGeneratedScenario
         {
-            public string ScenarioLabel = "ScenarioFilename.scn:  "This and That"";
+            public string ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
+
 
             public ScenarioFilename_generated(TabulaStepRunner runner)
                 : base(runner)

@@ -71,7 +71,7 @@ class Target-Testopia {
         make ">$cmd: $<Phrases>"
     }
 
-    #ok
+    #scribe
     method Command-Use($/) {
         for $<Phrases><Phrase> -> $fixture-label {
             my $fixture = $!Binder.pull-fixture($fixture-label);
@@ -82,6 +82,8 @@ class Target-Testopia {
             }
             else           { } #TODO: notify on failure to find fixture
         }
+
+        make ""
     }
 
     #C#
@@ -121,15 +123,18 @@ class Target-Testopia {
 
     #echo
     method Statement($/) {
-        make
-            $<Action>.made
-            ~ ($<Comment> ?? "  " ~ $<Comment> !! "")
-            ~ "\n"
+        my $statement = $<Action>.made;
+        my $comment-suffix = ($<Comment> ?? "  " ~ $<Comment> !! "");
+        if $statement or $comment-suffix {
+            make $statement ~ $comment-suffix ~ "\n";
+        }
+        else {
+            make "";
+        }
     }
 
     #C#
     method Step($match) {
-        #my $source-location = $!Context.file-name ~ ':' ~ line-of-match-start($match);
         my $source-location = $!Context.source-location($match);
 
         my $result = $!Context.resolve-step($match);
@@ -182,8 +187,4 @@ class Target-Testopia {
         make $<Date> || $<Number> || $<String> || $<ID>.made
     }
 
-    #nn?
-    method TOP($/) {
-        make $<Scenario>.made
-    }
 }

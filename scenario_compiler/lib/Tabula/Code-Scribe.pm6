@@ -83,9 +83,10 @@ class Code-Scribe
 
     method compose-paragraph($/) {
         my $name = self.name-section('paragraph', $/);
+        my $statements = [~] $<Statement>.map({ .made ?? ("            " ~ .made) !! "" });
 
-        my $para = "        public void " ~ $name ~ "()\n        \{\n "
-            ~ [~] $<Statement>.map({ "           " ~ .made})
+        my $para = "        public void " ~ $name ~ "()\n        \{\n"
+            ~ $statements
             ~ "        \}\n";
 
         self.declare-section($para);
@@ -93,6 +94,7 @@ class Code-Scribe
         return $para;
     }
 
+    #TODO: Table Labels
     method compose-table($/) {
         my $name = self.name-section('table', $/);
 
