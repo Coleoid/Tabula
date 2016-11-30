@@ -27,7 +27,6 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     EOS
 
     my $expected-SDs = q:to/EOP/;
-
             public void paragraph_from_003_to_004()
             {
                 Unfound(     "do a thing",     "ScenarioFilename.scn:3" );
@@ -49,7 +48,6 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     EOS
 
     my $expected-SDs = q:to/EOP/;
-
             public Table table_from_003_to_005()
             {
                 return new Table {
@@ -75,7 +73,6 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     EOS
 
     my $expected-SDs = q:to/EOP/;
-
             public Table table_from_003_to_004()
             {
                 return new Table {
@@ -99,7 +96,6 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     EOS
 
     my $expected-SDs = q:to/EOP/;
-
             public Table table_from_003_to_003()
             {
                 return new Table {

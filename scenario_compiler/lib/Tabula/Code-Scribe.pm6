@@ -49,18 +49,11 @@ class Code-Scribe
     has Str $.staged-paragraph;
     has Bool $.paragraph-pending;
 
-    method add-paragraph-call($paragraph-name) {
-        $!execute-body-text ~= '            ' ~ $paragraph-name ~ "();\n";
-    }
-
-    method add-table-call($table-name) {
-        $!execute-body-text ~= '            Run_para_over_table( ' ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );\n";
-        $!paragraph-pending = False;
-    }
-
-    method flush-pending-paragraph() {
-        self.add-paragraph-call($!staged-paragraph) if $!paragraph-pending;
-        $!paragraph-pending = False;
+    method add-next-section($name) {
+        if $name ~~ /^paragraph/ { self.stage-paragraph($name); }
+        elsif $name ~~ /^table/  { self.add-table-call($name); }
+        elsif $name eq ''        { self.flush-pending-paragraph; }
+        else { die "I do not know how to add a section named [$name]." }
     }
 
     method stage-paragraph($name) {
@@ -69,11 +62,18 @@ class Code-Scribe
         $!paragraph-pending = True;
     }
 
-    method add-next-section($name) {
-        if $name ~~ /^paragraph/ { self.stage-paragraph($name); }
-        elsif $name ~~ /^table/  { self.add-table-call($name); }
-        elsif $name eq ''        { self.flush-pending-paragraph; }
-        else { die "I do not know how to add a section named [$name]." }
+    method flush-pending-paragraph() {
+        self.add-paragraph-call($!staged-paragraph) if $!paragraph-pending;
+        $!paragraph-pending = False;
+    }
+
+    method add-paragraph-call($paragraph-name) {
+        $!execute-body-text ~= '            ' ~ $paragraph-name ~ "();\n";
+    }
+
+    method add-table-call($table-name) {
+        $!execute-body-text ~= '            Run_para_over_table( ' ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );\n";
+        $!paragraph-pending = False;
     }
 
 
@@ -146,9 +146,7 @@ class Code-Scribe
 
     # Paragraph and Table method declarations
     method compose-section-declarations() {
-        $!section-declaration-text = @!section-declarations.elems == 0
-            ?? ""
-            !! "\n" ~ (join "\n", @!section-declarations);
+        $!section-declaration-text = @!section-declarations.join("\n");
     }
 
     #  Returns the full source file--includes, namespace, class.
@@ -157,7 +155,7 @@ class Code-Scribe
             self.get-class-header() ~
             $!fixture-declaration-text ~ "\n" ~
             self.compose-constructor() ~ "\n" ~
-            self.compose-method-ExecuteScenario() ~
+            self.compose-method-ExecuteScenario() ~ "\n" ~
             self.compose-section-declarations() ~
             self.get-class-footer();
 
