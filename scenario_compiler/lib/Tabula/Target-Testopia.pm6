@@ -77,8 +77,7 @@ class Target-Testopia {
             my $fixture = $!Binder.pull-fixture($fixture-label);
             if so $fixture {
                 $!Context.add-fixture($fixture);
-                $!Scribe.declare-fixture($fixture);
-                $!Scribe.instantiate-fixture($fixture);
+                $!Scribe.initialize-fixture($fixture);
             }
             else           { } #TODO: notify on failure to find fixture
         }

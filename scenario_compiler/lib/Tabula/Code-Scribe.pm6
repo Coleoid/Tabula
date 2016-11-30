@@ -17,22 +17,14 @@ class Code-Scribe
         @!section-declarations.push( $section );
     }
 
-    has %.declared-fixtures;
+    has %.seen-fixtures;
     has Str $.fixture-declaration-text;
-    method declare-fixture($fixture) {
-        if not %!declared-fixtures{$fixture.key} {
-            %!declared-fixtures{$fixture.key} = $fixture;
+    has Str $.fixture-instantiation-text;
+    method initialize-fixture($fixture) {
+        if not %!seen-fixtures{$fixture.key} {
+            %!seen-fixtures{$fixture.key} = $fixture;
             $!fixture-declaration-text ~= "        public " ~ $fixture.class-name ~ " "
                 ~ $fixture.instance-name ~ ";\n";
-        }
-    }
-
-    #  The fixture instantiations go into the generated constructor.
-    has %.instantiated-fixtures;
-    has Str $.fixture-instantiation-text;
-    method instantiate-fixture($fixture) {
-        if not %!instantiated-fixtures{$fixture.key} {
-            %!instantiated-fixtures{$fixture.key} = $fixture;
             $!fixture-instantiation-text ~= "            " ~
                 $fixture.instance-name ~ " = new " ~ $fixture.class-name ~ "();\n";
         }
@@ -170,11 +162,14 @@ class Code-Scribe
         $!staged-paragraph = '';
         $!paragraph-pending = False;
 
-        @!section-declarations = Empty;
-        $!section-declaration-text = '';
+        %!seen-fixtures = Empty;
         $!fixture-declaration-text = '';
         $!fixture-instantiation-text = '';
+
         $!execute-body-text = '';
+
+        @!section-declarations = Empty;
+        $!section-declaration-text = '';
     }
 
     submethod BUILD {
