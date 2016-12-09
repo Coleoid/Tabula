@@ -21,16 +21,16 @@ class Target-Echo {
     }
 
     method Command($/) {
-        make ($<Command-Use> || $<Command-Tag> || $<Command-Alias> || $<Command-Step>).made
+        make ($<Command-Use> || $<Command-Tag> || $<Command-Alias> || $<Command-Set>).made
+    }
+
+    method Command-Set($/) {
+        my $lhs = $<Word> || $<Variable>;
+        make ">set: $lhs => $<Term>"
     }
 
     method Command-Alias($/) {
-        my $lhs = $<Word> || $<ID>;
-        make ">alias: $lhs => $<Term>"
-    }
-
-    method Command-Step($/) {
-        make ">step: $<Phrase> => $<Action>"
+        make ">alias: $<Phrase> => $<Action>"
     }
 
     method Command-Tag($/) {
@@ -115,7 +115,7 @@ class Target-Echo {
     }
 
     method Term($/) {
-        make $<Date> || $<Number> || $<String> || $<ID>
+        make $<Date> || $<Number> || $<String> || $<Variable>
     }
 
 }

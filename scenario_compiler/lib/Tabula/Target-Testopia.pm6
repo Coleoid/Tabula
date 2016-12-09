@@ -48,21 +48,22 @@ class Target-Testopia {
 
     #nn?
     method Command($/) {
-        make ($<Command-Use> || $<Command-Tag> || $<Command-Alias>).made
+        # I think I can simply make "" here and not bother with it lower down
+        make ($<Command-Use> || $<Command-Tag> || $<Command-Set>).made
     }
 
     #C#
-    method Command-Alias($/) {
+    method Command-Set($/) {
         my $lhs = $<Word>
             ?? '"' ~ $<Word>.lc ~ '"'
-            !! $<ID>.made;
+            !! $<Variable>.made;
         my $rhs = $<Term>.made;
 
-        make get-Do-statement( 'alias[' ~ $lhs ~ '] = ' ~ $rhs , "SampleScenario.scn:1" );
+        make get-Do-statement( 'var[' ~ $lhs ~ '] = ' ~ $rhs , "SampleScenario.scn:1" );
     }
 
     #--
-    method Command-Step($/) {
+    method Command-Alias($/) {
     }
 
     #echo
@@ -79,15 +80,17 @@ class Target-Testopia {
                 $!Context.add-fixture($fixture);
                 $!Scribe.initialize-fixture($fixture);
             }
-            else           { } #TODO: notify on failure to find fixture
+            else {
+                #TODO: notify on failure to find fixture
+            }
         }
 
         make ""
     }
 
     #C#
-    method ID($/) {
-        make 'alias["' ~ $<Word>.lc ~ '"]';
+    method Variable($/) {
+        make 'var["' ~ $<Word>.lc ~ '"]';
     }
 
     #scribe
@@ -183,7 +186,7 @@ class Target-Testopia {
 
     #nn?
     method Term($/) {
-        make $<Date> || $<Number> || $<String> || $<ID>.made
+        make $<Date> || $<Number> || $<String> || $<Variable>.made
     }
 
 }

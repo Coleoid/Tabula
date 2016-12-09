@@ -29,7 +29,7 @@ say "\n";
 
     $parse = parser( 'use', ">use: Mail Server" );
     $parse = parser( 'tags', ">tags: Housing, Person Search, AC-20341" );
-    $parse = parser( 'simple alias', '>alias: JR => "Jackie Robinson"' );
+    $parse = parser( 'set', '>set: JR => "Jackie Robinson"' );
 }
 
 
@@ -47,7 +47,7 @@ say "\n";
     ok $symbols[5]<Term><String>, "String in Step parses as a Term";
     is $symbols[5], '"Bill"', "Find value of String";
 
-    ok $symbols[8]<Term><ID>, "Tagged word in Step parses as a Term";
+    ok $symbols[8]<Term><Variable>, "Tagged word in Step parses as a Term";
     is $symbols[8], "#day", "Find value of tag";
 
     $step = '"Eek!" Blocks and string-first Steps both work with LTM';

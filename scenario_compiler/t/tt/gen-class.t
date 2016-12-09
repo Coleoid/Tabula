@@ -94,8 +94,8 @@ $context.file-name = "ScenarioFilename.scn";
 
             public void paragraph_from_003_to_005()
             {
-                Do(() =>     Action.Action_one_with__argument(alias["flavor"]),     "ScenarioFilename.scn:4", @"Action.Action_one_with__argument(alias[""flavor""])" );
-                Do(() =>     Action.Action_two_with__and__(alias["color"], alias["attitude"]),     "ScenarioFilename.scn:5", @"Action.Action_two_with__and__(alias[""color""], alias[""attitude""])" );
+                Do(() =>     Action.Action_one_with__argument(var["flavor"]),     "ScenarioFilename.scn:4", @"Action.Action_one_with__argument(var[""flavor""])" );
+                Do(() =>     Action.Action_two_with__and__(var["color"], var["attitude"]),     "ScenarioFilename.scn:5", @"Action.Action_two_with__and__(var[""color""], var[""attitude""])" );
             }
 
             public Table table_from_006_to_008()

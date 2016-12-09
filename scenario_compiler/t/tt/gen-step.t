@@ -39,7 +39,7 @@ $context.add-fixture($fixture);
         "quotes date arg when signature takes string";
 
     $parse = parser( "Interpreting a variable arg", 'please don\'t "hassle" the #Hoff' );
-    is $parse.made, 'Do(() =>     Advice.Please_dont__the__("hassle", alias["Hoff"]),     "SampleScenario.scn:1", @"Advice.Please_dont__the__(""hassle"", alias[""Hoff""])" );',
+    is $parse.made, 'Do(() =>     Advice.Please_dont__the__("hassle", var["Hoff"]),     "SampleScenario.scn:1", @"Advice.Please_dont__the__(""hassle"", var[""Hoff""])" );',
         "dereferences variable without further cast when signature takes string";
 }
 

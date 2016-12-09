@@ -71,11 +71,11 @@ class Scope {
     #TODO:  Evaluate terms as number and date types
     sub get-Term-string($term) {
         given $term {
-            when .<String> {return .made};
-            when .<Number> {return '"' ~ .made ~ '"'};
-            when .<Date>   {return '"' ~ .made ~ '"'};
-            when .<ID>     {return 'alias["' ~ .<ID><Word> ~ '"]'};
-            default        {fail "Unknown Term type"};
+            when .<String>   {return .made};
+            when .<Number>   {return '"' ~ .made ~ '"'};
+            when .<Date>     {return '"' ~ .made ~ '"'};
+            when .<Variable> {return 'var["' ~ .<Variable><Word> ~ '"]'};
+            default          {fail "Unknown Term type"};
         }
     }
 }

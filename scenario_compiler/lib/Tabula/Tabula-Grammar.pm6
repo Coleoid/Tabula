@@ -28,11 +28,11 @@ grammar Tabula-Grammar {
 
     token Step { $<OptQ> = '? '? <Phrase> }
 
-    token Command { <Command-Use> || <Command-Alias> || <Command-Tag> || <Command-Step> }
-    token Command-Use   { '>' use   ':' \h* <Phrases> \h* }
+    token Command { <Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use> }
+    token Command-Alias { '>' alias ':' \h* <Phrase> \h* '=>' \h* <Action> }  # build time
+    token Command-Set   { '>' set   ':' \h* [ <Word> || <Variable> ] \h* '=>' \h* <Term> }  # run time
     token Command-Tag   { '>' tags? ':' \h* <Phrases> \h* }
-    token Command-Alias { '>' alias ':' \h* [ <Word> || <ID> ] \h* '=>' \h* <Term> }  # run time
-    token Command-Step  { '>' step  ':' \h* <Phrase> \h* '=>' \h* <Action> }  # build time
+    token Command-Use   { '>' use   ':' \h* <Phrases> \h* }
 
     token Indentation { \h* }
     token Comment { '//' \N* }
@@ -41,10 +41,10 @@ grammar Tabula-Grammar {
     token Phrase  { <Symbol>+ % \h+ }
     token Symbol  { <Word> || <Term> }
     token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }   # using just \w+, numbers were words.
-    token Term    { [ <Date> || <Number> || <String> || <ID> ] }
+    token Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
-    token Number { \d+ }
-    token String { '"' <-["]>* '"' }
-    token ID { '#' <Word> }
-    token Date { \d\d? '/' \d\d? '/' \d\d\d\d }
+    token Number   { \d+ }
+    token String   { '"' <-["]>* '"' }  # TODO: single quotes, quote escaping
+    token Variable { '#' <Word> }
+    token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }
 }

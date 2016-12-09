@@ -22,7 +22,7 @@ class Code-Scribe
     has Str $.fixture-instantiation-text;
     method initialize-fixture($fixture) {
         if not %!seen-fixtures{$fixture.key} {
-            %!seen-fixtures{$fixture.key} = $fixture;
+            %!seen-fixtures{$fixture.key} = True;
             $!fixture-declaration-text ~= "        public " ~ $fixture.class-name ~ " "
                 ~ $fixture.instance-name ~ ";\n";
             $!fixture-instantiation-text ~= "            " ~

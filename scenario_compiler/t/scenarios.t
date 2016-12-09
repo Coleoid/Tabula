@@ -63,7 +63,7 @@ say "\n";
     .
 
     "What we'll call our people in this scenario"...
-        >alias: #handle => #FullNameLF
+        >set: #handle => #FullNameLF
         [ handle | FullNameLF             ]
         | Lina   | "Frixell, Rorolina"    |
         | Gio    | "Arland, Giovanni"     |
@@ -72,7 +72,7 @@ say "\n";
     .
 
     "What we'll call the organizations they work for"...
-        >alias: #TLA => #OrganizationName
+        >set: #TLA => #OrganizationName
         [ TLA | OrganizationName             ]
         | HPD | Hometown Police Department   |
         | OPD | Otherville Police Department |
@@ -126,7 +126,7 @@ say "\n";
         | #Mimi    | #OA      | Instructor | Reserve  | Part Time | 8/15/2012  |
     .
 
-    >step: "Add employment actions for #employeeName at #orgName" => ...
+    >alias: "Add employment actions for #employeeName at #orgName" => ...
         >use: Employment Action Edit
 
         Browse to Add Employment Action for #employeeName at #orgName
