@@ -9,14 +9,12 @@ namespace Tabula
     {
         public FunkyWorkflow Funky;
         public EvaluateResultsWorkflow EvaluateResults;
-        public Table table_from_007_to_009;
-        public ScenarioContext Context;
 
         public paragraphAndTable_generated(TabulaStepRunner runner)
             : base(runner)
         {
-            Funky = new FunkyWorkflow(Context);
-            EvaluateResults = new EvaluateResultsWorkflow(Context);
+            Funky = new FunkyWorkflow();
+            EvaluateResults = new EvaluateResultsWorkflow();
         }
 
         public void ExecuteScenario()
@@ -46,7 +44,7 @@ namespace Tabula
     }
 
 
-//  If this text is found in the file paragraphAndTable.scn, it would generate
+//  If this text is found in the file paragraphAndTable.tab, it would generate
 //  the class above, paragraphAndTable_generated.
     public const string sampleScenarioText =
 @"Scenario: ""This and That""

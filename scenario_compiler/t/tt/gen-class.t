@@ -25,12 +25,10 @@ $context.file-name = "ScenarioFilename.scn";
         public class ScenarioFilename_generated
             : GeneratedScenarioBase, IGeneratedScenario
         {
-            public string ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
-
-
             public ScenarioFilename_generated(TabulaStepRunner runner)
                 : base(runner)
             {
+                ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
             }
 
             public void ExecuteScenario()
@@ -77,13 +75,12 @@ $context.file-name = "ScenarioFilename.scn";
         public class ScenarioFilename_generated
             : GeneratedScenarioBase, IGeneratedScenario
         {
-            public string ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
-
             public ActionWorkflow Action;
 
             public ScenarioFilename_generated(TabulaStepRunner runner)
                 : base(runner)
             {
+                ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
                 Action = new ActionWorkflow();
             }
 
@@ -115,7 +112,7 @@ $context.file-name = "ScenarioFilename.scn";
     my $parse = parser( "empty scenario", $scenario );
     my $output-class = $parse.made;
 
-    is $output-class, $expected-class-output, "empty scenario creates compilable empty class";
+    is $output-class, $expected-class-output, "simple scenario with paragraph and table works";
 }
 
 
