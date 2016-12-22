@@ -19,8 +19,9 @@ class Method-Page {
         my $name-key = $name.lc.subst('workflow', '').subst('_', '', :g);
 
         #  Future:  Optional args, args with defaults?
-        unless $args ~~ / '(' $<arg> = ( \s* $<t1> = \S \S* \s+ $<argname> = [\S+] )* % ',' ')' / {
-            die "I didn't understand the argument list:  $args";
+        unless $args ~~ / '(' \s* $<arg> = ( \s* $<t1> = \S \S* \s+ $<argname> = [\S+] )* % ',' \s* ')' / {
+            #  Doesn't understand generic types or optional arguments
+            die "    ? I didn't understand the argument list for:  $name$args";
         }
 
         #  The sig key encodes the method arg types.  For example,
@@ -45,10 +46,10 @@ class Method-Page {
 }
 
 #  Fixture:  A C# class containing testing methods to be called by the
-# IGeneratedScenario.  Fixture-Book organizes what Tabula needs to generate
+# IGeneratedScenario.  Fixture-Class organizes what Tabula needs to generate
 # the C# scenario classes.  The Fixture-Binder will traverse the file system
-# and create these books from the C# fixtures it finds there.
-class Fixture-Book {
+# and create these from the C# fixtures it finds there.
+class Fixture-Class {
     has Str $.class-name;
     has Str $.instance-name;
     has Str $.key;
@@ -62,10 +63,17 @@ class Fixture-Book {
         $!key = $short-name.lc;
     }
 
-    has Method-Page %.pages;
+    has Method-Page %.pages{Str};
     method add-method($definition) {
         my $method = Method-Page.new(:definition($definition));
-        %.pages{$method.key} = $method;
+        my $key = $method.key;
+        %!pages{$key} = $method;
+        CATCH {
+            default {
+                # when we want to monitor Method-Page failures
+                # .Str.say;
+            }
+        }
     }
 
     method key-from-step($step) {
