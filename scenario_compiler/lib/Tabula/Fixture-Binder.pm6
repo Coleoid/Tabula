@@ -31,37 +31,37 @@ class Fixture-Binder {
     }
 
     method parse-source($file) {
-        my Fixture-Class $book;
-        my Bool $found-workflow = False;
+        my Fixture-Class $class;
+        my Bool $found-class = False;
 
         for $file.IO.lines {
-            if $found-workflow {
+            if $found-class {
                 if / public \s+ void \s+ (\w+ '(' <-[)]>* ')') / {
                     #say "  $0";
-                    $book.add-method(~$0);
+                    $class.add-method(~$0);
                 }
             }
 
             if / public \s+ class \s+ (\w+) / {
                 my $class-name = ~$0;
-                $found-workflow = so ($class-name ~~ / Workflow $ /);
-                if $found-workflow {
-                    $book = Fixture-Class.new(class-name => $class-name);
-                    self.add-workflow($book);
+                $found-class = so ($class-name ~~ / Workflow $ /);
+                if $found-class {
+                    $class = Fixture-Class.new(class-name => $class-name);
+                    self.add-class($class);
                     #say "$class-name:";
                 }
                 else {
-                    $book = Nil;
+                    $class = Nil;
                 }
             }
         }
     }
 
-    method add-workflow($book) {
-        %!shelf{$book.key} = $book;
+    method add-class($class) {
+        %!shelf{$class.key} = $class;
     }
 
-    method get-workflow($name) {
+    method get-class($name) {
         %!shelf{$name} || %!shelf{key-from-command-text($name)};
     }
 

@@ -21,7 +21,7 @@ use Tabula::Fixture-Binder;
 #     nok $context.current-scope.parent, "start with ONLY one scope";
 #     $context.file-name = "myfile.scn";
 #
-#     my $book = Fixture-Book.new(class-name => "AdviceWorkflow");
+#     my $book = Fixture-Class.new(class-name => "AdviceWorkflow");
 #     $book.add-method("Not_This()");
 #
 #     nok $context.current-scope.fixtures.defined, "starting with no libraries declared";

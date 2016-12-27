@@ -47,11 +47,11 @@ $context.file-name = "ScenarioFilename.scn";
 
 {   diag "The class has tables, paragraphs, and and an execution plan matching the scenario";
 
-    my $book = Fixture-Book.new(class-name => 'ActionWorkflow');
-    $book.add-method("Action_one_with__argument(string flavor)");
-    $book.add-method("Action_two_with__and__(string color, string irrelevant)");
+    my $class = Fixture-Class.new(class-name => 'ActionWorkflow');
+    $class.add-method("Action_one_with__argument(string flavor)");
+    $class.add-method("Action_two_with__and__(string color, string irrelevant)");
 
-    $binder.bind-fixture($book);
+    $binder.add-class($class);
 
     my $scenario = q:to/EOS/;
     Scenario:  "This and That"

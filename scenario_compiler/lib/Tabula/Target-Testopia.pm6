@@ -75,7 +75,7 @@ class Target-Testopia {
     #scribe
     method Command-Use($/) {
         for $<Phrases><Phrase> -> $fixture-label {
-            my $fixture = $!Binder.pull-fixture($fixture-label);
+            my $fixture = $!Binder.get-class($fixture-label);
             if so $fixture {
                 $!Context.add-fixture($fixture);
                 $!Scribe.initialize-fixture($fixture);

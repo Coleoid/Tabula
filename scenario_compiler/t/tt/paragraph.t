@@ -9,17 +9,17 @@ say "\n";
 {   diag "Basic Paragraph output";
     $context.file-name = "SampleScenario.scn";
 
-    my $advice-fixture = Fixture-Book.new(class-name => "AdviceWorkflow", instance-name => "Advice");
+    my $advice-fixture = Fixture-Class.new(class-name => "AdviceWorkflow", instance-name => "Advice");
     $advice-fixture.add-method("Some_Thing()");
     $advice-fixture.add-method("This_is_a_step()");
 
-    my $another-fixture = Fixture-Book.new(class-name => "AnotherWorkflow", instance-name => "Another");
+    my $another-fixture = Fixture-Class.new(class-name => "AnotherWorkflow", instance-name => "Another");
     $another-fixture.add-method("Step_from_AnotherFixture()");
 
-    my $check-fixture = Fixture-Book.new(class-name => "CheckWorkflow");
+    my $check-fixture = Fixture-Class.new(class-name => "CheckWorkflow");
     $check-fixture.add-method("Am_I_Done()");
 
-    my $overriding-fixture = Fixture-Book.new(class-name => "OverridingWorkflow", instance-name => "Overriding");
+    my $overriding-fixture = Fixture-Class.new(class-name => "OverridingWorkflow", instance-name => "Overriding");
     $overriding-fixture.add-method("THIS__IS__A__STEP()");
     $overriding-fixture.add-method("STEP_FROM_ANOTHERFIXTURE()");
 

@@ -1,7 +1,7 @@
 use Test;
-use Tabula::Fixture-Book;
+use Tabula::Fixture-Class;
 
-my $book = Fixture-Book.new(class-name => 'AdviceWorkflow');
+my $book = Fixture-Class.new(class-name => 'AdviceWorkflow');
 
 my $sig = 'This_is_a_step()';
 $book.add-method($sig);

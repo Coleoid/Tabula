@@ -1,5 +1,5 @@
 use v6;
-use Tabula::Fixture-Book;
+use Tabula::Fixture-Class;
 
 #  Holding fixtures, labels, and aliases for a portion of the scenario.
 class Scope {
@@ -10,9 +10,9 @@ class Scope {
     }
 
     #  Methods defined in multiple fixtures will be found in the most recently
-    # added Fixture-Book.
+    # added Fixture-Class.
     has @.fixtures;
-    method add-fixture(Fixture-Book $fixture) {
+    method add-fixture(Fixture-Class $fixture) {
         if (? $fixture) and ($fixture !~~ @!fixtures.any) {
             @!fixtures.unshift($fixture);
         }

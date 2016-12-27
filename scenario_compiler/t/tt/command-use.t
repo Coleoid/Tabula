@@ -10,15 +10,15 @@ say "\n";
 #if False
 {   diag "A use command adds a fixture to the current scope";
 
-    my $book = Fixture-Book.new(instance-name => "Advice", class-name => "AdviceWorkflow");
-    $book.add-method("Some_Thing()");
-    $book.add-method("This_is_a_step()");
+    my $class = Fixture-Class.new(instance-name => "Advice", class-name => "AdviceWorkflow");
+    $class.add-method("Some_Thing()");
+    $class.add-method("This_is_a_step()");
 
-    my $check-book = Fixture-Book.new(instance-name => "Check", class-name => "CheckWorkflow");
-    $check-book.add-method("Am_I_Done()");
+    my $check-class = Fixture-Class.new(instance-name => "Check", class-name => "CheckWorkflow");
+    $check-class.add-method("Am_I_Done()");
 
-    $binder.bind-fixture($book);
-    $binder.bind-fixture($check-book);
+    $binder.add-class($class);
+    $binder.add-class($check-class);
 
 
     is $context.current-scope.fixtures.elems, 0, "begin with no fixtures in scope";
