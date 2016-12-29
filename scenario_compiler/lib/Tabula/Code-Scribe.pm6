@@ -130,6 +130,22 @@ class Code-Scribe {
     #  Composing code for paragraphs and tables of the scenario class,
     # and adding them to the ExecuteScenario() plan.
 
+    sub get-Do-statement( $code, $source-location ) {
+        my $quoted-code = '@"' ~ $code.subst('"', '""', :g) ~ '"';
+        'Do(() =>     ' ~ $code
+            ~ ',     "' ~ $source-location ~ '", ' ~ $quoted-code ~ ' );';
+    }
+
+    method compose-not-implemented($messsage, $location) {
+        return '';
+    }
+
+    method compose-set-statement($lhs, $rhs, $location) {
+        my $command = 'var[' ~ $lhs ~ '] = ' ~ $rhs;
+        return get-Do-statement( $command, $location );
+    }
+
+
     method compose-paragraph($name, $statements) {
         my $para = "        public void " ~ $name ~ "()\n        \{\n"
             ~ $statements

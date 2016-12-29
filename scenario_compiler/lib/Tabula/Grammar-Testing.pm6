@@ -25,8 +25,8 @@ module Grammar-Testing {
 
     sub curry-parser-emitting-Testopia( $rule ) is export {
         use Test;
-        state $grammar = Tabula-Grammar.new;
-        state $actions = Target-Testopia.new;
+        my $grammar = Tabula-Grammar.new;
+        my $actions = Target-Testopia.new;
 
         return (
             sub ( $label, $input ) {

@@ -1,10 +1,10 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my (&parser, $actions) = curry-parser-emitting-Testopia( "Command" );
+my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
+$composer.Context.file-name = "SampleScenario.scn";
+my $binder = $composer.Binder;
 say "\n";
-
-#TODO:  Think!  How should aliases and libraries interact?
 
 #if False
 {   diag "A set command adds a variable to the current scope";

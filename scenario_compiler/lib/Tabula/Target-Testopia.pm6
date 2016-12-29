@@ -10,9 +10,9 @@ class Target-Testopia does Match-Helper {
     has Fixture-Binder $.Binder;
 
     submethod BUILD {
-        $!Context = Execution-Context.new();
-        $!Scribe = Code-Scribe.new();
-        $!Binder = Fixture-Binder.new();
+        $!Context = Execution-Context.new;
+        $!Scribe = Code-Scribe.new;
+        $!Binder = Fixture-Binder.new;
     }
 
     sub get-Do-statement( $code, $source-location ) {
@@ -23,7 +23,7 @@ class Target-Testopia does Match-Helper {
     }
 
     method normalized-name-CSharp() {
-        $!Context.file-name.subst('.scn', '')
+        $!Context.file-name.subst('.scn', '').subst('.tab', '')
     }
 
 
@@ -35,7 +35,7 @@ class Target-Testopia does Match-Helper {
         make ($<Step> || $<Block> || $<Command>).made
     }
 
-    #C#
+    #inline C#
     method Block($/) {
         $!Context.open-scope($<String>);
 
@@ -49,31 +49,34 @@ class Target-Testopia does Match-Helper {
 
     #nn?
     method Command($/) {
-        # I think I can simply make "" here and not bother with it lower down
+        # Set emits code back into the streams
         make ($<Command-Use> || $<Command-Tag> || $<Command-Set>).made
     }
 
-    #C#
+    # mature
     method Command-Set($/) {
+        my $source-location = $!Context.source-location($/);
+
         my $lhs = $<Word>
             ?? '"' ~ $<Word>.lc ~ '"'
             !! $<Variable>.made;
         my $rhs = $<Term>.made;
 
-        make get-Do-statement( 'var[' ~ $lhs ~ '] = ' ~ $rhs , "SampleScenario.scn:1" );
+        make $!Scribe.compose-set-statement($lhs, $rhs, $source-location);
     }
 
     #--
     method Command-Alias($/) {
     }
 
-    #echo
+    #NI
     method Command-Tag($/) {
+        my $source-location = $!Context.source-location($/);
         my $cmd = $<PhraseList>.elems == 1 ?? 'tag' !! 'tags';
-        make ">$cmd: $<Phrases>"
+        make $!Scribe.compose-not-implemented(">$cmd: $<Phrases>", $source-location);
     }
 
-    #scribe
+    # mature
     method Command-Use($/) {
         for $<Phrases><Phrase> -> $fixture-label {
             my $fixture = $!Binder.get-class($fixture-label);
@@ -82,7 +85,7 @@ class Target-Testopia does Match-Helper {
                 $!Scribe.initialize-fixture($fixture);
             }
             else {
-                #TODO: notify on failure to find fixture
+                warn "unable to find fixture matching [$fixture-label].";
             }
         }
 
@@ -102,17 +105,17 @@ class Target-Testopia does Match-Helper {
         make $!Scribe.compose-paragraph( $name, $statements );
     }
 
-    #echo
+    #text
     method Phrase($/) {
         make '"' ~ $<Symbol>.join(' ') ~ '"';
     }
 
-    #ok
+    #text
     method Phrases($/) {
-        make $<Phrase>[0].made;
+        make $<Phrase>.map({.made}).join(', ');
     }
 
-    #scribe
+    # mature
     method Scenario($/) {
         $!Scribe.scenario-title = $<String>;
         $!Scribe.file-name = $!Context.file-name;
@@ -137,7 +140,7 @@ class Target-Testopia does Match-Helper {
         }
     }
 
-    #C#
+    #inline C#
     method Step($match) {
         my $source-location = $!Context.source-location($match);
 
@@ -156,7 +159,7 @@ class Target-Testopia does Match-Helper {
         make ($<Word> || $<Term>.made) ~ ' '
     }
 
-    #scribe
+    # mature
     method Table($/) {
         my $name = self.name-section('table', $/);
         my $header = $<Table-Header>.made.chomp;
@@ -175,7 +178,7 @@ class Target-Testopia does Match-Helper {
         make $<Table-Cell>.map({.made}).join(', ')
     }
 
-    #C#
+    #inline C#
     method Table-Header($/) {
         make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
     }
@@ -185,7 +188,7 @@ class Target-Testopia does Match-Helper {
         make "$<Indentation>=== $<Step> ===\n"
     }
 
-    #C#
+    #inline C#
     method Table-Row($/) {
         make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
     }
