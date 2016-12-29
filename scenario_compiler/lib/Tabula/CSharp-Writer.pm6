@@ -24,14 +24,13 @@ role CSharp-Writer {
     }
 
     method class-scenario-label() {
-'        public string ScenarioLabel = @"' ~ self.file-name ~ ':  "' ~ self.scenario-title ~ '"";
+    '           ScenarioLabel = @"' ~ self.file-name ~ ':  "' ~ self.scenario-title ~ '"";
 ';
     }
 
     method get-class-header() {
         self.class-prefix ~
-        self.class-declaration ~
-        self.class-scenario-label ~ "\n";
+        self.class-declaration ~ "\n";
     }
 
     method get-class-footer() {

@@ -18,8 +18,8 @@ class Code-Scribe
     }
 
     has %.seen-fixtures;
-    has Str $.fixture-declaration-text;
-    has Str $.fixture-instantiation-text;
+    has Str $.fixture-declaration-text = '';
+    has Str $.fixture-instantiation-text = '';
     method initialize-fixture($fixture) {
         if not %!seen-fixtures{$fixture.key} {
             %!seen-fixtures{$fixture.key} = True;
@@ -122,7 +122,8 @@ class Code-Scribe
 '        public ' ~ self.class-name ~ '(TabulaStepRunner runner)
             : base(runner)
         {
-'       ~ $!fixture-instantiation-text ~ '        }
+'       ~ self.class-scenario-label
+        ~ $!fixture-instantiation-text ~ '        }
 ';
     }
 
@@ -136,8 +137,15 @@ class Code-Scribe
 ';
     }
 
+    method compose-fixture-declarations() {
+        return 'x' if $!fixture-declaration-text ~~ '';
+
+        return $!fixture-declaration-text ~ "\n";
+    }
+
     # Paragraph and Table method declarations
     method compose-section-declarations() {
+        return '' if @!section-declarations ~~ Empty;
         $!section-declaration-text = @!section-declarations.join("\n");
     }
 
@@ -145,6 +153,7 @@ class Code-Scribe
     method compose-file() {
         my $full-source-file =
             self.get-class-header() ~
+            self.compose-fixture-declarations() ~
             $!fixture-declaration-text ~ "\n" ~
             self.compose-constructor() ~ "\n" ~
             self.compose-method-ExecuteScenario() ~ "\n" ~

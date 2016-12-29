@@ -45,6 +45,7 @@ $context.file-name = "ScenarioFilename.scn";
     is $output-class, $expected-class-output, "empty scenario creates compilable empty class";
 }
 
+if False
 {   diag "The class has tables, paragraphs, and and an execution plan matching the scenario";
 
     my $class = Fixture-Class.new(class-name => 'ActionWorkflow');
