@@ -1,5 +1,4 @@
 use v6;
-use Tabula::Match-Helper;
 
 #  Normalizing join, to improve output sanity
 multi sub njoin( Int $count, *@elements, :$delim = "\n" )
@@ -23,8 +22,7 @@ multi sub njoin( *@elements, :$delim = "\n" )
 }
 
 #  Composes a Tabula scenario into a C# class
-class Code-Scribe
-    does Match-Helper {
+class Code-Scribe {
     has $.scenario-title is rw;
     has $.file-name is rw;
 
@@ -132,10 +130,7 @@ class Code-Scribe
     #  Composing code for paragraphs and tables of the scenario class,
     # and adding them to the ExecuteScenario() plan.
 
-    method compose-paragraph($/) {
-        my $name = self.name-section('paragraph', $/);
-        my $statements = [~] $<Statement>.map({ .made ?? ("            " ~ .made) !! "" });
-
+    method compose-paragraph($name, $statements) {
         my $para = "        public void " ~ $name ~ "()\n        \{\n"
             ~ $statements
             ~ "        \}\n";
@@ -145,28 +140,21 @@ class Code-Scribe
         return $para;
     }
 
-    #TODO: Table Labels
-    method compose-table($/) {
-        my $name = self.name-section('table', $/);
+    method compose-table($name, $header, @rows) {
+        #TODO: Labels and Row hashes
 
-        #TODO: Row hashes
-        my $table = '        public Table ' ~ $name ~ '()
+        my $table = njoin(
+'        public Table ' ~ $name ~ '()
         {
             return new Table {
-                Header = new List<string>     ' ~ $<Table-Header>.ast.chomp ~ ','
-            ~ '
-                Data = new List<List<string>> {';
-
-        for $<Table-Row> -> $row {
-            $table ~= '
-                    new List<string>          ' ~ $row.ast.chomp ~ ',';
-        }
-
-        $table ~= '
-                }
+                Header = new List<string>     ' ~ $header ~ ',',
+'                Data = new List<List<string>> {',
+            @rows.map({
+'                    new List<string>          ' ~ $_ ~ ',' }),
+'                }
             };
         }
-';
+');
 
         self.declare-section($table);
         self.add-next-section($name);
@@ -200,15 +188,6 @@ class Code-Scribe
         );
     }
 
-    #  Provides a clean testing interface for gen-ExecuteScenatio.t
-    method trimmed-body-actions() is export(:test-content) {
-        njoin( @body-actions.map({.trim}) ) ~ "\n"
-    }
-
-    method show-sections() is export(:test-content) {
-        njoin( 2, @section-declarations ) ~ "\n"
-    }
-
     # Paragraph and Table method declarations
     method compose-fixture-declarations() {
         njoin(@fixture-declarations)
@@ -226,6 +205,18 @@ class Code-Scribe
             ),
             self.get-class-footer()
         ) ~ "\n";
+    }
+
+
+    ##################################################################
+    #  Unit testing helpers for readability
+
+    method trimmed-body-actions() is export(:test-content) {
+        njoin( @body-actions.map({.trim}) ) ~ "\n"
+    }
+
+    method show-sections() is export(:test-content) {
+        njoin( 2, @section-declarations ) ~ "\n"
     }
 
 

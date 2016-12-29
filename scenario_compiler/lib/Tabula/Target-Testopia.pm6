@@ -2,8 +2,9 @@ use v6;
 use Tabula::Execution-Context;
 use Tabula::Code-Scribe;
 use Tabula::Fixture-Binder;
+use Tabula::Match-Helper;
 
-class Target-Testopia {
+class Target-Testopia does Match-Helper {
     has Execution-Context $.Context;
     has Code-Scribe $.Scribe;
     has Fixture-Binder $.Binder;
@@ -95,7 +96,10 @@ class Target-Testopia {
 
     #scribe
     method Paragraph($/) {
-        make $!Scribe.compose-paragraph($/);
+        my $name = self.name-section('paragraph', $/);
+        my $statements = [~] $<Statement>.map({ .made ?? ("            " ~ .made) !! "" });
+
+        make $!Scribe.compose-paragraph( $name, $statements );
     }
 
     #echo
@@ -105,9 +109,7 @@ class Target-Testopia {
 
     #ok
     method Phrases($/) {
-        #make $<Phrase>.map({ '"' ~ .made ~ '"' }).join(', ');
         make $<Phrase>[0].made;
-        #make "-phrases-"
     }
 
     #scribe
@@ -156,7 +158,11 @@ class Target-Testopia {
 
     #scribe
     method Table($/) {
-        make $!Scribe.compose-table($/);
+        my $name = self.name-section('table', $/);
+        my $header = $<Table-Header>.made.chomp;
+        my @rows = $<Table-Row>.map({.made.chomp});
+
+        make $!Scribe.compose-table($name, $header, @rows);
     }
 
     #nn?
