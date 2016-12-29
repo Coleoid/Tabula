@@ -1,5 +1,6 @@
 use Test;
 use Tabula::Grammar-Testing;
+use Tabula::Code-Scribe :test-content;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia("Scenario");
 my $context = $actions.Context;
@@ -13,7 +14,7 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
     $scribe.clear-work();
     my $parse = parser( $sequence, $scenario );
 
-    is $scribe.section-declaration-text, $expected-SDs, $expectation;
+    is $scribe.show-sections, $expected-SDs, $expectation;
 }
 
 

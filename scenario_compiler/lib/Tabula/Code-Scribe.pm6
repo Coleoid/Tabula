@@ -1,39 +1,98 @@
 use v6;
-use Tabula::CSharp-Writer;
 use Tabula::Match-Helper;
+
+#  Normalizing join, to improve output sanity
+multi sub njoin( Int $count, *@elements, :$delim = "\n" )
+    is export(:njoin) {
+    return njoin( @elements, delim => $delim x $count );
+}
+
+multi sub njoin( *@elements, :$delim = "\n" )
+    is export(:njoin) {
+    my $separator = '';
+
+    my $result = '';
+    for @elements -> $element {
+        if $element ~~ / ^^ $<content> = ([\s* \S+]+) \s* $$ / {
+            $result ~= $separator ~ $<content>;
+            $separator = $delim;
+        }
+    }
+
+    return $result;
+}
 
 #  Composes a Tabula scenario into a C# class
 class Code-Scribe
-    does Match-Helper
-    does CSharp-Writer {
+    does Match-Helper {
     has $.scenario-title is rw;
     has $.file-name is rw;
 
-    ##################################################################
-    #  Sections (tables and paragraphs) are added by declare-section()
-    has Str @.section-declarations;
-    has Str $.section-declaration-text;
-    method declare-section( $section ) {
-        @!section-declarations.push( $section );
+    method class-file-prefix() {
+        q:to/END/;
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+
+        namespace Tabula
+        {
+        END
     }
 
-    has %.seen-fixtures;
-    has Str $.fixture-declaration-text = '';
-    has Str $.fixture-instantiation-text = '';
+    #TODO: a coherent technique for scenario suffixes
+    method class-name() {
+        self.file-name
+            .subst('.scn', '')
+            .subst('.tab', '')
+            ~ '_generated'
+    }
+
+    method class-declaration() {
+'    public class ' ~ self.class-name ~ '
+        : GeneratedScenarioBase, IGeneratedScenario
+    {';
+}
+
+    method class-scenario-label() {
+        '            ScenarioLabel = @"'
+            ~ self.file-name ~ ':  "'
+            ~ self.scenario-title ~ '"";';
+    }
+
+    method get-class-header() {
+        njoin( self.class-file-prefix, self.class-declaration )
+    }
+
+    method get-class-footer() {
+        "    }\n}";
+    }
+
+
+
+    ##################################################################
+    #  Sections (tables and paragraphs) are added by declare-section()
+    my @section-declarations;
+    method declare-section( $section ) {
+        push @section-declarations, $section;
+    }
+
+    my %seen-fixtures;
+    my @fixture-declarations;
+    my @fixture-instantiations;
     method initialize-fixture($fixture) {
-        if not %!seen-fixtures{$fixture.key} {
-            %!seen-fixtures{$fixture.key} = True;
-            $!fixture-declaration-text ~= "        public " ~ $fixture.class-name ~ " "
-                ~ $fixture.instance-name ~ ";\n";
-            $!fixture-instantiation-text ~= "            " ~
-                $fixture.instance-name ~ " = new " ~ $fixture.class-name ~ "();\n";
-        }
+        return if %seen-fixtures{$fixture.key};
+        %seen-fixtures{$fixture.key} = True;
+
+        push @fixture-declarations,
+            "        public $($fixture.class-name) $($fixture.instance-name);";
+        push @fixture-instantiations,
+            "            $($fixture.instance-name) = new " ~ $fixture.class-name ~ '();';
     }
 
 
     ##################################################################
     #  Our ExecuteScenario text, built by add-next-section()
-    has Str $.execute-body-text;
+    my @body-actions;
 
     #  Tabula scenario flow:
     #  A paragraph may run directly, or per-row of tables below it,
@@ -60,11 +119,11 @@ class Code-Scribe
     }
 
     method add-paragraph-call($paragraph-name) {
-        $!execute-body-text ~= '            ' ~ $paragraph-name ~ "();\n";
+        push @body-actions, '            ' ~ $paragraph-name ~ "();";
     }
 
     method add-table-call($table-name) {
-        $!execute-body-text ~= '            Run_para_over_table( ' ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );\n";
+        push @body-actions, '            Run_para_over_table( ' ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );";
         $!paragraph-pending = False;
     }
 
@@ -119,48 +178,54 @@ class Code-Scribe
     #  Composing portions of the scenario class file
 
     method compose-constructor() {
+        njoin(
 '        public ' ~ self.class-name ~ '(TabulaStepRunner runner)
             : base(runner)
-        {
-'       ~ self.class-scenario-label
-        ~ $!fixture-instantiation-text ~ '        }
-';
+        {',
+            self.class-scenario-label,
+            @fixture-instantiations,
+'        }'
+        );
     }
 
     #  ExecuteScenario() runs the scenario as it was sequenced, at the
     # paragraph granularity.
     method compose-method-ExecuteScenario() {
         self.flush-pending-paragraph();
+        njoin(
 '        public void ExecuteScenario()
-        {
-' ~ $!execute-body-text ~ '        }
-';
+        {',
+            @body-actions,
+'        }'
+        );
     }
 
-    method compose-fixture-declarations() {
-        return 'x' if $!fixture-declaration-text ~~ '';
+    #  Provides a clean testing interface for gen-ExecuteScenatio.t
+    method trimmed-body-actions() is export(:test-content) {
+        njoin( @body-actions.map({.trim}) ) ~ "\n"
+    }
 
-        return $!fixture-declaration-text ~ "\n";
+    method show-sections() is export(:test-content) {
+        njoin( 2, @section-declarations ) ~ "\n"
     }
 
     # Paragraph and Table method declarations
-    method compose-section-declarations() {
-        return '' if @!section-declarations ~~ Empty;
-        $!section-declaration-text = @!section-declarations.join("\n");
+    method compose-fixture-declarations() {
+        njoin(@fixture-declarations)
     }
 
     #  Returns the full source file--includes, namespace, class.
     method compose-file() {
-        my $full-source-file =
-            self.get-class-header() ~
-            self.compose-fixture-declarations() ~
-            $!fixture-declaration-text ~ "\n" ~
-            self.compose-constructor() ~ "\n" ~
-            self.compose-method-ExecuteScenario() ~ "\n" ~
-            self.compose-section-declarations() ~
-            self.get-class-footer();
-
-        return $full-source-file;
+        njoin(
+            self.get-class-header(),
+            njoin( 2,
+                self.compose-fixture-declarations(),
+                self.compose-constructor(),
+                self.compose-method-ExecuteScenario(),
+                @section-declarations
+            ),
+            self.get-class-footer()
+        ) ~ "\n";
     }
 
 
@@ -171,14 +236,12 @@ class Code-Scribe
         $!staged-paragraph = '';
         $!paragraph-pending = False;
 
-        %!seen-fixtures = Empty;
-        $!fixture-declaration-text = '';
-        $!fixture-instantiation-text = '';
+        %seen-fixtures = Empty;
+        @fixture-declarations = Empty;
+        @fixture-instantiations = Empty;
 
-        $!execute-body-text = '';
-
-        @!section-declarations = Empty;
-        $!section-declaration-text = '';
+        @body-actions = Empty;
+        @section-declarations = Empty;
     }
 
     submethod BUILD {

@@ -1,5 +1,6 @@
 use Test;
 use Tabula::Grammar-Testing;
+use Tabula::Code-Scribe :test-content;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia("Scenario");
 my $context = $actions.Context;
@@ -17,7 +18,7 @@ sub does-scenario-contain($scenario, $expected-code, $outcome) {
 
     my $parse = parser( $outcome, $scenario );
 
-    is $scribe.execute-body-text, $expected-code, $expectation;
+    is $scribe.trimmed-body-actions, $expected-code, $expectation;
 }
 
 
@@ -31,7 +32,7 @@ sub does-scenario-contain($scenario, $expected-code, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-                paragraph_from_003_to_004();
+    paragraph_from_003_to_004();
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'single paragraph' );
@@ -50,8 +51,8 @@ sub does-scenario-contain($scenario, $expected-code, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-                paragraph_from_003_to_004();
-                paragraph_from_006_to_007();
+    paragraph_from_003_to_004();
+    paragraph_from_006_to_007();
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'each paragraph once' );
@@ -72,7 +73,7 @@ sub does-scenario-contain($scenario, $expected-code, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-                Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_008 );
+    Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_008 );
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'paragraph run over table' );
@@ -98,8 +99,8 @@ sub does-scenario-contain($scenario, $expected-code, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-                Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_008 );
-                Run_para_over_table( paragraph_from_003_to_004, table_from_010_to_014 );
+    Run_para_over_table( paragraph_from_003_to_004, table_from_006_to_008 );
+    Run_para_over_table( paragraph_from_003_to_004, table_from_010_to_014 );
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'paragraph run over each table' );
@@ -122,8 +123,8 @@ sub does-scenario-contain($scenario, $expected-code, $outcome) {
     EOS
 
     my $expected-code = q:to/EOC/;
-                paragraph_from_003_to_004();
-                Run_para_over_table( paragraph_from_006_to_007, table_from_009_to_011 );
+    paragraph_from_003_to_004();
+    Run_para_over_table( paragraph_from_006_to_007, table_from_009_to_011 );
     EOC
 
     does-scenario-contain( $scenario, $expected-code, 'para1 alone and para2 over table' );

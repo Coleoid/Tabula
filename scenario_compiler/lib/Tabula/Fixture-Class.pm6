@@ -20,7 +20,7 @@ class Method-Page {
 
         #  Future:  Optional args, args with defaults?
         unless $args ~~ / '(' \s* $<arg> = ( \s* $<t1> = \S \S* \s+ $<argname> = [\S+] )* % ',' \s* ')' / {
-            #  Doesn't understand generic types or optional arguments
+            #  Doesn't yet understand generic types or optional arguments
             die "    ? I didn't understand the argument list for:  $name$args";
         }
 
