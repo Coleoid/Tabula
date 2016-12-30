@@ -1,0 +1,34 @@
+
+===
+Finish tying together p6 Tabula compiler
+
+C# unit tests for the runtime variable Context
+    looks much like the scope handling portion of Execution-Context
+    primarily for table rows
+    perhaps also serves the output construction
+    var[] should wrap scopes
+
+
+===
+Developer mode output
+
+not implemented steps:
+    17:  create new badge named "Bad Monkey Fighter"
+    44:  retire badge "Bad Monkey Fighter"
+story not tied to steps:
+    8:  * controlled by content admin permission
+steps not tied to story:
+please enjoy this nice chewy stack trace:
+
+
+
+===
+Demo mode output
+
+[show/hide setup]
+stories covered:
+    [V] AC-XXXXX [focus this story]
+        "As a major dude, I want to create badges on the fly..."
+        * Admin setting "Create Badge"
+        *
+    [>] AC-YYYYY [focus this story]
