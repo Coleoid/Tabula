@@ -1,20 +1,18 @@
 use v6;
 use Tabula::Fixture-Class;
 
-#  Loads fixtures from disk, binds them into books, shelves results
+#  Reads fixtures from disk, creates Fixture-Class objects
+#  Stores/fetches results
 class Fixture-Binder {
     has %.shelf;
 
     #  Main responsibilities
     method load-fixtures($folder) {
 
+        die "[$folder] is not a folder within [$*CWD]." unless $folder.IO.d;
+
         my @folders;
-        if $folder.IO.d {
-            @folders.push($folder);
-        }
-        else {
-            die "[$folder] is not a folder within [$*CWD].";
-        }
+        @folders.push($folder);
 
         while (my $target = @folders.pop) {
             my @folder-contents = dir $target;
@@ -37,7 +35,7 @@ class Fixture-Binder {
         for $file.IO.lines {
             if $found-class {
                 if / public \s+ void \s+ (\w+ '(' <-[)]>* ')') / {
-                    #say "  $0";
+                    say "  $0";
                     $class.add-method(~$0);
                 }
             }
@@ -48,7 +46,7 @@ class Fixture-Binder {
                 if $found-class {
                     $class = Fixture-Class.new(class-name => $class-name);
                     self.add-class($class);
-                    #say "$class-name:";
+                    say "$class-name:";
                 }
                 else {
                     $class = Nil;

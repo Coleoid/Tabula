@@ -18,15 +18,6 @@ class Scope {
         }
     }
 
-    #  An alias value may be defined in terms of other aliases, but only
-    # those which have already been defined.  Resolution is most-recent-first.
-    has %.aliases;
-    method add-alias($alias, $value) { ... }
-
-    #  Arguments, table values, any other symbolic reference
-    has %.labels;
-    method add-label($label, $value) { ... }
-
     method resolve-step($step) {
         my $method-call = self.find-step-method($step);
 
@@ -68,7 +59,7 @@ class Scope {
         return join ', ', @args;
     }
 
-    #TODO:  Evaluate terms as number and date types
+    #TODO:  Evaluate Number and Date types as those types when fitting
     sub get-Term-string($term) {
         given $term {
             when .<String>   {return .made};

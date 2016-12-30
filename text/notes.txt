@@ -1,0 +1,67 @@
+Plans and notes
+
+
+===  Developer mode output
+
+Not Found and Not Implemented steps:
+    17:  create new badge named "Bad Monkey Fighter"
+    44:  retire badge "Bad Monkey Fighter"
+
+Story not tied to steps:
+    8:  * Controlled by content admin permission
+Steps not tied to story:
+    188...220:  "Cannot create badge when lacking permission"
+
+Please enjoy this chewy stack trace:
+
+
+=====================================================================
+===  Demo mode output
+
+---------------------------------------------------------------------
+Scenario:  "Badge management, discounts, and capabilities" (Badge_basics.tab)
+PASS:      148 story steps, 218 setup, 18 uncategorized
+Run on:    Friday, 30 Dec 2016  10:48:35
+
+---------------------------------------------------------------------
+Stories:
+
+[V] AC-XXXXX  "As a major dude, I want to create badges on the fly"
+    [focus this story]
+    * Admin setting "Create Badge"
+    * Controlled by content admin permission
+    * Page listing badges, linked from menu X
+    * Blah blah blah
+
+    * Happy path
+        ** Log in as Major Dude
+        ** Enable Create Badge in Admin settings
+        ** See Badge List in menu X
+        ** Choose Add Badge from Badge List page
+        ** Enter Badge info and save
+        ** See new badge in Badge List page
+
+    * Exception path:  Create Badge not enabled
+        ** Disable Create Badge in Admin settings
+        ** From Badge list page, see that Add Badge is not visible
+
+    * Exception path:  User not a content admin
+        ** Enable Create Badge in Admin settings
+        ** From Badge list page, see that Add Badge is visible
+        ** Log in as Sergeant Bradshaw
+        ** From Badge list page, see that Add Badge is not visible
+
+[>] AC-YYYYY  "As a badge holder, I want to see a discount"
+
+
+---------------------------------------------------------------------
+Steps
+
+[Show Setup]
+
+...lots of steps here, with no line numbers or timings...
+
+===========
+
+SeleniumPageIDTests.cs has reflective nuggets
+P6 to read .NET assembly manifest?

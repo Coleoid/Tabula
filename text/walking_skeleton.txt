@@ -1,0 +1,44 @@
+===  Tabula walking skeleton, remaining work  ===  30 Dec 2016
+
+
+Fixture-Binder finishes enough of its education
+
+    [ ] 1.00  Resolve methods available to class via inheritance
+            At scenario compile-time, rather than at C# parsing-time
+
+    [ ] 0.50  Comprehend generic classes (somewhat)
+
+    [ ] 0.50  Comprehend partial classes (somewhat)
+            Or pre-grind & special-case the Workflow base class partials?
+
+    [ ] 0     Fixture-finding to catch 'workflow' embedded in name
+
+
+Compiler builds class from head to toe
+
+    [ ] 0.25  Loads Binder from command-line args, uses it
+
+    [ ] 0.25  Write class to output file
+
+
+Scope management
+
+    [ ] 0.50  API:  open_scope, close_scope, add_row, add_var, resolve_var
+            Create a scope object for value fetching, delegating outward
+
+    [ ] 0.50  When running a table, insert row values into scope
+
+    [ ] 0.25  var(string) delegates to scope.resolve_var to expose scoped values
+
+
+Other runtime needs
+
+    [ ] 0.50  Scenario Context supplied to fixtures using it
+
+
+Testopia runner does Tabula
+
+    [ ] 0.50  Loads Tabula scenario classes dynamically
+
+    [ ] 0.25  Reports minimally/adequately
+            Or 1.00 - 2.00 if reporting via the old mechanism
