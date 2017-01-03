@@ -23,12 +23,8 @@ Compiler builds class from head to toe
 
 Scope management
 
-    [ ] 0.50  API:  open_scope, close_scope, add_row, add_var, resolve_var
-            Create a scope object for value fetching, delegating outward
-
-    [ ] 0.50  When running a table, insert row values into scope
-
-    [ ] 0.25  var(string) delegates to scope.resolve_var to expose scoped values
+    [ ] 0.50  Unit tests to solidify behavior
+        ? does empty string on missing key fit our needs?
 
 
 Other runtime needs
@@ -42,3 +38,14 @@ Testopia runner does Tabula
 
     [ ] 0.25  Reports minimally/adequately
             Or 1.00 - 2.00 if reporting via the old mechanism
+
+
+Pragmatics and plumbing
+
+    [ ] 0.50  Translate modern Testopia scenario into Tabula
+        Repetitive stretch so that tables can shine
+        Half in browse/choose, half in translate/rewrite
+
+    [ ] 0.25  Add generated class (or several?) to Acadis
+
+    [ ] 0.25  Update mechanical translation script to 16.12 dialect
