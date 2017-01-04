@@ -115,3 +115,16 @@ Workflow : ISetupAndTeardown, IScenarioMetadata
 
 
 ---------------------------------------------------------------------
+
+Recurring technique:  When facing a mass of data of unknown variability
+Create a processing loop which reports clearly on elements which are
+ not in the expected form, somehow.
+Have it loose enough to wedge in more adjustment rules/code.
+This can aid quick iteration towards success with all data in the set.
+
+Note that coding to fix all the cases which do come up is often easier
+than coding to handle the general case.
+  However, it's often fragile to new odd input, so it's better suited to
+single-shot translation code than code which will keep getting new input.
+
+---------------------------------------------------------------------

@@ -2,69 +2,51 @@
 ===  Tabula walking skeleton, remaining work  ===  03 Jan 2017
 
 Fixture-Binder finishes enough of its education
-
-    [ ] Comprehend partial classes (somewhat)
-        Or pre-grind & special-case the Workflow base class partials?
+    [ ] Manually pre-build parent classes for inheritance
     .75
-
-    [ ] Resolve methods available to class via inheritance
-        At scenario compile-time, rather than at C# parsing-time
+    [ ] Keep Parent in Fixture-Class, populate from declaration
+        delegate method finding at scenario compile-time
     1.0
-
     [ ] Comprehend generic classes (enough)
         (perhaps very little if inheritance/partials are already in)
     .5
-
-    [ ] Fixture-finding to catch 'workflow' embedded in name
-    .25
-
-
-Compiler builds class from head to toe
-
-    [ ] Loads Binder from command-line args, uses it
-    .25
-
-    [ ] Write class to output file
-    .25
-
-
-Scope management
-
-    [ ] Unit tests to solidify behavior
-        ? does empty string on missing key fit our needs?
+    [ ] Recognize and handle specials (parents, oddly-named, et c.)
     .5
+2.5
+
+
+Compiler
+    [ ] Decouple main loop some for smoother dev
+    .25
+0.25
 
 Testopia runner wired through Tabula
-
     [ ] Loads Tabula scenario classes dynamically
     .5
-
     [ ] Reports minimally/adequately
     .25
-
     [ ] Scenario Context supplied to fixtures using it
     .5
+1.25
+
 
 Pragmatics and plumbing
-
-    [ ] Translate modern Testopia scenario into Tabula
-        Want a repetitive stretch so that tables can shine
-        Half in browse/choose, half in translate/rewrite
-    .5
-
-    [ ] Manually add support code and generated class
-        (or several?) to Acadis
+    [ ] Finish translating TuitionBilling into Tabula
     .25
+    [ ] Manually add support code and generated scenario(s?)
+    .25
+.5
 
 
+Language growth
+    [ ] Start paragraph with a colon instead of block with an ellipsis
+        String becomes label for Paragraph
+        Paragraphs have their own scope
+    1.0
+1.0
 
 =====================================================================
 ===  Beyond the skeleton
-
-
-Pragmatics and plumbing
-
-    [ ] 0.25  Update mechanical translation script to 16.12 Tabula
 
 
 Testopia runner wired through Tabula
@@ -81,3 +63,19 @@ Dev mode vs. Demo mode
         ...which run against the current usage of '>use:'
         ...perhaps alternate large-scope 'use' is '>install:' or '<use:'
             . o O ( yuck )
+
+
+=====================================================================
+===  Done
+
+Compiler
+
+    [x] Loads Binder from command-line args, uses it
+    .25
+
+    [x] Write class to output file
+    .25
+
+Pragmatics and plumbing
+
+    [x] 0.25  Update mechanical translation script to 16.12 Tabula
