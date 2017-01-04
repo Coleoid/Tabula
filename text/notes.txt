@@ -65,3 +65,53 @@ Steps
 
 SeleniumPageIDTests.cs has reflective nuggets
 P6 to read .NET assembly manifest?
+
+
+---------------------------------------------------------------------
+
+Facility Add Edit Workflow: "Add a facility"
+# Login as "system"
+# Browse to page
+# Select owner "Testopia Academy"
+# Enter text "Training Building" for "Resource Name"
+# Check "Active"
+# Enter text "TB-100" for "Identifying Number"
+# Enter text "21" for "Asset Number"
+# Enter text "Renovated 2013" for "Comments"
+# Enter text "Building for basic training" for "Description"
+# Enter text "01/01/2000" for "Purchase Date"
+# Enter text "1000000" for "Purchase Price"
+# Click button "Save"
+
+
+"Add a facility":
+>use: Facility Add Edit Workflow
+Login as "system"
+Browse to page
+Select owner "Testopia Academy"
+Check "Active"
+
+=== Enter text in controls ===
+[ Resource Name     | Identifying Number | Asset Number | Comments       | Description | Purchase Date | Purchase Price ]
+| Training Building | TB-100             | 21           | Renovated 2013 | Buildin     | 01/01/2000    | 1000000        |
+
+Click button "Save"
+
+
+---------------------------------------------------------------------
+
+
+ExportWorkflowHelper.cs
+
+--- K:\code\acadis_trunk\ScenarioTests\ScenarioContext\
+
+MVBaseExportHandlerWorkflow<THandler> : Workflow
+MVBaseControlWorkflow<TView> : MVBaseWorkflow<TView>
+MvcBaseWorkflow<TModel> : MVBaseWorkflow
+partial class MVBaseWorkflow // ViewImplementations\MVBaseWorkflowProperties.cs
+MVBaseWorkflow<TView> : MVBaseWorkflow
+MVBaseWorkflow : Workflow
+Workflow : ISetupAndTeardown, IScenarioMetadata
+
+
+---------------------------------------------------------------------

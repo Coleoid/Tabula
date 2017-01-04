@@ -1,51 +1,83 @@
-===  Tabula walking skeleton, remaining work  ===  30 Dec 2016
-
+=====================================================================
+===  Tabula walking skeleton, remaining work  ===  03 Jan 2017
 
 Fixture-Binder finishes enough of its education
 
-    [ ] 1.00  Resolve methods available to class via inheritance
-            At scenario compile-time, rather than at C# parsing-time
+    [ ] Comprehend partial classes (somewhat)
+        Or pre-grind & special-case the Workflow base class partials?
+    .75
 
-    [ ] 0.50  Comprehend generic classes (somewhat)
+    [ ] Resolve methods available to class via inheritance
+        At scenario compile-time, rather than at C# parsing-time
+    1.0
 
-    [ ] 0.50  Comprehend partial classes (somewhat)
-            Or pre-grind & special-case the Workflow base class partials?
+    [ ] Comprehend generic classes (enough)
+        (perhaps very little if inheritance/partials are already in)
+    .5
 
-    [ ] 0     Fixture-finding to catch 'workflow' embedded in name
+    [ ] Fixture-finding to catch 'workflow' embedded in name
+    .25
 
 
 Compiler builds class from head to toe
 
-    [ ] 0.25  Loads Binder from command-line args, uses it
+    [ ] Loads Binder from command-line args, uses it
+    .25
 
-    [ ] 0.25  Write class to output file
+    [ ] Write class to output file
+    .25
 
 
 Scope management
 
-    [ ] 0.50  Unit tests to solidify behavior
+    [ ] Unit tests to solidify behavior
         ? does empty string on missing key fit our needs?
+    .5
+
+Testopia runner wired through Tabula
+
+    [ ] Loads Tabula scenario classes dynamically
+    .5
+
+    [ ] Reports minimally/adequately
+    .25
+
+    [ ] Scenario Context supplied to fixtures using it
+    .5
+
+Pragmatics and plumbing
+
+    [ ] Translate modern Testopia scenario into Tabula
+        Want a repetitive stretch so that tables can shine
+        Half in browse/choose, half in translate/rewrite
+    .5
+
+    [ ] Manually add support code and generated class
+        (or several?) to Acadis
+    .25
 
 
-Other runtime needs
 
-    [ ] 0.50  Scenario Context supplied to fixtures using it
-
-
-Testopia runner does Tabula
-
-    [ ] 0.50  Loads Tabula scenario classes dynamically
-
-    [ ] 0.25  Reports minimally/adequately
-            Or 1.00 - 2.00 if reporting via the old mechanism
+=====================================================================
+===  Beyond the skeleton
 
 
 Pragmatics and plumbing
 
-    [ ] 0.50  Translate modern Testopia scenario into Tabula
-        Repetitive stretch so that tables can shine
-        Half in browse/choose, half in translate/rewrite
+    [ ] 0.25  Update mechanical translation script to 16.12 Tabula
 
-    [ ] 0.25  Add generated class (or several?) to Acadis
 
-    [ ] 0.25  Update mechanical translation script to 16.12 dialect
+Testopia runner wired through Tabula
+
+    [ ] split local/MVC into separate axis from Testopia/Tabula
+
+    [ ] Reporting via existing web-page mechanism
+    1.0 - 2.0
+
+Dev mode vs. Demo mode
+
+    [ ] BDD styled >when: and >then:
+        Raises questions of scope
+        ...which run against the current usage of '>use:'
+        ...perhaps alternate large-scope 'use' is '>install:' or '<use:'
+            . o O ( yuck )
