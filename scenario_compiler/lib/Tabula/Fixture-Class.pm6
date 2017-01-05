@@ -53,9 +53,10 @@ class Fixture-Class {
     has Str $.class-name;
     has Str $.instance-name;
     has Str $.key;
+    has Fixture-Class $.parent;
 
     #  Future:  Namespace detection?
-    submethod BUILD(:$!class-name is required, :$!instance-name = "") {
+    submethod BUILD(:$!class-name is required, :$!instance-name = "", :$!parent ) {
         my str $short-name = $!class-name.subst('Workflow', '');
         if $!instance-name eq "" {
             $!instance-name = $short-name;
