@@ -165,9 +165,7 @@ Click Continue
 Export all billing items
 ? Verify there are "3" items
 
-// same for all 3:
-
-? Verify row #Row
+? Verify Row #Item
 ? Verify "Category" is "Class"
 ? Verify "Date" is equal to today
 ? Verify "Billing Usage" is ""
@@ -175,17 +173,17 @@ Export all billing items
 ? Verify "Usage Period End" is ""
 ? Verify "Cancelled" is "N"
 ? Verify Fields match Row values  //TODO: how?
-[ Row | Bill Created At | Event / Class*                | Billing Item                  | For              | Bill To          | Amount |
+[ Item| Bill Created At | Event / Class*                | Billing Item                  | For              | Bill To          | Amount |
 | 1   | Registration    | Driving - Highway Pursuit 100 | Driving - Highway Pursuit 100 | Bradley, Blake   | Bradley, Blake   | 101.42 |
 | 2   | Registration    | Driving - Highway Pursuit 101 | Driving - Highway Pursuit 101 | Bradley, Blake   | Bradley, Blake   | 131.55 |
 | 3   | Enrollment      | Driving - Highway Pursuit 103 | Driving - Highway Pursuit 103 | Nicholas, Jamila | Nicholas, Jamila | 172.55 |
 
 
-"Bradley, Blake":
+"Enroll Bradley, Blake":
 >use: Registration Management
 Enroll "Bradley, Blake" in "Highway Pursuit 101" from registration
 
-"Verify no bill was created at enrollment":
+"Verify no bill was created at enrollment for already registered student":
 >use: Billing Items Export Workflow
 Export all billing items
 ? Verify there are "3" items

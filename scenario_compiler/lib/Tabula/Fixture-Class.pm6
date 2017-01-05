@@ -1,6 +1,6 @@
 use v6;
 
-class Method-Page {
+class Fixture-Method {
     has Str $.definition is rw;
     has Str $.name;
     has Str $.key;
@@ -54,9 +54,14 @@ class Fixture-Class {
     has Str $.instance-name;
     has Str $.key;
     has Fixture-Class $.parent;
+    has Fixture-Method %.methods{Str};
+    has Bool $.debug = False;
 
-    #  Future:  Namespace detection?
-    submethod BUILD(:$!class-name is required, :$!instance-name = "", :$!parent ) {
+    #  Future:  Namespace detection in case of Fixture name collision
+    submethod BUILD(
+            :$!class-name is required,
+            :$!instance-name = "",
+            :$!parent = Nil) {
         my str $short-name = $!class-name.subst('Workflow', '');
         if $!instance-name eq "" {
             $!instance-name = $short-name;
@@ -64,15 +69,13 @@ class Fixture-Class {
         $!key = $short-name.lc;
     }
 
-    has Method-Page %.pages{Str};
     method add-method($definition) {
-        my $method = Method-Page.new(:definition($definition));
+        my $method = Fixture-Method.new(:definition($definition));
         my $key = $method.key;
-        %!pages{$key} = $method;
+        %!methods{$key} = $method;
         CATCH {
             default {
-                # when we want to monitor Method-Page failures
-                # .Str.say;
+                .Str.say if $!debug;
             }
         }
     }
@@ -83,6 +86,14 @@ class Fixture-Class {
 
     method find-step-method($step) {
         my $key = self.key-from-step($step);
-        return %.pages{$key};
+        if %.methods{$key}:exists {
+            return %.methods{$key};
+        }
+        elsif $!parent.defined {
+            return $!parent.find-step-method($step);
+        }
+        else {
+            return Nil;
+        }
     }
 }
