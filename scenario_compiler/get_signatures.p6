@@ -1,11 +1,14 @@
 use Tabula::Fixture-Binder;
 use Tabula::Fixture-Class;
 
-sub MAIN(
-        Str :$folder = 'k:\\code\\acadis_trunk\\ScenarioTests\\ScenarioContext\\Implementations'
-        #Str :$folder = 'd:\\code\\acadis\\ScenarioTests\\ScenarioContext\\Implementations'
-        ) {
+#my $root_default = 'k:\\code\\acadis_trunk\\';
+my $root_default = 'd:\\code\\acadis\\';
+
+sub MAIN( Str :$root = $root_default ) {
     my $binder = Fixture-Binder.new();
     $binder.debug = True;
-    $binder.load-fixtures($folder);
+
+    my $imps = $root_default ~ 'ScenarioTests\\ScenarioContext\\Implementations';
+    my $view-imps = $root_default ~ 'ScenarioTests\\ScenarioContext\\ViewImplementations';
+    $binder.load-fixtures($imps, $view-imps);
 }

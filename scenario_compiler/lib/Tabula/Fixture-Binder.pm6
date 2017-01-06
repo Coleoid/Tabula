@@ -7,14 +7,17 @@ class Fixture-Binder {
     has Fixture-Class %.classes{Str};
     has Bool $.debug is rw = False;
 
-    #  Main responsibilities
-    method load-fixtures($folder) {
+    my SetHash $namespaces .= new;
 
-        die "[$folder] is not a folder within [$*CWD]." unless $folder.IO.d;
+    #  Main responsibilities
+    method load-fixtures(*@subtree-trunks) {
 
         my @folders;
-        say "Starting at folder $folder" if $!debug;
-        @folders.push($folder);
+        for @subtree-trunks -> $trunk {
+            die "[$trunk] is not a folder within [$*CWD]." unless $trunk.IO.d;
+            say "Adding folder $trunk" if $!debug;
+            @folders.push($trunk);
+        }
 
         while (my $target = @folders.pop) {
             my @folder-contents = dir $target;
@@ -30,9 +33,11 @@ class Fixture-Binder {
                 }
             }
         }
+        say "Namespaces: $namespaces";
     }
 
     my $base-classes = 'Workflow' | 'MVAWorkflow' | 'MVBaseWorkflow';
+    my regex namespace { ^ \s* namespace \s+ ([\w || '.']+) }
     my regex method-decl { ^ \s* public \s+ [override \s+]? [virtual \s+]? void \s+ (\w+ '(' <-[)]>* ')') }
     my regex class-decl  { ^ \s* public \s+ ([abstract \s+]? [partial \s+]?) class \s+ (\w+) }
 
@@ -41,6 +46,10 @@ class Fixture-Binder {
         my Bool $filling-class = False;
 
         for $path.IO.lines -> $line {
+            if $line ~~ / <namespace> / {
+                $namespaces{~$<namespace>[0]} = True;
+            }
+
             if $filling-class && $line ~~ / <method-decl> / {
                 $class.add-method(~$<method-decl>[0]);
             }

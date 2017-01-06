@@ -2,7 +2,10 @@
 ===  Tabula walking skeleton, remaining work  ===  05 Jan 2017
 
 Fixture-Binder finishes enough of its education
-    [ ] Recognize and handle specials (parents, oddly-named, et c.)
+    [ ] Recognize parent class declaration, set parent to match
+    .25
+    [ ] Handle connecting parent classes which have not yet been loaded...somehow?
+        1 if ns collisions, track namespace (first check, are there multiple?)
     .5
 0.5
 
