@@ -2,10 +2,7 @@
 ===  Tabula walking skeleton, remaining work  ===  05 Jan 2017
 
 Fixture-Binder finishes enough of its education
-    [ ] Recognize parent class declaration, set parent to match
-    .25
-    [ ] Handle connecting parent classes which have not yet been loaded...somehow?
-        1 if ns collisions, track namespace (first check, are there multiple?)
+    [ ] Mop up remaining oddballs
     .5
 0.5
 
@@ -77,4 +74,6 @@ Fixture-Binder growth
     1.0
     [x] Comprehend generic classes (enough)
         (perhaps very little if inheritance/partials are already in)
+    .5
+    [x] Handle connecting parent classes
     .5

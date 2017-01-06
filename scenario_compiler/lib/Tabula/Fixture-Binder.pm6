@@ -1,13 +1,13 @@
 use v6;
 use Tabula::Fixture-Class;
+use MONKEY-SEE-NO-EVAL;
 
 #  Fixture-Class factory and repository
-#  Deserializes from C# source in subtree passed to load-fixtures()
+#  Deserializes from C# source in subtrees passed to load-fixtures()
 class Fixture-Binder {
     has Fixture-Class %.classes{Str};
     has Bool $.debug is rw = False;
-
-    my SetHash $namespaces .= new;
+    has SetHash $pucks;  #  Possibly Useless Classes Known
 
     #  Main responsibilities
     method load-fixtures(*@subtree-trunks) {
@@ -15,7 +15,7 @@ class Fixture-Binder {
         my @folders;
         for @subtree-trunks -> $trunk {
             die "[$trunk] is not a folder within [$*CWD]." unless $trunk.IO.d;
-            say "Adding folder $trunk" if $!debug;
+            say "Adding folder [$trunk]" if $!debug;
             @folders.push($trunk);
         }
 
@@ -33,22 +33,37 @@ class Fixture-Binder {
                 }
             }
         }
-        say "Namespaces: $namespaces";
     }
 
-    my $base-classes = 'Workflow' | 'MVAWorkflow' | 'MVBaseWorkflow';
-    my regex namespace { ^ \s* namespace \s+ ([\w || '.']+) }
-    my regex method-decl { ^ \s* public \s+ [override \s+]? [virtual \s+]? void \s+ (\w+ '(' <-[)]>* ')') }
-    my regex class-decl  { ^ \s* public \s+ ([abstract \s+]? [partial \s+]?) class \s+ (\w+) }
+    method repl() {
+        while True {
+            my $in = prompt "> ";
+            return if $in eq 'exit';
+            my $result = EVAL $in;
+            say $result if $result.defined;
+
+            CATCH { default { say .message; } }
+        }
+    }
+
+    my regex method-decl {
+        ^ \s* public \s+ [override \s+]? [virtual \s+]?
+        void \s+ (\w+ '(' <-[)]>* ')')
+    }
+
+    my regex class-decl  {
+        ^ \s* public \s+ ([abstract \s+]? [partial \s+]?)
+        class \s+ (\w+)
+        [ \s* ':' \s* (\w+) ]?
+    }
 
     method parse-source($path) {
         my Fixture-Class $class = Nil;
         my Bool $filling-class = False;
 
+        self.preload-base-classes();
+
         for $path.IO.lines -> $line {
-            if $line ~~ / <namespace> / {
-                $namespaces{~$<namespace>[0]} = True;
-            }
 
             if $filling-class && $line ~~ / <method-decl> / {
                 $class.add-method(~$<method-decl>[0]);
@@ -57,18 +72,19 @@ class Fixture-Binder {
             if $line ~~ / <class-decl> / {
                 my $modifiers = ~$<class-decl>[0].trim;
                 my $class-name = ~$<class-decl>[1];
+                my $parent-name = ~($<class-decl>[2] // '');
 
                 self.add-class($class);
                 $class = Nil;
 
-                $filling-class = ($class-name ne $base-classes);
+                $filling-class = not ($class-name ~~ /^[MVAWorkflow|MVBaseWorkflow|Workflow]$/);
                 if $filling-class {
-                    say $line;
-                    $class = Fixture-Class.new(class-name => $class-name);
-                    #say "$class-name:" if $!debug;
+                    #say $line;
+                    my Fixture-Class $parent = self.ready-parent($parent-name);
+                    $class = self.ready-class($class-name, :$parent);
                 }
                 else {
-                    say "--- Skipped base class $class-name";
+                    say ">>> Skipped preloaded base class: $modifiers $class-name";
                     $class = Nil;
                 }
             }
@@ -78,23 +94,50 @@ class Fixture-Binder {
         $class = Nil;
     }
 
-    method add-class($class) {
-        return unless $class.defined;
-        die "Binder already has a fixture named [$($class.class-name)]."
-            if %!classes{$class.key}:exists;
+    method ready-parent($parent-name) {
+        return Nil if $parent-name eq '';
 
-        if $class.methods.elems > 0 {
-            say "+++ Added $($class.class-name)";
-            %!classes{$class.key} = $class;
-        }
-        else {
-            say "--- Skipped binding class $($class.class-name) with no methods.";
-        }
-
+        return self.ready-class($parent-name, :add-new);
     }
 
-    method get-class($name) {
-        %!classes{$name} || %!classes{key-from-command-text($name)};
+    #   To either pull matching class or create one new.
+    method ready-class($class-name, Fixture-Class :$parent?, Bool :$add-new = False) {
+        my Fixture-Class $class = self.get-class($class-name);
+        if not $class.defined {
+            $class .= new(:$class-name, :$parent);
+            self.add-class($class) if $add-new;
+        }
+
+        if $parent.defined {
+            if $class.parent.defined && $class.parent !=== $parent {
+                die "Conflicting parents [$($parent.class-name)] and [$($class.parent.class-name)] for [$($class.class-name)].";
+            }
+            $class.parent = $parent;
+        }
+
+        return $class;
+    }
+
+    method add-class(Fixture-Class $class) {
+        return unless $class.defined;
+
+        if %!classes{$class.key}:exists {
+            return if $class === %!classes{$class.key}; # my work here is done!
+            die "Binder contains a different fixture named [$($class.class-name)].";
+            #  Since this doesn't happen, I don't worry about namespaces.  :D
+        }
+
+        #say "+++ Added $($class.class-name)";
+        %!classes{$class.key} = $class;
+
+        if $class.methods.elems == 0 {
+            #say "--- Class $($class.class-name) currently supplies no methods.";
+            $pucks{$class} = True;
+        }
+    }
+
+    method get-class(Str $name --> Fixture-Class) {
+        %!classes{$name} || %!classes{key-from-command-text($name)} || Nil;
     }
 
     sub key-from-command-text($text) {
@@ -120,7 +163,8 @@ class Fixture-Binder {
         $workflow.add-method("Log_into_portal_as(string emailAddress)");
         $workflow.add-method("Log_out()");
         $workflow.add-method("Enable_login_in_scenario_scope()");
-        self.add-class($workflow);
+        %!classes{$workflow.key} = $workflow;
+        #self.add-class($workflow);
 
         #  Acadis\ScenarioTests\ScenarioContext\ViewImplementations\MVAWorkflow.cs
         #   public abstract class MVAWorkflow<TestopiaView, TView> : Workflow
@@ -130,7 +174,8 @@ class Fixture-Binder {
         $mva-workflow.add-method("Browse_to_Page()");
         $mva-workflow.add-method("Verify_access_denied()");
         $mva-workflow.add-method("Verify_access_granted()");
-        self.add-class($mva-workflow);
+        %!classes{$mva-workflow.key} = $mva-workflow;
+        #self.add-class($mva-workflow);
 
         #  Acadis\ScenarioTests\ScenarioContext\ViewImplementations\MVBaseWorkflow.cs
         #   public abstract partial class MVBaseWorkflow<TView> : MVBaseWorkflow where TView : IView
@@ -156,7 +201,7 @@ class Fixture-Binder {
         $mvBase-workflow.add-method("public virtual void Browse_to_Page()");
         $mvBase-workflow.add-method("public virtual void Verify_access_denied()");
         $mvBase-workflow.add-method("ublic void Verify_access_granted()");
-        self.add-class($mvBase-workflow);
-
+        %!classes{$mvBase-workflow.key} = $mvBase-workflow;
+        #self.add-class($mvBase-workflow);
     }
 }

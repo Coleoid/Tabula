@@ -129,72 +129,24 @@ single-shot translation code than code which will keep getting new input.
 
 ---------------------------------------------------------------------
 
-Implementations Namespaces:
-
-Acadis.Web.Tests
-Envisage.DataAccess.Client.Tests
-Integration.Implementations.Organizations
-Integration.ImporterTests
-Integration.Model.Tests
-PersistenceTests
-ScenarioContext
-ScenarioContext.Curriculum
-ScenarioContext.Housing
-ScenarioContext.Implementations
-ScenarioContext.Implementations.AdHocExports
-ScenarioContext.Implementations.Administration
-ScenarioContext.Implementations.Compliance
-ScenarioContext.Implementations.Curriculum
-ScenarioContext.Implementations.CustomerViews
-ScenarioContext.Implementations.DynamicLabels
-ScenarioContext.Implementations.Exports
-ScenarioContext.Implementations.Import
-ScenarioContext.Implementations.LMS
-ScenarioContext.Implementations.Organizations
-ScenarioContext.Implementations.People
-ScenarioContext.Implementations.Registration
-ScenarioContext.Implementations.Reports
-ScenarioContext.Implementations.Scheduling
-ScenarioContext.Implementations.Scheduling.FNH
-ScenarioContext.Implementations.Search
-ScenarioContext.Implementations.Training
-ScenarioContext.Implementations.Users
-ScenarioContext.Implementations.WrittenTests
-ScenarioContext.Implementations.Xadr
-ScenarioContext.Import
-ScenarioContext.Organizations
-ScenarioContext.People
-ScenarioContext.Portal
-ScenarioContext.Search
+my SetHash $namespaces .= new;
+my regex namespace   { ^ \s* namespace \s+ ([\w || '.']+) }
 
 
-ViewImplementations Namespaces:
-ScenarioContext.Implementations
-ScenarioContext.Implementations.Compliance
-ScenarioContext.Implementations.InServiceEvents
-ScenarioContext.Implementations.People
-ScenarioContext.Implementations.Portal
-ScenarioContext.Implementations.Search
-ScenarioContext.PresenterImplementations.People
-ScenarioContext.ViewImplementations
-ScenarioContext.ViewImplementations.Administration
-ScenarioContext.ViewImplementations.Administration.PerformanceReports
-ScenarioContext.ViewImplementations.AutomatedTesting
-ScenarioContext.ViewImplementations.Compliance
-ScenarioContext.ViewImplementations.Curriculum
-ScenarioContext.ViewImplementations.Documents
-ScenarioContext.ViewImplementations.Events
-ScenarioContext.ViewImplementations.Forecasting
-ScenarioContext.ViewImplementations.Inventory
-ScenarioContext.ViewImplementations.Kirby
-ScenarioContext.ViewImplementations.Organizations
-ScenarioContext.ViewImplementations.People
-ScenarioContext.ViewImplementations.Portal
-ScenarioContext.ViewImplementations.Registration
-ScenarioContext.ViewImplementations.Reports
-ScenarioContext.ViewImplementations.Scheduling
-ScenarioContext.ViewImplementations.Survey
-ScenarioContext.ViewImplementations.Training
-ScenarioContext.ViewImplementations.Udfs
-ScenarioContext.ViewImplementations.Vehicles
-ScenarioContext.ViewImplementations.WebForms
+if $line ~~ / <namespace> / {
+    $namespaces{~$<namespace>[0]} = True;
+}
+
+say "Namespaces: $namespaces";
+
+--------------------------
+There are plenty of namespaces, but no collisions, so I can skip
+all that complexity.  GLEE.
+
+
+---------------------------------------------------------------------
+
+for $!possibly-useless.keys -> $puc { say ($puc.parent.defined > 0 ?? "^^^ " !! "--- ") ~ $puc.class-name; }
+
+
+---------------------------------------------------------------------

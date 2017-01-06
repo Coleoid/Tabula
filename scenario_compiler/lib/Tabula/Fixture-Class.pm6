@@ -53,7 +53,7 @@ class Fixture-Class {
     has Str $.class-name;
     has Str $.instance-name;
     has Str $.key;
-    has Fixture-Class $.parent;
+    has Fixture-Class $.parent is rw;
     has Fixture-Method %.methods{Str};
     has Bool $.debug = False;
 
