@@ -1,4 +1,5 @@
 use v6;
+use MONKEY-SEE-NO-EVAL;
 
 class Fixture-Method {
     has Str $.definition is rw;
@@ -54,6 +55,7 @@ class Fixture-Class {
     has Str $.instance-name;
     has Str $.key;
     has Fixture-Class $.parent is rw;
+    has Bool $.is-parent is rw;
     has Fixture-Method %.methods{Str};
     has Bool $.debug = False;
 
@@ -69,15 +71,15 @@ class Fixture-Class {
         $!key = $short-name.lc;
     }
 
-    method add-method($definition) {
-        my $method = Fixture-Method.new(:definition($definition));
+    method add-method(Str $definition) {
+        my $method = Fixture-Method.new(:$definition);
+        die "Definition [$definition] did not create a method" unless $method.defined;
+
+        say "[$definition]";
         my $key = $method.key;
         %!methods{$key} = $method;
-        CATCH {
-            default {
-                .Str.say if $!debug;
-            }
-        }
+
+        CATCH { default { .Str.say if $!debug; } }
     }
 
     method key-from-step($step) {

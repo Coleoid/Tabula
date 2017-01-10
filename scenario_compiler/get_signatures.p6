@@ -1,8 +1,8 @@
 use Tabula::Fixture-Binder;
 use Tabula::Fixture-Class;
 
-my $root_default = 'k:\\code\\acadis_trunk\\';
-#my $root_default = 'd:\\code\\acadis\\';
+#my $root_default = 'k:\\code\\acadis_trunk\\';
+my $root_default = 'd:\\code\\acadis\\';
 
 sub MAIN( Str :$root = $root_default ) {
 

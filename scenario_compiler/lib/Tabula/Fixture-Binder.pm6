@@ -47,8 +47,7 @@ class Fixture-Binder {
     }
 
     my regex method-decl {
-        ^ \s* public \s+ [override \s+]? [virtual \s+]?
-        void \s+ (\w+ '(' <-[)]>* ')')
+        ^ \s* public \s+ [override \s+]? [virtual \s+]? void \s+ $<name> = (\w+ '(' <-[)]>* ')')
     }
 
     my regex class-decl  {
@@ -66,7 +65,7 @@ class Fixture-Binder {
         for $path.IO.lines -> $line {
 
             if $filling-class && $line ~~ / <method-decl> / {
-                $class.add-method(~$<method-decl>[0]);
+                $class.add-method(~$<method-decl><name>);
             }
 
             if $line ~~ / <class-decl> / {
@@ -109,7 +108,9 @@ class Fixture-Binder {
         }
 
         if $parent.defined {
-            if $class.parent.defined && $class.parent !=== $parent {
+            $parent.is-parent = True;
+            if $class.parent.defined {
+                return if $class.parent === $parent;
                 die "Conflicting parents [$($parent.class-name)] and [$($class.parent.class-name)] for [$($class.class-name)].";
             }
             $class.parent = $parent;
