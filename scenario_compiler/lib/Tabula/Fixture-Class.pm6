@@ -19,9 +19,8 @@ class Fixture-Method {
 
         my $name-key = $name.lc.subst('workflow', '').subst('_', '', :g);
 
-        #  Future:  Optional args, args with defaults?
-        unless $args ~~ / '(' \s* $<arg> = ( \s* $<t1> = \S \S* \s+ $<argname> = [\S+] )* % ',' \s* ')' / {
-            #  Doesn't yet understand generic types or optional arguments
+        #  Future:  Generic, nullable, optional, default values...
+        if not $args ~~ / '(' \s* $<arg> = ( [ \s* $<t1> = \S \S* \s+ $<argname> = [\S+] ]* % ',') \s* ')' / {
             die "    ? I didn't understand the argument list for:  $name$args";
         }
 
@@ -55,7 +54,7 @@ class Fixture-Class {
     has Str $.instance-name;
     has Str $.key;
     has Fixture-Class $.parent is rw;
-    has Bool $.is-parent is rw;
+    has Bool $.is-parent is rw = False;
     has Fixture-Method %.methods{Str};
     has Bool $.debug = False;
 
@@ -75,7 +74,7 @@ class Fixture-Class {
         my $method = Fixture-Method.new(:$definition);
         die "Definition [$definition] did not create a method" unless $method.defined;
 
-        say "[$definition]";
+        #say "[$definition]";
         my $key = $method.key;
         %!methods{$key} = $method;
 

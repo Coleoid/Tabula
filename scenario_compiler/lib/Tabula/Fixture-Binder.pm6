@@ -15,27 +15,50 @@ class Fixture-Binder {
         my @folders;
         for @subtree-trunks -> $trunk {
             die "[$trunk] is not a folder within [$*CWD]." unless $trunk.IO.d;
-            say "Adding folder [$trunk]" if $!debug;
+            #say "Adding folder [$trunk]" if $!debug;
             @folders.push($trunk);
         }
 
         while (my $target = @folders.pop) {
+            #say ">>> into $target";
             my @folder-contents = dir $target;
 
-            for @folder-contents {
-                when .IO.d {
+            for @folder-contents -> $entry {
+                when $entry.IO.d {
                     #say "folder $_ added." if $!debug;
-                    @folders.push($_) unless / '\.' \w /;  # skip dot-folders
+                    @folders.push($entry) unless $entry ~~ / '\.' \w /;  # skip dot-folders
                 }
-                when / .+ '.' cs $ / {
-                    #say "parsing $_." if $!debug;
-                    self.parse-source($_);
+                when $entry ~~ / .+ '.' cs $ / {
+                    #say "==> parsing $entry" if $!debug;
+                    self.parse-source($entry);
                 }
             }
         }
+
+        #  A little patch that lets me sidestep parsing generics.
+        my $mvcbw = self.get-class('MvcBaseWorkflow');
+        my $mvbw = self.get-class('MVBaseWorkflow');
+        $mvcbw.parent = $mvbw;
     }
 
     method repl() {
+        say "\n=== Base classes:";
+        for %!classes.values -> $class {
+            say $class.class-name ~ " has $($class.methods.elems) methods inheritable."
+                if $class.is-parent;
+        }
+
+        say "\n=== Pucks providing methods or parents to scenarios:";
+        for $!pucks.keys {
+            say .class-name if .methods.elems > 0 or .parent.defined;
+        }
+
+        say "\n=== Pucks NOT providing methods or parents to scenarios:";
+        for $!pucks.keys {
+            say .class-name if .methods.elems == 0 and not .parent.defined;
+        }
+
+        say "";
         while True {
             my $in = prompt "> ";
             return if $in eq 'exit';
@@ -60,11 +83,9 @@ class Fixture-Binder {
         my Fixture-Class $class = Nil;
         my Bool $filling-class = False;
 
-        self.preload-base-classes();
-
         for $path.IO.lines -> $line {
 
-            if $filling-class && $line ~~ / <method-decl> / {
+            if $line ~~ / <method-decl> / && $class.defined {
                 $class.add-method(~$<method-decl><name>);
             }
 
@@ -76,16 +97,8 @@ class Fixture-Binder {
                 self.add-class($class);
                 $class = Nil;
 
-                $filling-class = not ($class-name ~~ /^[MVAWorkflow|MVBaseWorkflow|Workflow]$/);
-                if $filling-class {
-                    #say $line;
-                    my Fixture-Class $parent = self.ready-parent($parent-name);
-                    $class = self.ready-class($class-name, :$parent);
-                }
-                else {
-                    say ">>> Skipped preloaded base class: $modifiers $class-name";
-                    $class = Nil;
-                }
+                my Fixture-Class $parent = self.ready-parent($parent-name);
+                $class = self.ready-class($class-name, :$parent);
             }
         }
 
@@ -93,14 +106,31 @@ class Fixture-Binder {
         $class = Nil;
     }
 
-    method ready-parent($parent-name) {
-        return Nil if $parent-name eq '';
+    #  Here's one difference between a tool and a product.
+    my $any-non-parent = any('', 'IAcadisServiceClient', 'System',
+        'IAcadisSmtpClientFactory', 'IMutableUserContext', 'ITestopiaMonitor',
+        'IMessenger', 'IObjectBuilder', 'IDateTimeProvider', 'TraceListener',
+        'IUrlResolver', 'IAcadisSmtpClient', 'ISetupAndTeardown',
+        'IAcadisReadOnlyDBConnectionFactory', 'EmailSender', 'IDisposable',
+        'DocumentStorageProviderFactory', 'Exception',
+        'AcadisConfigurationManager', 'CollectionEquivalentConstraint',
+        'IFiltersView', 'IStudentListViewRowItem', 'FieldAttribute',
+        'Attribute', 'Is', 'MvcBaseWorkflow', 'HttpPostedFileBase',
+        'IAcadisUserDetailsEditorView'
+        );
 
-        return self.ready-class($parent-name, :add-new);
+    method ready-parent($parent-name) {
+        return Nil if $parent-name eq $any-non-parent;
+        #say "^^^ readying parent $parent-name";
+        my $parent = self.ready-class($parent-name, :add-new);
+        $parent.is-parent = True;
+        return $parent;
     }
 
-    #   To either pull matching class or create one new.
-    method ready-class($class-name, Fixture-Class :$parent?, Bool :$add-new = False) {
+    #   To either pull matching class or create one new, with parent.
+    method ready-class($class-name, Fixture-Class :$parent?, Bool :$add-new = False
+            --> Fixture-Class) {
+
         my Fixture-Class $class = self.get-class($class-name);
         if not $class.defined {
             $class .= new(:$class-name, :$parent);
@@ -108,12 +138,14 @@ class Fixture-Binder {
         }
 
         if $parent.defined {
-            $parent.is-parent = True;
-            if $class.parent.defined {
-                return if $class.parent === $parent;
-                die "Conflicting parents [$($parent.class-name)] and [$($class.parent.class-name)] for [$($class.class-name)].";
+            $class.parent = $parent if !$class.parent.defined;
+
+            if $class.parent !=== $parent {
+                die "Trying to give a conflicting parent [" ~ $parent.class-name
+                    ~ "] to fixture [" ~ $class.class-name
+                    ~ "] which already has parent [" ~ $class.parent.class-name
+                    ~ "].";
             }
-            $class.parent = $parent;
         }
 
         return $class;
@@ -126,6 +158,8 @@ class Fixture-Binder {
             return if $class === %!classes{$class.key}; # my work here is done!
             die "Binder contains a different fixture named [$($class.class-name)].";
             #  Since this doesn't happen, I don't worry about namespaces.  :D
+            #  Ooh, except that if I do this, I must 'using' every namespace at
+            # the top of my generated scenarios.  Oobleck.
         }
 
         #say "+++ Added $($class.class-name)";
@@ -138,7 +172,9 @@ class Fixture-Binder {
     }
 
     method get-class(Str $name --> Fixture-Class) {
-        %!classes{$name} || %!classes{key-from-command-text($name)} || Nil;
+        %!classes{$name}
+            || %!classes{key-from-command-text($name)}
+            || Nil;
     }
 
     sub key-from-command-text($text) {
@@ -146,63 +182,5 @@ class Fixture-Binder {
             .subst('workflow', '')
             .subst('_', '', :g)
             .subst(' ', '', :g);
-    }
-
-    # FUTURE:  Load these dynamically
-    method preload-base-classes() {
-
-        #  Acadis\ScenarioTests\ScenarioContext\Implementations\Workflow.cs
-        #   public abstract class Workflow : ISetupAndTeardown, IScenarioMetadata
-        my $workflow = Fixture-Class.new(class-name => 'Workflow', instance-name => 'Workflow');
-        $workflow.add-method("Set_today_to_( DateTime today )");
-        $workflow.add-method("Set_today_to_current_date_plus__days(int days)");
-        $workflow.add-method("set_today_to_start_of_fiscal_year()");
-        $workflow.add-method("set_today_to_end_of_fiscal_year()");
-        $workflow.add-method("set_today_to_end_of_fiscal_year_plus( int interval, string timeUnit )");
-        $workflow.add-method("Add__to_today( int interval, string timeUnit )");
-        $workflow.add-method("Log_in_as(string userName)");
-        $workflow.add-method("Log_into_portal_as(string emailAddress)");
-        $workflow.add-method("Log_out()");
-        $workflow.add-method("Enable_login_in_scenario_scope()");
-        %!classes{$workflow.key} = $workflow;
-        #self.add-class($workflow);
-
-        #  Acadis\ScenarioTests\ScenarioContext\ViewImplementations\MVAWorkflow.cs
-        #   public abstract class MVAWorkflow<TestopiaView, TView> : Workflow
-        #        where TestopiaView : TestopiaView<TView>, new()
-        #        where TView : IView
-        my $mva-workflow = Fixture-Class.new(class-name => 'MVAWorkflow', instance-name => 'MVAWorkflow', parent => $workflow);
-        $mva-workflow.add-method("Browse_to_Page()");
-        $mva-workflow.add-method("Verify_access_denied()");
-        $mva-workflow.add-method("Verify_access_granted()");
-        %!classes{$mva-workflow.key} = $mva-workflow;
-        #self.add-class($mva-workflow);
-
-        #  Acadis\ScenarioTests\ScenarioContext\ViewImplementations\MVBaseWorkflow.cs
-        #   public abstract partial class MVBaseWorkflow<TView> : MVBaseWorkflow where TView : IView
-        #   public abstract class MVBaseWorkflow : Workflow, IView
-        #  Acadis\ScenarioTests\ScenarioContext\ViewImplementations\MVBaseWorkflowProperties.cs
-        #   public abstract partial class MVBaseWorkflow<TView> where TView : IView
-        my $mvBase-workflow = Fixture-Class.new(class-name => 'MVBaseWorkflow', instance-name => 'MVBaseWorkflow', parent => $workflow);
-        $mvBase-workflow.add-method("Enter_text__for__(string value, string label)");
-        $mvBase-workflow.add-method("Choose_option__for_( string value, string label )");
-        $mvBase-workflow.add-method("Check__( string label )");
-        $mvBase-workflow.add-method("Uncheck__(string label)");
-        $mvBase-workflow.add-method("Select__for__(string selectedText, string fieldLabel)");
-        $mvBase-workflow.add-method("Verify_option_for__is__(string label, string expectedValue)");
-        $mvBase-workflow.add-method("Verify_label_for__is__( string fieldLabel, string expectedValue )");
-        $mvBase-workflow.add-method("Verify_text_for__is__(string fieldLabel, string expectedValue)");
-        $mvBase-workflow.add-method("Verify_text_for__is_empty(string fieldLabel)");
-        $mvBase-workflow.add-method("Verify__is_checked(string fieldLabel)");
-        $mvBase-workflow.add-method("Verify__is_unchecked(string fieldLabel)");
-        $mvBase-workflow.add-method("Verify_options_for__are__(string fieldLabel, string options)");
-        $mvBase-workflow.add-method("Verify__is_selected_for__(string selectedOption, string fieldLabel)");
-        $mvBase-workflow.add-method("Click_button__(string buttonName)");
-        $mvBase-workflow.add-method("Verify_feature____available(string featureName, string isOrNot)");
-        $mvBase-workflow.add-method("public virtual void Browse_to_Page()");
-        $mvBase-workflow.add-method("public virtual void Verify_access_denied()");
-        $mvBase-workflow.add-method("ublic void Verify_access_granted()");
-        %!classes{$mvBase-workflow.key} = $mvBase-workflow;
-        #self.add-class($mvBase-workflow);
     }
 }
