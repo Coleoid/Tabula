@@ -6,7 +6,6 @@ class Fixture-Method {
     has Str $.name;
     has Str $.key;
 
-
     sub name-and-args-from-signature($signature) {
         unless $signature ~~ / $<name> = [ \w+ ] $<sig> = ['(' .* ')'] / {
             die "I didn't understand the method signature:  $signature";
@@ -57,14 +56,15 @@ class Fixture-Class {
     has Bool $.is-parent is rw = False;
     has Fixture-Method %.methods{Str};
     has Bool $.debug = False;
+    has Str $.namespace;
 
-    #  Future:  Namespace detection in case of Fixture name collision
     submethod BUILD(
             :$!class-name is required,
-            :$!instance-name = "",
-            :$!parent = Nil) {
+            :$!instance-name = '',
+            :$!parent = Nil,
+            :$!namespace = '') {
         my str $short-name = $!class-name.subst('Workflow', '');
-        if $!instance-name eq "" {
+        if $!instance-name eq '' {
             $!instance-name = $short-name;
         }
         $!key = $short-name.lc;

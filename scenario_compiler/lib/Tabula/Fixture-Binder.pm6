@@ -69,6 +69,8 @@ class Fixture-Binder {
         }
     }
 
+    my regex namespace { ^ \s* namespace \s+ ( <[\w.]>+ ) }
+
     my regex method-decl {
         ^ \s* public \s+ [override \s+]? [virtual \s+]? void \s+ $<name> = (\w+ '(' <-[)]>* ')')
     }
@@ -82,23 +84,28 @@ class Fixture-Binder {
     method parse-source($path) {
         my Fixture-Class $class = Nil;
         my Bool $filling-class = False;
+        my $namespace = '';
 
         for $path.IO.lines -> $line {
+
+            if line ~~ / <namespace>[0] / {
+                $namespace = ~$<namespace>;
+            }
 
             if $line ~~ / <method-decl> / && $class.defined {
                 $class.add-method(~$<method-decl><name>);
             }
 
             if $line ~~ / <class-decl> / {
+                self.add-class($class);
+                $class = Nil;
+
                 my $modifiers = ~$<class-decl>[0].trim;
                 my $class-name = ~$<class-decl>[1];
                 my $parent-name = ~($<class-decl>[2] // '');
 
-                self.add-class($class);
-                $class = Nil;
-
                 my Fixture-Class $parent = self.ready-parent($parent-name);
-                $class = self.ready-class($class-name, :$parent);
+                $class = self.ready-class($class-name, :$parent, :$namespace);
             }
         }
 
@@ -128,12 +135,13 @@ class Fixture-Binder {
     }
 
     #   To either pull matching class or create one new, with parent.
-    method ready-class($class-name, Fixture-Class :$parent?, Bool :$add-new = False
+    method ready-class($class-name, Fixture-Class :$parent?,
+            Bool :$add-new = False, Str :$namespace = ''
             --> Fixture-Class) {
 
         my Fixture-Class $class = self.get-class($class-name);
         if not $class.defined {
-            $class .= new(:$class-name, :$parent);
+            $class .= new(:$class-name, :$parent, :$namespace);
             self.add-class($class) if $add-new;
         }
 

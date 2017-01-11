@@ -1,15 +1,12 @@
 =====================================================================
-===  Tabula walking skeleton, remaining work  ===  05 Jan 2017
-
-Fixture-Binder finishes enough of its education
-    [ ] Mop up remaining oddballs
-    .5
-0.5
+===  Tabula walking skeleton, remaining work  ===  11 Jan 2017
 
 Compiler
     [ ] Decouple main loop some for smoother dev
     .25
-0.25
+    [ ] Track and generate usings for fixtures used
+    .25
+0.5
 
 Testopia runner wired through Tabula
     [ ] Loads Tabula scenario classes dynamically
@@ -30,7 +27,7 @@ Pragmatics and plumbing
 Language growth
     [ ] Start paragraph with a colon instead of block with an ellipsis
         String becomes label for Paragraph
-        Paragraphs have their own scope (when labelled?)
+        Paragraphs have their own scope (only when labelled?)
     1.0
 1.0
 
@@ -77,3 +74,7 @@ Fixture-Binder growth
     .5
     [x] Handle connecting parent classes
     .5
+    [x] Mop up remaining oddballs
+    .5
+    [x] Note namespaces
+    .25
