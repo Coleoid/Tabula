@@ -4,7 +4,7 @@
 Compiler
     [ ] Decouple main loop some for smoother dev
     .25
-    [ ] Track and generate usings for fixtures used
+    [ ] Prefix fixture type with namespace
     .25
 0.5
 
@@ -20,14 +20,16 @@ Testopia runner wired through Tabula
 Pragmatics and plumbing
     [ ] Finish translating TuitionBilling into Tabula
     .25
-    [ ] Manually add support code and generated scenario(s?)
+    [ ] Manually add needed code to project for demo
+        * Base classes
+        * Generated scenario class(es?)
     .25
 .5
 
-Language growth
-    [ ] Start paragraph with a colon instead of block with an ellipsis
+Language
+    [ ] Start paragraph with string and colon
         String becomes label for Paragraph
-        Paragraphs have their own scope (only when labelled?)
+        Paragraphs get their own scope
     1.0
 1.0
 
@@ -35,20 +37,20 @@ Language growth
 =====================================================================
 ===  Beyond the skeleton
 
-
 Testopia runner wired through Tabula
-
     [ ] split local/MVC into separate axis from Testopia/Tabula
-
     [ ] Reporting via existing web-page mechanism
     1.0 - 2.0
 
 Dev mode vs. Demo mode
-
     [ ] BDD styled >when: and >then:
         Raises questions of scope
         ...which run against the current usage of '>use:'
         ...perhaps alternate large-scope 'use' is '>install:'
+
+Fixture-Binder
+    [ ] serialize classes (json? .parent?) for compiler speed
+        Cache invalidated when fixtures .dll newer than binder.json
 
 
 =====================================================================
@@ -63,7 +65,7 @@ Compiler
 Pragmatics and plumbing
     [x] 0.25  Update mechanical translation script to 16.12 Tabula
 
-Fixture-Binder growth
+Fixture-Binder
     [x] Manually pre-build parent classes for inheritance
     .75
     [x] Keep Parent in Fixture-Class, populate from declaration

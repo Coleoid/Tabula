@@ -1,10 +1,11 @@
 use v6;
 use Tabula::Fixture-Class;
 use MONKEY-SEE-NO-EVAL;
+use JSON::Class;
 
 #  Fixture-Class factory and repository
 #  Deserializes from C# source in subtrees passed to load-fixtures()
-class Fixture-Binder {
+class Fixture-Binder does JSON::Class {
     has Fixture-Class %.classes{Str};
     has Bool $.debug is rw = False;
     has SetHash $pucks;  #  Possibly Useless Classes Known
@@ -35,10 +36,10 @@ class Fixture-Binder {
             }
         }
 
-        #  A little patch that lets me sidestep parsing generics.
-        my $mvcbw = self.get-class('MvcBaseWorkflow');
-        my $mvbw = self.get-class('MVBaseWorkflow');
-        $mvcbw.parent = $mvbw;
+        #  A patch that lets me avoid parsing generics.
+        # my Fixture-Class $mvcbw = self.get-class('MvcBaseWorkflow');
+        # my Fixture-Class $mvbw = self.get-class('MVBaseWorkflow');
+        # $mvcbw.parent = $mvbw;
     }
 
     method repl() {
@@ -48,15 +49,15 @@ class Fixture-Binder {
                 if $class.is-parent;
         }
 
-        say "\n=== Pucks providing methods or parents to scenarios:";
-        for $!pucks.keys {
-            say .class-name if .methods.elems > 0 or .parent.defined;
-        }
-
-        say "\n=== Pucks NOT providing methods or parents to scenarios:";
-        for $!pucks.keys {
-            say .class-name if .methods.elems == 0 and not .parent.defined;
-        }
+        # say "\n=== Pucks providing methods or parents to scenarios:";
+        # for $!pucks.keys {
+        #     say .class-name if .methods.elems > 0 or .parent-name.defined;
+        # }
+        #
+        # say "\n=== Pucks NOT providing methods or parents to scenarios:";
+        # for $!pucks.keys {
+        #     say .class-name if .methods.elems == 0 and not .parent-name.defined;
+        # }
 
         say "";
         while True {
@@ -88,7 +89,7 @@ class Fixture-Binder {
 
         for $path.IO.lines -> $line {
 
-            if line ~~ / <namespace>[0] / {
+            if $line ~~ / <namespace>[0] / {
                 $namespace = ~$<namespace>;
             }
 
@@ -100,7 +101,6 @@ class Fixture-Binder {
                 self.add-class($class);
                 $class = Nil;
 
-                my $modifiers = ~$<class-decl>[0].trim;
                 my $class-name = ~$<class-decl>[1];
                 my $parent-name = ~($<class-decl>[2] // '');
 
@@ -128,7 +128,7 @@ class Fixture-Binder {
 
     method ready-parent($parent-name) {
         return Nil if $parent-name eq $any-non-parent;
-        #say "^^^ readying parent $parent-name";
+
         my $parent = self.ready-class($parent-name, :add-new);
         $parent.is-parent = True;
         return $parent;
@@ -145,16 +145,7 @@ class Fixture-Binder {
             self.add-class($class) if $add-new;
         }
 
-        if $parent.defined {
-            $class.parent = $parent if !$class.parent.defined;
-
-            if $class.parent !=== $parent {
-                die "Trying to give a conflicting parent [" ~ $parent.class-name
-                    ~ "] to fixture [" ~ $class.class-name
-                    ~ "] which already has parent [" ~ $class.parent.class-name
-                    ~ "].";
-            }
-        }
+        $class.set-parent(:$parent);
 
         return $class;
     }
@@ -163,20 +154,15 @@ class Fixture-Binder {
         return unless $class.defined;
 
         if %!classes{$class.key}:exists {
-            return if $class === %!classes{$class.key}; # my work here is done!
-            die "Binder contains a different fixture named [$($class.class-name)].";
-            #  Since this doesn't happen, I don't worry about namespaces.  :D
-            #  Ooh, except that if I do this, I must 'using' every namespace at
-            # the top of my generated scenarios.  Oobleck.
+            die "Binder contains a different fixture named [$($class.class-name)]."
+                unless $class === %!classes{$class.key};
+            #  When this happens, we may need more code to deal
+            # with fixture name collisions.
         }
 
-        #say "+++ Added $($class.class-name)";
         %!classes{$class.key} = $class;
 
-        if $class.methods.elems == 0 {
-            #say "--- Class $($class.class-name) currently supplies no methods.";
-            $pucks{$class} = True;
-        }
+        $pucks{$class} = ($class.methods.elems == 0);
     }
 
     method get-class(Str $name --> Fixture-Class) {
