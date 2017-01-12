@@ -20,11 +20,7 @@ Testopia runner wired through Tabula
 Pragmatics and plumbing
     [ ] Finish translating TuitionBilling into Tabula
     .25
-    [ ] Manually add needed code to project for demo
-        * Base classes
-        * Generated scenario class(es?)
-    .25
-.5
+.25
 
 Language
     [ ] Start paragraph with string and colon
@@ -64,6 +60,10 @@ Compiler
 
 Pragmatics and plumbing
     [x] 0.25  Update mechanical translation script to 16.12 Tabula
+    [x] Manually add needed code to project for demo
+        * Base classes
+        * Generated scenario class(es?)
+    .25
 
 Fixture-Binder
     [x] Manually pre-build parent classes for inheritance
