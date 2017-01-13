@@ -10,11 +10,11 @@ say "\n";
 #if False
 {   diag "A use command adds a fixture to the current scope";
 
-    my $class = Fixture-Class.new(instance-name => "Advice", class-name => "AdviceWorkflow");
+    my $class = Fixture-Class.new(instance-name => "Advice", class-name => "AdviceWorkflow", namespace => 'foo');
     $class.add-method("Some_Thing()");
     $class.add-method("This_is_a_step()");
 
-    my $check-class = Fixture-Class.new(instance-name => "Check", class-name => "CheckWorkflow");
+    my $check-class = Fixture-Class.new(instance-name => "Check", class-name => "CheckWorkflow", namespace => 'foo');
     $check-class.add-method("Am_I_Done()");
 
     $binder.add-class($class);

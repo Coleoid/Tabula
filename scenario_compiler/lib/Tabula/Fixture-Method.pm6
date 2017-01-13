@@ -4,15 +4,19 @@ use JSON::Class;
 
 class Fixture-Method does JSON::Class {
     has Str $.definition is rw;
-    has Str $.name;
-    has Str $.key;
+
+    has Str $!name;
+    method name() { $!name }
+    has Str $!args;
+
+    has Str $!key;
+    method key() { $!key }
 
     #  Tabula presumes all methods are public void, and that this information
     # is stripped from the signature before being sent as the definition.
     submethod BUILD(:$!definition is required) {
-        my ($name, $args) = name-and-args-from-signature($!definition);
-        $!key = key-from-name-and-args($name, $args);
-        $!name = $name;
+        ($!name, $!args) = name-and-args-from-signature($!definition);
+        $!key = key-from-name-and-args($!name, $!args);
     }
 
     sub name-and-args-from-signature($signature) {

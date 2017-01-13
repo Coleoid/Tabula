@@ -48,7 +48,8 @@ class Scope {
         }
 
         #TODO: actually comprehend the argument types
-        return $flatName ~ '(' ~ 's' x $arg-count ~ ')';
+        #return $flatName ~ '(' ~ 's' x $arg-count ~ ')';
+        return $flatName ~ '()';
     }
 
     sub args-from-match($match) {

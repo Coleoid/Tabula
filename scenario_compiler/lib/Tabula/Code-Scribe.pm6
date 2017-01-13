@@ -85,7 +85,7 @@ class Code-Scribe {
         push @fixture-declarations,
             "        public $full-class-name $($fixture.instance-name);";
         push @fixture-instantiations,
-            "            $($fixture.instance-name) = new $($full-class-name)();";
+            "            $($fixture.instance-name) = new " ~ $($full-class-name) ~ '();';
     }
 
 

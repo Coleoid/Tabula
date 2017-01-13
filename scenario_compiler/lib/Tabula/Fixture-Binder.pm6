@@ -37,17 +37,17 @@ class Fixture-Binder does JSON::Class {
         }
 
         #  A patch that lets me avoid parsing generics.
-        # my Fixture-Class $mvcbw = self.get-class('MvcBaseWorkflow');
-        # my Fixture-Class $mvbw = self.get-class('MVBaseWorkflow');
-        # $mvcbw.parent = $mvbw;
+        my Fixture-Class $mvcbw = self.get-class('MvcBaseWorkflow');
+        my Fixture-Class $mvbw = self.get-class('MVBaseWorkflow');
+        $mvcbw.set-parent(parent => $mvbw);
     }
 
     method repl() {
-        say "\n=== Base classes:";
-        for %!classes.values -> $class {
-            say $class.class-name ~ " has $($class.methods.elems) methods inheritable."
-                if $class.is-parent;
-        }
+        # say "\n=== Base classes:";
+        # for %!classes.values -> $class {
+        #     say $class.class-name ~ " has $($class.methods.elems) methods inheritable."
+        #         if $class.is-parent;
+        # }
 
         # say "\n=== Pucks providing methods or parents to scenarios:";
         # for $!pucks.keys {
@@ -130,7 +130,7 @@ class Fixture-Binder does JSON::Class {
         return Nil if $parent-name eq $any-non-parent;
 
         my $parent = self.ready-class($parent-name, :add-new);
-        $parent.is-parent = True;
+        #$parent.is-parent = True;
         return $parent;
     }
 
@@ -154,10 +154,10 @@ class Fixture-Binder does JSON::Class {
         return unless $class.defined;
 
         if %!classes{$class.key}:exists {
-            die "Binder contains a different fixture named [$($class.class-name)]."
-                unless $class === %!classes{$class.key};
-            #  When this happens, we may need more code to deal
-            # with fixture name collisions.
+            # die "Binder contains a different fixture named [$($class.class-name)]."
+            #     unless $class === %!classes{$class.key};
+            # #  When this happens, we may need more code to deal
+            # # with fixture name collisions.
         }
 
         %!classes{$class.key} = $class;

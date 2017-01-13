@@ -9,28 +9,32 @@ use JSON::Class;
 class Fixture-Class does JSON::Class {
     has Str $.class-name;
     has Str $.namespace;
-    has Str $.instance-name;
-    has Str $.parent-name;
-    has Str $.key;
-    has Bool $.is-parent is rw = False;
     has Fixture-Method %.methods{Str};
+
     has Fixture-Class $!parent;
+    has Str $.parent-name;
+
+    has Str $!instance-name;
+    method instance-name() { return $!instance-name; }
+
+    has Str $!key;
+    method key() { $!key }
 
     submethod BUILD(
             :$!class-name is required,
             :$!instance-name = '',
-            :$parent = Nil,
-            :$!namespace = '') {
+            Fixture-Class :$parent,
+            :$!namespace is required) {
 
-        my Str $short-name = $!class-name.subst('Workflow', '');
-        $short-name = 'Workflow' if $!short-name eq '';
+        my $short-name = $!class-name.subst('Workflow', '');
+        $short-name = 'Workflow' if $short-name eq '';
         $!instance-name = $short-name if $!instance-name eq '';
         $!key = $short-name.lc;
 
         self.set-parent(:$parent);
     }
 
-    method set-parent(Fixture-Class :$!parent is required) {
+    method set-parent(Fixture-Class :$!parent) {
         $!parent-name = $!parent.defined
             ?? $!parent.class-name
             !! Nil;

@@ -47,7 +47,7 @@ $context.file-name = "ScenarioFilename.scn";
 #if False
 {   diag "The class has tables, paragraphs, and and an execution plan matching the scenario";
 
-    my $class = Fixture-Class.new(class-name => 'ActionWorkflow');
+    my $class = Fixture-Class.new(class-name => 'ActionWorkflow', namespace => 'ScenarioContext');
     $class.add-method("Action_one_with__argument(string flavor)");
     $class.add-method("Action_two_with__and__(string color, string irrelevant)");
 
@@ -75,13 +75,13 @@ $context.file-name = "ScenarioFilename.scn";
         public class ScenarioFilename_generated
             : GeneratedScenarioBase, IGeneratedScenario
         {
-            public ActionWorkflow Action;
+            public ScenarioContext.ActionWorkflow Action;
 
             public ScenarioFilename_generated(TabulaStepRunner runner)
                 : base(runner)
             {
                 ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
-                Action = new ActionWorkflow();
+                Action = new ScenarioContext.ActionWorkflow();
             }
 
             public void ExecuteScenario()

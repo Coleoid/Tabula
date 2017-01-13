@@ -5,7 +5,7 @@ use Tabula::Fixture-Class;
 my (&parser, $actions) = curry-parser-emitting-Testopia( "Step" );
 my $context = $actions.Context;
 
-my $fixture = Fixture-Class.new(class-name => 'AdviceWorkflow');
+my $fixture = Fixture-Class.new(class-name => 'AdviceWorkflow', namespace => 'foo');
 $fixture.add-method('This_is_a_step()');
 $fixture.add-method('Please_dont__the__(String verb, String noun)');
 
@@ -43,7 +43,7 @@ $context.add-fixture($fixture);
         "dereferences variable without further cast when signature takes string";
 }
 
-#if False
+if False
 {   diag "discriminate on method signature";
     my $parse = parser( "fail to find method", 'this is a step "which should not be found"' );
     is $parse.made, 'Unfound(     "this is a step \"which should not be found\"",     "SampleScenario.scn:1" );',
