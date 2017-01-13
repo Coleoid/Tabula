@@ -81,10 +81,11 @@ class Code-Scribe {
         return if %seen-fixtures{$fixture.key};
         %seen-fixtures{$fixture.key} = True;
 
+        my $full-class-name = $fixture.namespace ~ '.' ~ $fixture.class-name;
         push @fixture-declarations,
-            "        public $($fixture.class-name) $($fixture.instance-name);";
+            "        public $full-class-name $($fixture.instance-name);";
         push @fixture-instantiations,
-            "            $($fixture.instance-name) = new " ~ $fixture.class-name ~ '();';
+            "            $($fixture.instance-name) = new $($full-class-name)();";
     }
 
 

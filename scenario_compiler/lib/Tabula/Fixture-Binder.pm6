@@ -88,7 +88,7 @@ class Fixture-Binder {
 
         for $path.IO.lines -> $line {
 
-            if line ~~ / <namespace>[0] / {
+            if $line ~~ / <namespace>[0] / {
                 $namespace = ~$<namespace>;
             }
 
