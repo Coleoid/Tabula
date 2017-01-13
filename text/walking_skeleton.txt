@@ -1,21 +1,10 @@
 =====================================================================
-===  Tabula walking skeleton, remaining work  ===  11 Jan 2017
-
-Compiler
-    [ ] Decouple main loop some for smoother dev
-    .25
-    [ ] Prefix fixture type with namespace
-    .25
-0.5
+===  Tabula walking skeleton, remaining work   ===  13 Jan 2017   ===
 
 Testopia runner wired through Tabula
     [ ] Loads Tabula scenario classes dynamically
     .5
-    [ ] Reports minimally/adequately
-    .25
-    [ ] Scenario Context supplied to fixtures using it
-    .5
-1.25
+.5
 
 Pragmatics and plumbing
     [ ] Finish translating TuitionBilling into Tabula
@@ -45,17 +34,25 @@ Dev mode vs. Demo mode
         ...perhaps alternate large-scope 'use' is '>install:'
 
 Fixture-Binder
-    [ ] serialize classes (json? .parent?) for compiler speed
-        Cache invalidated when fixtures .dll newer than binder.json
+    [ ] Cache invalidated when fixtures .dll newer than fixtures.json
+    [ ] Deserialize from fixtures.json
 
 
 =====================================================================
 ===  Done
 
+Testopia runner
+    [x] Pathway for running Tabula scenarios
+    1.0
+    [x] Reports minimally/adequately
+    .25
+
 Compiler
     [x] Loads Binder from command-line args, uses it
     .25
     [x] Write class to output file
+    .25
+    [x] Prefix fixture type with namespace
     .25
 
 Pragmatics and plumbing
@@ -66,6 +63,8 @@ Pragmatics and plumbing
     .25
 
 Fixture-Binder
+    [x] serialize classes (json? .parent?) for compiler speed
+    .5
     [x] Manually pre-build parent classes for inheritance
     .75
     [x] Keep Parent in Fixture-Class, populate from declaration
