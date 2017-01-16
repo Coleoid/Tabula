@@ -165,6 +165,17 @@ say "\n";
 
     my $parse = parser( 'contains block', $paragraph );
     is $parse<Statement>.elems, 3, "Three Statements in this paragraph";
+
+
+    my $labeled-para = q:to/EOP/;
+    "This is a label, which will describe the para":
+    Do "a thing"
+    ? verify "the result"
+    EOP
+
+    my $parse = parser( 'contains block', $labeled-para );
+    is $parse<Paragraph-Label><String>, '"This is a label, which will describe the para"';
+
 }
 
 

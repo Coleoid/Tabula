@@ -100,9 +100,10 @@ class Target-Testopia does Match-Helper {
     #scribe
     method Paragraph($/) {
         my $name = self.name-section('paragraph', $/);
+        my $label = $<Paragraph-Label> ?? $<Paragraph-Label><String><Body> !! '';
         my $statements = [~] $<Statement>.map({ .made ?? ("            " ~ .made) !! "" });
 
-        make $!Scribe.compose-paragraph( $name, $statements );
+        make $!Scribe.compose-paragraph( $name, $label, $statements );
     }
 
     #text

@@ -7,9 +7,28 @@ use JSON::Class;
 # the C# scenario classes.  The Fixture-Binder will traverse the file system
 # and create these from the C# fixtures it finds there.
 class Fixture-Class does JSON::Class {
-    has Str $.class-name;
+
+    submethod BUILD(
+            Str :$!namespace?,
+            Str :$!class-name is required,
+            Fixture-Class :$parent?,
+            ) {
+
+        my $short-name = $!class-name.subst('Workflow', '');
+        $short-name = 'Workflow' if $short-name eq '';
+        $!instance-name = $short-name;
+        $!key = $short-name.lc;
+
+        self.set-parent(:$parent);
+    }
+
+
     has Str $.namespace;
-    has Fixture-Method %.methods{Str};
+    method update-namespace($new-namespace) {
+        $!namespace = $new-namespace if $!namespace eq '';
+    }
+
+    has Str $.class-name;
 
     has Fixture-Class $!parent;
     has Str $.parent-name;
@@ -20,26 +39,13 @@ class Fixture-Class does JSON::Class {
     has Str $!key;
     method key() { $!key }
 
-    submethod BUILD(
-            :$!class-name is required,
-            :$!instance-name = '',
-            Fixture-Class :$parent,
-            :$!namespace is required) {
-
-        my $short-name = $!class-name.subst('Workflow', '');
-        $short-name = 'Workflow' if $short-name eq '';
-        $!instance-name = $short-name if $!instance-name eq '';
-        $!key = $short-name.lc;
-
-        self.set-parent(:$parent);
-    }
-
     method set-parent(Fixture-Class :$!parent) {
         $!parent-name = $!parent.defined
             ?? $!parent.class-name
             !! Nil;
     }
 
+    has Fixture-Method %.methods{Str};
     method add-method(Str $definition) {
         my $method = Fixture-Method.new(:$definition);
         die "Definition [$definition] did not create a method" unless $method.defined;

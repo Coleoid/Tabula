@@ -135,13 +135,13 @@ class Fixture-Binder does JSON::Class {
     }
 
     #   To either pull matching class or create one new, with parent.
-    method ready-class($class-name, Fixture-Class :$parent?,
-            Bool :$add-new = False, Str :$namespace = ''
+    method ready-class(:$class-name, :$namespace is required,
+            Fixture-Class :$parent?, Bool :$add-new = False
             --> Fixture-Class) {
 
         my Fixture-Class $class = self.get-class($class-name);
         if not $class.defined {
-            $class .= new(:$class-name, :$parent, :$namespace);
+            $class .= new(:$namespace, :$class-name, :$parent);
             self.add-class($class) if $add-new;
         }
 

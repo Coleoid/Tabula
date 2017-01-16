@@ -51,8 +51,12 @@ class Target-Echo {
     }
 
     method Paragraph($/) {
-        make [~] $<Statement>.map({.made})
+        make ($<Paragraph-Label>.defined ?? $<Paragraph-Label>.made ~ "\n" !! '') ~ [~] $<Statement>.map({.made})
         # future (grammar):  blank lines and shifts from statements to tables
+    }
+
+    method Paragraph-Label($/) {
+        make $<String> ~ ':'
     }
 
     method Phrases($/) {

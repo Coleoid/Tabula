@@ -4,7 +4,7 @@ use Tabula::Fixture-Class;
 
 my $binder = Fixture-Binder.new();
 
-my Fixture-Class $workflow = $binder.ready-class('Workflow');
+my Fixture-Class $workflow = $binder.ready-class('Workflow', :add-new);
 
 ok $workflow.defined, "Get Workflow succeeds";
 is $workflow.instance-name, 'Workflow', "All-Father is properly named";

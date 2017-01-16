@@ -147,8 +147,8 @@ class Code-Scribe {
     }
 
 
-    method compose-paragraph($name, $statements) {
-        my $para = "        public void " ~ $name ~ "()\n        \{\n"
+    method compose-paragraph($name, $label, $statements) {
+        my $para = "        public void " ~ $name ~ '(' ~ $label ~ ")\n        \{\n"
             ~ $statements
             ~ "        \}\n";
 
@@ -158,7 +158,7 @@ class Code-Scribe {
     }
 
     method compose-table($name, $header, @rows) {
-        #TODO: Labels and Row hashes
+        #TODO: Label
 
         my $table = njoin(
 '        public Table ' ~ $name ~ '()

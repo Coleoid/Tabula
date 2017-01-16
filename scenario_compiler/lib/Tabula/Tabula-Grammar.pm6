@@ -18,7 +18,8 @@ grammar Tabula-Grammar {
     token Table-Cell   { [\h* <Phrases> \h*] || <Empty-Cell> }
     token Empty-Cell   { \h+ }
 
-    token Paragraph { <Statement>+ }
+    token Paragraph { <Paragraph-Label>? <Statement>+ }
+    token Paragraph-Label { <Indentation> <String> \h* ':' \h* \n }
     token Statement { <Indentation> <Action> \h* <Comment>? \n }
     token Action    { <Block> || <Step> || <Command> }
 
@@ -44,7 +45,7 @@ grammar Tabula-Grammar {
     token Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
     token Number   { \d+ }
-    token String   { '"' <-["]>* '"' }  # TODO: single quotes, quote escaping
+    token String   { '"' $<Body> = [ <-["]>* ] '"' }  # TODO: single quotes, quote escaping
     token Variable { '#' <Word> }
     token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }
 }
