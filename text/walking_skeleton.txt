@@ -12,11 +12,9 @@ Pragmatics and plumbing
 .25
 
 Language
-    [ ] Start paragraph with string and colon
-        String becomes label for Paragraph
-        Paragraphs get their own scope
-    1.0
-1.0
+    [ ] Paragraphs get their own scope
+    .25
+.25
 
 
 =====================================================================
@@ -79,3 +77,8 @@ Fixture-Binder
     .5
     [x] Note namespaces
     .25
+
+Language
+    [x] Start paragraph with string and colon
+        String becomes label for Paragraph
+    .5

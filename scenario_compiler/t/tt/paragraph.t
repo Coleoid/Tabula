@@ -3,11 +3,11 @@ use Tabula::Grammar-Testing;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia( "Paragraph" );
 my $context = $actions.Context;
+$context.file-name = "SampleScenario.scn";
 say "\n";
 
 #if False
-{   diag "Basic Paragraph output";
-    $context.file-name = "SampleScenario.scn";
+{   diag "Paragraph step resolution depending on in-scope fixtures";
 
     my $advice-fixture = Fixture-Class.new(class-name => "AdviceWorkflow", instance-name => "Advice", namespace => 'foo');
     $advice-fixture.add-method("Some_Thing()");
@@ -98,6 +98,31 @@ say "\n";
     $context.add-fixture($overriding-fixture);
     $parse = parser( "Paragraph", $paragraph-source );
     is $parse.made, $found-two-different-methods, "last fixture added wins signature collisions";
+}
+
+# if False
+{   diag "Paragraph labels";
+
+    my $paragraph-source = q:to/EOP/;
+    "Find fun things":
+    step this way
+    do a thing
+    ? Am I done
+    EOP
+
+    my $labeled-para = q:to/EO_testo/;
+            public void paragraph_from_001_to_004()
+            {
+                Label(  "Find fun things" );
+                Unfound(     "step this way",     "SampleScenario.scn:2" );
+                Unfound(     "do a thing",     "SampleScenario.scn:3" );
+                Unfound(     "? Am I done",     "SampleScenario.scn:4" );
+            }
+    EO_testo
+
+    my $parse = parser( "Paragraph", $paragraph-source );
+    is $parse.made, $labeled-para, "label represented in generated method";
+
 }
 
 done-testing;

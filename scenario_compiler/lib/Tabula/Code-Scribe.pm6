@@ -148,9 +148,13 @@ class Code-Scribe {
 
 
     method compose-paragraph($name, $label, $statements) {
-        my $para = "        public void " ~ $name ~ '(' ~ $label ~ ")\n        \{\n"
-            ~ $statements
-            ~ "        \}\n";
+        my $label-line = $label eq '' ?? '' !! '            Label(  "' ~ $label ~ '" );';
+        my $para = njoin(
+            '        public void ' ~ $name ~ "()\n        \{",
+            $label-line,
+            $statements,
+            '        }'
+        ) ~ "\n";
 
         self.declare-section($para);
         self.add-next-section($name);

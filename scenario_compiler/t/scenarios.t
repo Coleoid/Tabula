@@ -57,46 +57,41 @@ say "\n";
 
     >tags: Person Search, Duty Assignments, AC-16629
 
-    "Enable duty locations"...
-        >use: Global Setting Management
-        Enable Duty Locations
-    .
+    "Enable duty locations":
+    >use: Global Setting Management
+    Enable Duty Locations
 
-    "What we'll call our people in this scenario"...
-        >set: #handle => #FullNameLF
-        [ handle | FullNameLF             ]
-        | Lina   | "Frixell, Rorolina"    |
-        | Gio    | "Arland, Giovanni"     |
-        | Sterky | "Cranach, Sterkenberg" |
-        | Mimi   | "Schwarzlang, Mimi"    |
-    .
+    "What we'll call our people in this scenario"
+    >set: #handle => #FullNameLF
+    [ handle | FullNameLF             ]
+    | Lina   | "Frixell, Rorolina"    |
+    | Gio    | "Arland, Giovanni"     |
+    | Sterky | "Cranach, Sterkenberg" |
+    | Mimi   | "Schwarzlang, Mimi"    |
 
-    "What we'll call the organizations they work for"...
-        >set: #TLA => #OrganizationName
-        [ TLA | OrganizationName             ]
-        | HPD | Hometown Police Department   |
-        | OPD | Otherville Police Department |
-        | OA  | Otherville Academy           |
-    .
+    "What we'll call the organizations they work for":
+    >set: #TLA => #OrganizationName
+    [ TLA | OrganizationName             ]
+    | HPD | Hometown Police Department   |
+    | OPD | Otherville Police Department |
+    | OA  | Otherville Academy           |
 
-    "Create our people"...
-        >use: User Creation
-        Create Person named #name
-        [ name    ]
-        | #Lina   |
-        | #Gio    |
-        | #Sterky |
-        | #Mimi   |
-    .
+    "Create our people":
+    >use: User Creation
+    Create Person named #name
+    [ name    ]
+    | #Lina   |
+    | #Gio    |
+    | #Sterky |
+    | #Mimi   |
 
-    "Create our organizations"...
-        >use: Organization FNH Management
-        Create Organization named #orgName of type "organization" under base parent group
-        [ orgName  ]
-        | #HPD     |
-        | #OPD     |
-        | #OA      |
-    .
+    "Create our organizations":
+    >use: Organization FNH Management
+    Create Organization named #orgName of type "organization" under base parent group
+    [ orgName  ]
+    | #HPD     |
+    | #OPD     |
+    | #OA      |
 
     "Create list items"...
         >use: List Management
