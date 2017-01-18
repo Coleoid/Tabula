@@ -7,23 +7,38 @@ my $context = $actions.Context;
 my $binder = $actions.Binder;
 
 
-sub MAIN(Str :$folder, Str :$scenario-file) {
+#my $root_default = 'k:\\code\\acadis_trunk\\';
+my $root_default = 'd:\\code\\acadis\\';
 
-    die "$scenario-file does not exist there." unless $scenario-file.IO.f;
+sub MAIN(Str :$folder = $root_default, Str :$scenario-file) {
+
     die "$folder does not exist there." unless $folder.IO.d;
+    die "$scenario-file does not exist there." unless $scenario-file.IO.f;
 
+    say "Loading fixtures...";
     $binder.debug = True;
-    $binder.load-fixtures($folder);
+    my $imps = $root_default ~ 'ScenarioTests\\ScenarioContext\\Implementations';
+    my $view-imps = $root_default ~ 'ScenarioTests\\ScenarioContext\\ViewImplementations';
+    #$binder.load-fixtures($imps);
+    $binder.load-fixtures($imps, $view-imps);
 
 
-    $context.file-name = $scenario-file;
-    my $input = slurp $scenario-file;
+    while(True) {
 
-    my $parse = $grammar.parse( $input, :actions($actions) );
+        say "Parsing $scenario-file..."
+        $context.file-name = $scenario-file;
+        my $input = slurp $scenario-file;
 
-    die "$scenario-file did not parse." unless $parse ~~ Match;
+        my $parse = $grammar.parse( $input, :actions($actions) );
 
-    my $generated-class = $parse.made;
-    spurt $scenario-file ~ "_generated.cs", $generated-class;
+        die "$scenario-file did not parse." unless $parse ~~ Match;
 
+        my $generated-class = $parse.made;
+        spurt $scenario-file ~ "_generated.cs", $generated-class;
+        say "Done.";
+
+        my $response = prompt "'q' to quit or anything else to reparse: ";
+        exit if $response ~~ /q/;
+    }
+    
 }
