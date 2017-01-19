@@ -42,10 +42,12 @@ class Scope {
     sub key-from-match($match) {
         my $arg-count = 0;
         my $flatName = '';
-        for $match<Phrase><Symbol> {
+        for $match<Symbol> {
             when .<Word> {$flatName ~= .<Word>.lc.subst("'", '', :g)}
             when .<Term> {$arg-count++}
         }
+
+        # say $flatName if $flatName ~~ /verify/;
 
         #TODO: actually comprehend the argument types
         #return $flatName ~ '(' ~ 's' x $arg-count ~ ')';
@@ -53,7 +55,7 @@ class Scope {
     }
 
     sub args-from-match($match) {
-        my @args = $match<Phrase><Symbol>
+        my @args = $match<Symbol>
             .grep({.<Term>})
             .map({get-Term-string(.<Term>)});
 

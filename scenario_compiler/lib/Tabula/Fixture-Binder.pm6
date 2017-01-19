@@ -89,8 +89,8 @@ class Fixture-Binder does JSON::Class {
 
         for $path.IO.lines -> $line {
 
-            if $line ~~ / <namespace>[0] / {
-                $namespace = ~$<namespace>;
+            if $line ~~ / <namespace> / {
+                $namespace = ~$<namespace>[0];
             }
 
             if $line ~~ / <method-decl> / && $class.defined {
@@ -104,8 +104,8 @@ class Fixture-Binder does JSON::Class {
                 my $class-name = ~$<class-decl>[1];
                 my $parent-name = ~($<class-decl>[2] // '');
 
-                my Fixture-Class $parent = self.ready-parent($parent-name);
-                $class = self.ready-class($class-name, :$parent, :$namespace);
+                my Fixture-Class $parent = self.ready-parent($parent-name, :$namespace);
+                $class = self.ready-class(:$class-name, :$parent, :$namespace);
             }
         }
 
@@ -126,10 +126,10 @@ class Fixture-Binder does JSON::Class {
         'IAcadisUserDetailsEditorView'
         );
 
-    method ready-parent($parent-name) {
+    method ready-parent($parent-name, :$namespace) {
         return Nil if $parent-name eq $any-non-parent;
 
-        my $parent = self.ready-class($parent-name, :add-new);
+        my $parent = self.ready-class(class-name => $parent-name, :$namespace, :add-new);
         #$parent.is-parent = True;
         return $parent;
     }
@@ -137,7 +137,7 @@ class Fixture-Binder does JSON::Class {
     #   To either pull matching class or create one new, with parent.
     method ready-class(:$class-name, :$namespace is required,
             Fixture-Class :$parent?, Bool :$add-new = False
-            --> Fixture-Class) {
+            ) {
 
         my Fixture-Class $class = self.get-class($class-name);
         if not $class.defined {

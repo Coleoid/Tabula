@@ -188,8 +188,8 @@ class Code-Scribe {
 
     method compose-constructor() {
         njoin(
-'        public ' ~ self.class-name ~ '(TabulaStepRunner runner)
-            : base(runner)
+'        public ' ~ self.class-name ~ '()
+            : base()
         {',
             self.class-scenario-label,
             @fixture-instantiations,

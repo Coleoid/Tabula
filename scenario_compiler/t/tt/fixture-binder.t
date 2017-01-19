@@ -4,12 +4,13 @@ use Tabula::Fixture-Class;
 
 my $binder = Fixture-Binder.new();
 
-my Fixture-Class $workflow = $binder.ready-class('Workflow', :add-new);
+my Fixture-Class $workflow = $binder.ready-class(class-name => 'Workflow', namespace => 'Tabula', :add-new);
 
 ok $workflow.defined, "Get Workflow succeeds";
 is $workflow.instance-name, 'Workflow', "All-Father is properly named";
 
-my Fixture-Class $wf_another .= new(class-name => 'Workflow', namespace => 'foo');
+if False { # still hashing this out
+my Fixture-Class $wf_another .= new(class-name => 'Workflow', namespace => 'Tabula');
 try {
     $binder.add-class($wf_another);
     ok False, "Duplicate class name should die.";
@@ -19,6 +20,7 @@ try {
                 "Duplicate class name throws exception when added to Binder";
         }
     }
+}
 }
 
 $workflow.add-method('Log_out()');

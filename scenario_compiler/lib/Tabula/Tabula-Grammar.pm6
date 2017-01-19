@@ -7,7 +7,7 @@ grammar Tabula-Grammar {
     token Scenario { <Indentation> [:i scenario] <.ws> ':' <.ws> <String> \h* \n <Section>* }
     token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
 
-    token Break-Line { ^^ \h* \n }
+    token Break-Line { ^^ \h* <.Comment>? \n }
     token Document { start_doc [ \h+ <String> ]? \h* \n .*? \n end_doc }  #  crappy first draft placeholder
 
     token Table { <Table-Label>? <Table-Header> <Table-Row>* }
@@ -44,7 +44,7 @@ grammar Tabula-Grammar {
     token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }   # using just \w+, numbers were words.
     token Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
-    token Number   { \d+ }
+    token Number   { <[+-]>? [[\d+ ['.' \d*]?] || ['.' \d+]] }
     token String   { '"' $<Body> = [ <-["]>* ] '"' }  # TODO: single quotes, quote escaping
     token Variable { '#' <Word> }
     token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }

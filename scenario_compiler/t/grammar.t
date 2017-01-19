@@ -173,7 +173,7 @@ say "\n";
     ? verify "the result"
     EOP
 
-    my $parse = parser( 'contains block', $labeled-para );
+    $parse = parser( 'contains block', $labeled-para );
     is $parse<Paragraph-Label><String>, '"This is a label, which will describe the para"';
 
 }

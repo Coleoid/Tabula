@@ -1,11 +1,6 @@
 =====================================================================
 ===  Tabula walking skeleton, remaining work   ===  13 Jan 2017   ===
 
-Testopia runner wired through Tabula
-    [ ] Loads Tabula scenario classes dynamically
-    .5
-.5
-
 Pragmatics and plumbing
     [ ] Finish translating TuitionBilling into Tabula
     .25
@@ -16,6 +11,10 @@ Language
     .25
 .25
 
+Fire that nasty boy up, put out fires, repeat
+    [ ] trim leading ? before resolving class
+    [ ] clear prior run's sections from regen
+
 
 =====================================================================
 ===  Beyond the skeleton
@@ -24,6 +23,9 @@ Testopia runner wired through Tabula
     [ ] split local/MVC into separate axis from Testopia/Tabula
     [ ] Reporting via existing web-page mechanism
     1.0 - 2.0
+
+Shortcomings
+    [ ] blocks are FUBAR
 
 Dev mode vs. Demo mode
     [ ] BDD styled >when: and >then:
@@ -44,6 +46,8 @@ Testopia runner
     1.0
     [x] Reports minimally/adequately
     .25
+    [x] Loads Tabula scenario classes dynamically
+    .5
 
 Compiler
     [x] Loads Binder from command-line args, uses it
@@ -82,3 +86,11 @@ Language
     [x] Start paragraph with string and colon
         String becomes label for Paragraph
     .5
+
+Fire that nasty boy up, put out fires, repeat
+    [x] several call bugs
+    [x] comments not parsed correctly
+    [x] numbers not handling decimals or sign
+    [x] namespace missing on fixture instantiations
+    [x] wrong constructor
+    [x] class name includes path

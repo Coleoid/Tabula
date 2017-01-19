@@ -35,14 +35,14 @@ class Target-Testopia does Match-Helper {
         make ($<Step> || $<Block> || $<Command>).made
     }
 
-    #inline C#
+    # complete crap
     method Block($/) {
         $!Context.open-scope($<String>);
 
         make
             '{  //  ' ~ ($<String> // "unnamed block") ~ "\n"
             ~ ($<Section> ?? [~] $<Section>.map({.made}) !! "")
-            ~ $<Block-End><Indentation> ~ "\}\n";
+            ~ $<Block-End> ~ "\}\n";
 
         $!Context.close-scope();
     }
@@ -150,6 +150,7 @@ class Target-Testopia does Match-Helper {
             $match.make( get-Do-statement( $result, $source-location ) );
         }
         else {
+            #TODO: this is where suggestions of near-matches will go
             my $stepText = $match.subst('"', '\"', :g);
             $match.make( 'Unfound(     "' ~ $stepText ~ '",     "' ~ $source-location ~ '" );' );
         }
