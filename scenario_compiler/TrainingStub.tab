@@ -1,0 +1,7 @@
+Scenario: "Training Search Link Permissions"
+
+"Setup":
+>use: User Creation
+Create Person named "Jon Doe"
+Create Person named "Tom Doe"
+? Create Person named "Don Doe"

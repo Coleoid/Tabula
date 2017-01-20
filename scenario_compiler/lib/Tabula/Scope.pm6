@@ -49,7 +49,7 @@ class Scope {
 
         # say $flatName if $flatName ~~ /verify/;
 
-        #TODO: actually comprehend the argument types
+        #TODO: include and discriminate on the argument types
         #return $flatName ~ '(' ~ 's' x $arg-count ~ ')';
         return $flatName ~ '()';
     }

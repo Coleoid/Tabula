@@ -37,9 +37,9 @@ class Fixture-Binder does JSON::Class {
         }
 
         #  A patch that lets me avoid parsing generics.
-        my Fixture-Class $mvcbw = self.get-class('MvcBaseWorkflow');
-        my Fixture-Class $mvbw = self.get-class('MVBaseWorkflow');
-        $mvcbw.set-parent(parent => $mvbw);
+        # my Fixture-Class $mvcbw = self.get-class('MvcBaseWorkflow');
+        # my Fixture-Class $mvbw = self.get-class('MVBaseWorkflow');
+        # $mvcbw.set-parent(parent => $mvbw);
     }
 
     method repl() {

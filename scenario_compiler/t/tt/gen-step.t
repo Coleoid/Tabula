@@ -17,6 +17,10 @@ $context.add-fixture($fixture);
     my $parse = parser( "find method with no args", 'this is a step' );
     is $parse.made, 'Do(() =>     Advice.This_is_a_step(),     "SampleScenario.scn:1", @"Advice.This_is_a_step()" );',
         "outputs the expected line for one step";
+
+    $parse = parser( "find method with no args", '? this is a step' );
+    is $parse.made, 'Do(() =>     Advice.This_is_a_step(),     "SampleScenario.scn:1", @"Advice.This_is_a_step()" );',
+        "prefixed '?' is no problem";
 }
 
 #if False

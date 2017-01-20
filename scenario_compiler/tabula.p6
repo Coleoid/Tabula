@@ -11,8 +11,8 @@ my $scribe = $actions.Scribe;
 
 my Bool $debug = False;
 
-my $root-default = 'k:\\code\\acadis_trunk\\';
-#my $root-default = 'd:\\code\\acadis\\';
+#my $root-default = 'k:\\code\\acadis_trunk\\';
+my $root-default = 'd:\\code\\acadis\\';
 
 sub MAIN(Str :$scenario-name is required) {
 
@@ -41,6 +41,7 @@ sub load-scenario($scenario-name) {
     my $output-name = S/ '.tab' $ /_generated.cs/ given $scenario-name;
     say "Generating $output-name...";
 
+    $scribe.clear-work();
     my $file-name = $scenario-name.split( '\\' ).tail;
     $context.file-name = $file-name;
     my $input = slurp $scenario-name;
