@@ -82,6 +82,7 @@ Choose not to track category
 Prepare to save preference
 Click save preference
 
+
 // -- NONE --------------------------------------------------------------
 
 "Register person A":
@@ -113,6 +114,7 @@ Run task "AutoUpdateClassStatus"
 Export all billing items
 ? Verify there are "0" items
 
+
 // -- REGISTRATION --------------------------------------------------------------
 
 "Change billing to at registration":
@@ -133,23 +135,10 @@ Select student "Bradley, Blake"
 Select  "Individual" for Tuition Bill to Party
 Click Register
 
-"Verify  bill was created at registration":
+"Verify bill was created at registration":
 >use: Billing Items Export Workflow
 Export all billing items
 ? Verify there are "1" items
-? Verify row "1"
-? Verify "Category" is "Class"
-? Verify "Bill Created At" is "Registration"
-? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-? Verify "Billing Usage" is ""
-? Verify "Usage Period Start" is ""
-? Verify "Usage Period End" is ""
-? Verify "For" is "Bradley, Blake"
-? Verify "Date" is equal to today
-? Verify "Bill To" is "Bradley, Blake"
-? Verify "Amount" is "101.42"
-? Verify "Cancelled" is "N"
 
 "Transfer Bradley, Blake":
 >use: Transfer Student Workflow
@@ -161,19 +150,6 @@ Click transfer
 >use: Billing Items Export Workflow
 Export all billing items
 ? Verify there are "2" items
-? Verify row "2"
-? Verify "Category" is "Class"
-? Verify "Bill Created At" is "Registration"
-? Verify "Event / Class*" is "Driving - Highway Pursuit 101"
-? Verify "Billing Item" is "Driving - Highway Pursuit 101"
-? Verify "Billing Usage" is ""
-? Verify "Usage Period Start" is ""
-? Verify "Usage Period End" is ""
-? Verify "For" is "Bradley, Blake"
-? Verify "Date" is equal to today
-? Verify "Bill To" is "Bradley, Blake"
-? Verify "Amount" is "131.45"
-? Verify "Cancelled" is "N"
 
 "Enroll Nicholas, Jamila directly in course without registration":
 >use: Add Enrollment Workflow
@@ -186,19 +162,6 @@ Click Continue
 >use: Billing Items Export Workflow
 Export all billing items
 ? Verify there are "3" items
-? Verify row "3"
-? Verify "Category" is "Class"
-? Verify "Bill Created At" is "Enrollment"
-? Verify "Event / Class*" is "Driving - Highway Pursuit 103"
-? Verify "Billing Item" is "Driving - Highway Pursuit 103"
-? Verify "Billing Usage" is ""
-? Verify "Usage Period Start" is ""
-? Verify "Usage Period End" is ""
-? Verify "For" is "Nicholas, Jamila"
-? Verify "Date" is equal to today
-? Verify "Bill To" is "Nicholas, Jamila"
-? Verify "Amount" is "172.55"
-? Verify "Cancelled" is "N"
 
 "Bradley, Blake":
 >use: Registration Management
@@ -249,11 +212,61 @@ Export all billing items
 >use: Registration Management
 Enroll "Chase, Charles" in "Highway Pursuit 100" from registration
 
-
-"Verify  bill was created at enrollment":
+"Verify bill was created at enrollment":
 >use: Billing Items Export Workflow
 Export all billing items
 ? Verify there are "4" items
+
+"Enroll person D directly":
+>use: Add Enrollment Workflow
+Browse to page for "Highway Pursuit 100"
+Select "Doo, Dewbie" to enroll
+Select  "Individual" for Tuition Bill to Party
+Click Continue
+
+"Verify bill was created at enrollment":
+>use: Billing Items Export Workflow
+Export all billing items
+? Verify there are "5" items
+? Verify row "1"
+? Verify "Category" is "Class"
+? Verify "Bill Created At" is "Registration"
+? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
+? Verify "Billing Item" is "Driving - Highway Pursuit 100"
+? Verify "Billing Usage" is ""
+? Verify "Usage Period Start" is ""
+? Verify "Usage Period End" is ""
+? Verify "For" is "Bradley, Blake"
+? Verify "Date" is equal to today
+? Verify "Bill To" is "Bradley, Blake"
+? Verify "Amount" is "101.42"
+? Verify "Cancelled" is "N"
+? Verify row "2"
+? Verify "Category" is "Class"
+? Verify "Bill Created At" is "Registration"
+? Verify "Event / Class*" is "Driving - Highway Pursuit 101"
+? Verify "Billing Item" is "Driving - Highway Pursuit 101"
+? Verify "Billing Usage" is ""
+? Verify "Usage Period Start" is ""
+? Verify "Usage Period End" is ""
+? Verify "For" is "Bradley, Blake"
+? Verify "Date" is equal to today
+? Verify "Bill To" is "Bradley, Blake"
+? Verify "Amount" is "131.45"
+? Verify "Cancelled" is "N"
+? Verify row "3"
+? Verify "Category" is "Class"
+? Verify "Bill Created At" is "Enrollment"
+? Verify "Event / Class*" is "Driving - Highway Pursuit 103"
+? Verify "Billing Item" is "Driving - Highway Pursuit 103"
+? Verify "Billing Usage" is ""
+? Verify "Usage Period Start" is ""
+? Verify "Usage Period End" is ""
+? Verify "For" is "Nicholas, Jamila"
+? Verify "Date" is equal to today
+? Verify "Bill To" is "Nicholas, Jamila"
+? Verify "Amount" is "172.55"
+? Verify "Cancelled" is "N"
 ? Verify row "4"
 ? Verify "Category" is "Class"
 ? Verify "Bill Created At" is "Enrollment"
@@ -267,19 +280,6 @@ Export all billing items
 ? Verify "Bill To" is "Chase, Charles"
 ? Verify "Amount" is "99.99"
 ? Verify "Cancelled" is "N"
-
-"Enroll person D directly":
->use: Add Enrollment Workflow
-Browse to page for "Highway Pursuit 100"
-Select "Doo, Dewbie" to enroll
-Select  "Individual" for Tuition Bill to Party
-Click Continue
-
-
-"Verify  bill was created at enrollment":
->use: Billing Items Export Workflow
-Export all billing items
-? Verify there are "5" items
 ? Verify row "5"
 ? Verify "Category" is "Class"
 ? Verify "Bill Created At" is "Enrollment"
@@ -307,59 +307,25 @@ Export all billing items
 >use: Accounting Api Workflow
 Get invoiceable items
 ? Verify there are "5" invoiceable items
-Begin verifying invoiceable item "1"
-    ? Verify invoiceable item Event is "Driving - Highway Pursuit 100"
-    ? Verify invoiceable item Item is "Driving - Highway Pursuit 100"
+
+Begin verifying invoiceable item #Num
+    ? Verify invoiceable item Event is #EventName
+    ? Verify invoiceable item Item is #EventName
     ? Verify invoiceable item Usage is blank
     ? Verify invoiceable item PeriodStart is null
     ? Verify invoiceable item PeriodEnd is null
-    ? Verify invoiceable item BillFor is "Bradley, Blake"
-    ? Verify invoiceable item BillTo is "Bradley, Blake"
+    ? Verify invoiceable item BillFor is #BillName
+    ? Verify invoiceable item BillTo is #BillName
     ? Verify invoiceable item BillToID is greater than zero
-    ? Verify invoiceable item Amount is "101.42"
+    ? Verify invoiceable item Amount is #Amount
     ? Verify invoiceable item CreationDate is "1/1/2023"
-Begin verifying invoiceable item "2"
-    ? Verify invoiceable item Event is "Driving - Highway Pursuit 101"
-    ? Verify invoiceable item Item is "Driving - Highway Pursuit 101"
-    ? Verify invoiceable item Usage is blank
-    ? Verify invoiceable item PeriodStart is null
-    ? Verify invoiceable item PeriodEnd is null
-    ? Verify invoiceable item BillFor is "Bradley, Blake"
-    ? Verify invoiceable item BillTo is "Bradley, Blake"
-    ? Verify invoiceable item BillToID is greater than zero
-    ? Verify invoiceable item Amount is "131.45"
-    ? Verify invoiceable item CreationDate is "1/1/2023"
-Begin verifying invoiceable item "3"
-    ? Verify invoiceable item Event is "Driving - Highway Pursuit 103"
-    ? Verify invoiceable item Item is "Driving - Highway Pursuit 103"
-    ? Verify invoiceable item Usage is blank
-    ? Verify invoiceable item PeriodStart is null
-    ? Verify invoiceable item PeriodEnd is null
-    ? Verify invoiceable item BillFor is "Nicholas, Jamila"
-    ? Verify invoiceable item BillTo is "Nicholas, Jamila"
-    ? Verify invoiceable item Amount is "172.55"
-    ? Verify invoiceable item CreationDate is "1/1/2023"
-Begin verifying invoiceable item "4"
-    ? Verify invoiceable item Event is "Driving - Highway Pursuit 100"
-    ? Verify invoiceable item Item is "Driving - Highway Pursuit 100"
-    ? Verify invoiceable item Usage is blank
-    ? Verify invoiceable item PeriodStart is null
-    ? Verify invoiceable item PeriodEnd is null
-    ? Verify invoiceable item BillFor is "Chase, Charles"
-    ? Verify invoiceable item BillTo is "Chase, Charles"
-    ? Verify invoiceable item BillToID is greater than zero
-    ? Verify invoiceable item Amount is "99.99"
-    ? Verify invoiceable item CreationDate is "1/1/2023"
-Begin verifying invoiceable item "5"
-    ? Verify invoiceable item Event is "Driving - Highway Pursuit 100"
-    ? Verify invoiceable item Item is "Driving - Highway Pursuit 100"
-    ? Verify invoiceable item Usage is blank
-    ? Verify invoiceable item PeriodStart is null
-    ? Verify invoiceable item PeriodEnd is null
-    ? Verify invoiceable item BillFor is "Doo, Dewbie"
-    ? Verify invoiceable item BillTo is "Doo, Dewbie"
-    ? Verify invoiceable item Amount is "99.99"
-    ? Verify invoiceable item CreationDate is "1/1/2023"
+
+[ Num | Event name                    | BillName           | Amount ]
+| 1   | Driving - Highway Pursuit 100 | "Bradley, Blake"   | 101.42 |
+| 2   | Driving - Highway Pursuit 101 | "Bradley, Blake"   | 131.45 |
+| 3   | Driving - Highway Pursuit 103 | "Nicholas, Jamila" | 172.55 |
+| 4   | Driving - Highway Pursuit 100 | "Chase, Charles"   |  99.99 |
+| 5   | Driving - Highway Pursuit 100 | "Doo, Dewbie"      |  99.99 |
 
 
 // -- CANCELLATIONS -----------------------------------------------------------
@@ -375,30 +341,23 @@ Delete enrollment
 >use: Registration Management
 Cancel registration for "Bradley, Blake" in "Highway Pursuit 101"
 
-"Verify  bill was created at enrollment":
+"Verify bill was created at enrollment":
 >use: Billing Items Export Workflow
 Export all billing items
 ? Verify there are "5" items
-? Verify row "1"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Bill To" is "Bradley, Blake"
-    ? Verify "Cancelled" is "Y"
-? Verify row "2"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 101"
-    ? Verify "Bill To" is "Bradley, Blake"
-    ? Verify "Cancelled" is "Y"
-? Verify row "3"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 103"
-    ? Verify "For" is "Nicholas, Jamila"
-    ? Verify "Cancelled" is "N"
-? Verify row "4"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "For" is "Chase, Charles"
-    ? Verify "Cancelled" is "N"
-? Verify row "5"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "For" is "Doo, Dewbie"
-    ? Verify "Cancelled" is "Y"
+
+? Verify row #Num
+    ? Verify "Event / Class*" is #EventName
+    ? Verify "Bill To" is #BillName
+    ? Verify "Cancelled" is #Cancelled
+
+[ Num | Event name                    | BillName           | Cancelled ]
+| 1   | Driving - Highway Pursuit 100 | "Bradley, Blake"   | Y         |
+| 2   | Driving - Highway Pursuit 101 | "Bradley, Blake"   | Y         |
+| 3   | Driving - Highway Pursuit 103 | "Nicholas, Jamila" | N         |
+| 4   | Driving - Highway Pursuit 100 | "Chase, Charles"   | N         |
+| 5   | Driving - Highway Pursuit 100 | "Doo, Dewbie"      | N         |
+
 
 "Cancel a class":
 >use: Edit Class Workflow
