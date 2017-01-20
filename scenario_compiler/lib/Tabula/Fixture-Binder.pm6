@@ -37,9 +37,9 @@ class Fixture-Binder does JSON::Class {
         }
 
         #  A patch that lets me avoid parsing generics.
-        # my Fixture-Class $mvcbw = self.get-class('MvcBaseWorkflow');
-        # my Fixture-Class $mvbw = self.get-class('MVBaseWorkflow');
-        # $mvcbw.set-parent(parent => $mvbw);
+        my Fixture-Class $mvcbw = self.get-class('MvcBaseWorkflow');
+        my Fixture-Class $mvbw = self.get-class('MVBaseWorkflow');
+        $mvcbw.set-parent(parent => $mvbw);
     }
 
     method repl() {
@@ -73,7 +73,7 @@ class Fixture-Binder does JSON::Class {
     my regex namespace { ^ \s* namespace \s+ ( <[\w.]>+ ) }
 
     my regex method-decl {
-        ^ \s* public \s+ [override \s+]? [virtual \s+]? void \s+ $<name> = (\w+ '(' <-[)]>* ')')
+        ^ \s* public \s+ [new \s+]? [override \s+]? [virtual \s+]? void \s+ $<name> = (\w+ '(' <-[)]>* ')')
     }
 
     my regex class-decl  {
@@ -91,10 +91,12 @@ class Fixture-Binder does JSON::Class {
 
             if $line ~~ / <namespace> / {
                 $namespace = ~$<namespace>[0];
+                next;
             }
 
             if $line ~~ / <method-decl> / && $class.defined {
                 $class.add-method(~$<method-decl><name>);
+                next;
             }
 
             if $line ~~ / <class-decl> / {
@@ -122,7 +124,7 @@ class Fixture-Binder does JSON::Class {
         'DocumentStorageProviderFactory', 'Exception',
         'AcadisConfigurationManager', 'CollectionEquivalentConstraint',
         'IFiltersView', 'IStudentListViewRowItem', 'FieldAttribute',
-        'Attribute', 'Is', 'MvcBaseWorkflow', 'HttpPostedFileBase',
+        'Attribute', 'Is', 'HttpPostedFileBase', # 'MvcBaseWorkflow',
         'IAcadisUserDetailsEditorView'
         );
 

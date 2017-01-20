@@ -1,5 +1,5 @@
 =====================================================================
-===  Tabula walking skeleton, remaining work   ===  13 Jan 2017   ===
+===  Tabula walking skeleton, remaining work   ===  20 Jan 2017   ===
 
 Pragmatics and plumbing
     [ ] Finish translating TuitionBilling into Tabula
@@ -12,8 +12,7 @@ Language
 .25
 
 Fire that nasty boy up, put out fires, repeat
-    [ ] trim leading ? before resolving class
-    [ ] clear prior run's sections from regen
+    [ ] Methods in parents not being found
 
 
 =====================================================================
@@ -94,3 +93,5 @@ Fire that nasty boy up, put out fires, repeat
     [x] namespace missing on fixture instantiations
     [x] wrong constructor
     [x] class name includes path
+    [x] public new void do_thing()
+    [x] clear prior run's sections from regen

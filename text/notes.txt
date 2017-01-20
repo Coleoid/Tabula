@@ -183,3 +183,29 @@ ISetupAndTeardown
 ---
 
 'CollectionEquivalentConstraint', 'IFiltersView', 'IStudentListViewRowItem', 'FieldAttribute', 'Attribute', 'Is', 'MvcBaseWorkflow', 'HttpPostedFileBase', 'IAcadisUserDetailsEditorView'
+
+
+---
+
+load:
+    K:\code\acadis_trunk\ScenarioTests\ScenarioContext
+        \ViewImplementations\MVBaseWorkflowProperties.cs
+        \ViewImplementations\MvcBaseWorkflow.cs
+        \ViewImplementations\MVBaseWorkflow.cs
+        \Implementations\Workflow.cs
+        \ViewImplementations\Curriculum\ClassDescriptiveFieldsWorkflow.cs
+
+Verify parentage
+    parent of ClassDescriptive is MVBaseWorkflow
+    parent of MVBaseWorkflow is Workflow
+    parent of Workflow is undefined
+
+Verify both partials
+
+Can find from ClassDescriptive?
+        Workflow: Verify_proctor_login_failed
+        MVB: Debugger_break
+        MVBProps: Click_button__
+        
+
+---
