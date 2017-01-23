@@ -422,28 +422,13 @@ Click Register
 >use: Registration Management
 Cancel registration for "Fairchild, Florence" in "Highway Pursuit 100"
 
+
 "Verify  bill was created at enrollment":
 >use: Billing Items Export Workflow
 Export all billing items
 ? Verify there are "11" items
-? Verify row "1"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Registration"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Bradley, Blake"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Bradley, Blake"
-    ? Verify "Amount" is "101.42"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Description" is "TUITION CHARGE for Bradley, Blake (B1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "101.42"
 
-? Verify row "1"
+? Verify row #Num
     ? Verify "Category" is "Class"
     ? Verify "Bill Created At" is #BilledAt
     ? Verify "Event / Class*" is #ClassItem
@@ -460,190 +445,19 @@ Export all billing items
     ? Verify "Quantity" is "1"
     ? Verify "Unit Price" is #Amount
 
-[ Num | Billed At    | Class Item                    | Name               | Amount | Cancelled ]
-|   1 | Registration | Driving - Highway Pursuit 100 | "Bradley, Blake"   | 101.42 | Y         |
-|   2 | Registration | Driving - Highway Pursuit 101 | "Bradley, Blake"   | 131.45 | Y         |
-|   3 | Enrollment   | Driving - Highway Pursuit 103 | "Nicholas, Jamila" | 172.55 | N         |
-|   4 | Enrollment   | Driving - Highway Pursuit 100 | "Chase, Charles"   |  99.99 | N         |
-|   5 | Enrollment   | Driving - Highway Pursuit 100 | "Doo, Dewbie"      |  99.99 | N         |
+[ Num | Name               | ID | Billed At    | Class Item                    | Amount | Cancelled ]
+|   1 | "Bradley, Blake"   | B1 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
+|   2 | "Bradley, Blake"   | B1 | Registration | Driving - Highway Pursuit 101 | 131.45 | Y         |
+|   3 | "Nicholas, Jamila" | N1 | Enrollment   | Driving - Highway Pursuit 103 | 172.55 | N         |
+|   4 | "Chase, Charles"   | C1 | Enrollment   | Driving - Highway Pursuit 100 |  99.99 | N         |
+|   5 | "Doo, Dewbie"      | D1 | Enrollment   | Driving - Highway Pursuit 100 |  99.99 | N         |
+|   6 | "Eady, Forrest"    | E2 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
+|   7 | "Johnson, Danny"   | J1 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
+|   8 | "Worthen, Jorge"   | W1 | Registration | Driving - Highway Pursuit 100 | 104.99 | Y         |
+|   9 | "Murphy, Sam"      | M1 | Enrollment   | Driving - Highway Pursuit 100 | 104.99 | Y         |
+|  10 | "Brown, Wendell"   | B2 | Enrollment   | Driving - Highway Pursuit 100 | 104.99 | Y         |
+|  11 |"Fairchild, Florence"|F1 | Registration | Driving - Highway Pursuit 100 | 200    | Y         |
 
-[ Name                | ID ]
-| Agmeier, Armin      | A1 |
-| Bradley, Blake      | B1 |
-| Brown, Wendell      | B2 |
-| Chase, Charles      | C1 |
-| Doo, Dewbie         | D1 |
-| Easley, Erwin       | E1 |
-| Eady, Forrest       | E2 |
-| Fairchild, Florence | F1 |
-| Johnson, Danny      | J1 |
-| Murphy, Sam         | M1 |
-| Nicholas, Jamila    | N1 |
-| Worthen, Jorge      | W1 |
-
-
-    "Cancel a class":
-
-? Verify row "2"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Registration"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 101"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 101"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Bradley, Blake"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Bradley, Blake"
-    ? Verify "Amount" is "131.45"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Description" is "TUITION CHARGE for Bradley, Blake (B1): Driving - Highway Pursuit 101 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "131.45"
-? Verify row "3"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Enrollment"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 103"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 103"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Nicholas, Jamila"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Nicholas, Jamila"
-    ? Verify "Amount" is "172.55"
-    ? Verify "Cancelled" is "N"
-    ? Verify "Description" is "TUITION CHARGE for Nicholas, Jamila (N1): Driving - Highway Pursuit 103 (occurring 01/01/2023 - 02/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "172.55"
-? Verify row "4"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Enrollment"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Chase, Charles"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Chase, Charles"
-    ? Verify "Amount" is "99.99"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Description" is  "TUITION CHARGE for Chase, Charles (C1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "99.99"
-? Verify row "5"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Enrollment"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Doo, Dewbie"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Doo, Dewbie"
-    ? Verify "Amount" is "99.99"
-    ? Verify "Description" is "TUITION CHARGE for Doo, Dewbie (D1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "99.99"
-? Verify row "6"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Registration"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Eady, Forrest"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Eady, Forrest"
-    ? Verify "Amount" is "101.42"
-    ? Verify "Description" is "TUITION CHARGE for Eady, Forrest (E2): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "101.42"
-? Verify row "7"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Registration"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Johnson, Danny"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Johnson, Danny"
-    ? Verify "Amount" is "101.42"
-    ? Verify "Description" is  "TUITION CHARGE for Johnson, Danny (J1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "101.42"
-? Verify row "8"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Enrollment"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Worthen, Jorge"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Worthen, Jorge"
-    ? Verify "Amount" is "104.99"
-    ? Verify "Description" is "TUITION CHARGE for Worthen, Jorge (W1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "104.99"
-? Verify row "9"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Enrollment"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Murphy, Sam"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Murphy, Sam"
-    ? Verify "Amount" is "104.99"
-    ? Verify "Description" is "TUITION CHARGE for Murphy, Sam (M1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "104.99"
-? Verify row "10"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Enrollment"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 101"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 101"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Brown, Wendell"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Brown, Wendell"
-    ? Verify "Amount" is "104.99"
-    ? Verify "Description" is "TUITION CHARGE for Brown, Wendell (B2): Driving - Highway Pursuit 101 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "104.99"
-? Verify row "11"
-    ? Verify "Category" is "Class"
-    ? Verify "Bill Created At" is "Registration"
-    ? Verify "Event / Class*" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Item" is "Driving - Highway Pursuit 100"
-    ? Verify "Billing Usage" is blank
-    ? Verify "Usage Period Start" is blank
-    ? Verify "Usage Period End" is blank
-    ? Verify "For" is "Fairchild, Florence"
-    ? Verify "Cancelled" is "Y"
-    ? Verify "Date" is "01/01/2023"
-    ? Verify "Bill To" is "Fairchild, Florence"
-    ? Verify "Amount" is "200"
-    ? Verify "Description" is "TUITION CHARGE for Fairchild, Florence (F1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify "Quantity" is "1"
-    ? Verify "Unit Price" is "200"
 
 "Verify that cancellations are transmitted to an external accounting system":
 >use: Accounting Api Workflow

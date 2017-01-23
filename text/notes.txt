@@ -209,3 +209,16 @@ Can find from ClassDescriptive?
 
 
 ---
+Unfound(     "Set today to \"1/1/2023\"",     "TuitionBilling_2.tab:5" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:25" );
+Unfound(     "Enter text #fees for \"Fees\"",     "TuitionBilling_2.tab:42" );
+Unfound(     "Click button \"Done\"",     "TuitionBilling_2.tab:43" );
+Unfound(     "Verify text for \"Fees\" is #fees",     "TuitionBilling_2.tab:45" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:72" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:79" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:122" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:188" );
+Unfound(     "? Verify label for \"Student Name\" is \"Doo, Dewbie\"",     "TuitionBilling_2.tab:292" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:327" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:352" );
+Unfound(     "Browse to page",     "TuitionBilling_2.tab:405" );

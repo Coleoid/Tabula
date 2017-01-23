@@ -25,8 +25,8 @@ $context.file-name = "ScenarioFilename.scn";
         public class ScenarioFilename_generated
             : GeneratedScenarioBase, IGeneratedScenario
         {
-            public ScenarioFilename_generated(TabulaStepRunner runner)
-                : base(runner)
+            public ScenarioFilename_generated()
+                : base()
             {
                 ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
             }
@@ -77,8 +77,8 @@ $context.file-name = "ScenarioFilename.scn";
         {
             public ScenarioContext.ActionWorkflow Action;
 
-            public ScenarioFilename_generated(TabulaStepRunner runner)
-                : base(runner)
+            public ScenarioFilename_generated()
+                : base()
             {
                 ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
                 Action = new ScenarioContext.ActionWorkflow();

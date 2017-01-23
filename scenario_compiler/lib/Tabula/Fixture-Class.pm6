@@ -59,12 +59,13 @@ class Fixture-Class does JSON::Class {
     method find-step-method($step) {
         my $key = key-from-step($step);
 
-        return %.methods{$key} if %.methods{$key}:exists;
+        return %.methods{$key} if %.methods{$key}.defined;
         return $!parent.find-step-method($step) if $!parent.defined;
         return Nil;
     }
 
     sub key-from-step($step) {
+        return $step if $step ~~ / \w+ '()' /;
         return $step.lc.subst(' ', '', :g) ~ '()';
     }
 }

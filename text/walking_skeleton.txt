@@ -12,6 +12,8 @@ Language
 .25
 
 Fire that nasty boy up, put out fires, repeat
+    [ ] Comma within string should not cause list
+    [ ] Label(string labelText) in base class
 
 
 =====================================================================
@@ -95,3 +97,4 @@ Fire that nasty boy up, put out fires, repeat
     [x] public new void do_thing()
     [x] clear prior run's sections from regen
     [x] Fixture-Class fetching problems
+    [x] Final handful of unfound (from multiple fixtures in scope)

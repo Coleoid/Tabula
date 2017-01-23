@@ -31,7 +31,7 @@ class Scope {
         my $args = args-from-match($match);
 
         for @!fixtures -> $fixture {
-            my Fixture-Method $page = $fixture.methods{$key};
+            my Fixture-Method $page = $fixture.find-step-method($key);# $fixture.methods{$key};
             if $page.defined {
                 my $method = $page.name;
                 return $fixture.instance-name ~ '.' ~ $method ~ '(' ~ $args ~ ')';
