@@ -12,7 +12,6 @@ Language
 .25
 
 Fire that nasty boy up, put out fires, repeat
-    [ ] Methods in parents not being found
 
 
 =====================================================================
@@ -95,3 +94,4 @@ Fire that nasty boy up, put out fires, repeat
     [x] class name includes path
     [x] public new void do_thing()
     [x] clear prior run's sections from regen
+    [x] Fixture-Class fetching problems

@@ -8,39 +8,47 @@ my $binder = $actions.Binder;
 
 $context.file-name = "SampleScenario.scn";
 
-#my $machine-specific-prefix = 'k:\\code\\acadis_trunk\\';
-my $machine-specific-prefix = 'd:\\code\\acadis\\';
+my $install-location = 'k:\\code\\acadis_trunk\\';
+#my $install-location = 'd:\\code\\acadis\\';
 
-my $root = $machine-specific-prefix ~ 'ScenarioTests\\ScenarioContext\\';
-#my $cdfw-FileName  = $root ~ 'ViewImplementations\\Curriculum\\ClassDescriptiveFieldsWorkflow.cs';
+my $root = $install-location ~ 'ScenarioTests\\ScenarioContext\\';
+my $cdfw-FileName  = $root ~ 'ViewImplementations\\Curriculum\\ClassDescriptiveFieldsWorkflow.cs';
 my $ecw-FileName   = $root ~ 'ViewImplementations\\Curriculum\\EditClassWorkflow.cs';
 my $mvbw-FileName  = $root ~ 'ViewImplementations\\MVBaseWorkflow.cs';
 my $mvbwp-FileName = $root ~ 'ViewImplementations\\MVBaseWorkflowProperties.cs';
-#my $mvcbw-FileName = $root ~ 'ViewImplementations\\MvcBaseWorkflow.cs';
 my $workf-FileName = $root ~ 'Implementations\\Workflow.cs';
 
-#  Load MGH
-#$binder.parse-source($cdfw-FileName);
+$binder.parse-source($cdfw-FileName);
 $binder.parse-source($ecw-FileName);
 $binder.parse-source($mvbw-FileName);
 $binder.parse-source($mvbwp-FileName);
-#$binder.parse-source($mvcbw-FileName);
 $binder.parse-source($workf-FileName);
 
 my Fixture-Class $cdfw = $binder.get-class('ClassDescriptiveFieldsWorkflow');
-my Fixture-Class $ecw = $binder.get-class('EditClassWorkflow');
+is $cdfw.class-name, 'ClassDescriptiveFieldsWorkflow', "got 'ClassDescriptiveFieldsWorkflow'";
+my Fixture-Class $ecw  = $binder.get-class('EditClassWorkflow');
+is $ecw.class-name, 'EditClassWorkflow', "got 'EditClassWorkflow'";
 my Fixture-Class $mvbw = $binder.get-class('MVBaseWorkflow');
-#my Fixture-Class $mvcw = $binder.get-class(?);
-my Fixture-Class $work = $binder.get-class('workflow');
+is $mvbw.class-name, 'MVBaseWorkflow', "got 'MVBaseWorkflow'";
 
-#ok $cdfw.parent === $mvbw, "parent of ClassDescriptive is MVBaseWorkflow";
-say $ecw.parent-name;
-ok $ecw.parent-name === $mvbw, "parent of EditClass is MVBaseWorkflow";
-say $mvbw.parent-name;
-ok $mvbw.parent-name === $work, "parent of MVBaseWorkflow is Workflow";
-say $work.parent-name;
+my Fixture-Class $work = $binder.get-class('workflow');
+is $work.class-name, 'Workflow', "got 'Workflow'";
+ok $work.methods.elems > 20, 'parsed Workflow methods properly';
+ok $work.find-step-method("verify proctor login failed").defined, "can find method directly in Workflow";
+ok $mvbw.find-step-method("verify proctor login failed").defined, "can find method on parent";
+
+
+ok $cdfw.parent-name eq 'MVBaseWorkflow', "parent of ClassDescriptive is MVBaseWorkflow";
+ok $ecw.parent-name eq 'MVBaseWorkflow', "parent of EditClass is MVBaseWorkflow";
+ok $mvbw.parent-name eq 'Workflow', "parent of MVBaseWorkflow is Workflow";
 nok $work.parent-name.defined, "parent of Workflow is undefined";
 
-ok $ecw.find-step-method("verifyproctorloginfailed()").defined, "can find method inherited two levels above";
-ok $ecw.find-step-method("debuggerbreak()").defined, "inherited from first half of partial class";
-ok $ecw.find-step-method("clickbutton()").defined, "inherited from second half of partial class";
+ok $ecw.find-step-method("verify proctor login failed").defined, "can find method inherited two levels above";
+ok $ecw.find-step-method("Wait seconds").defined, "can find method inherited two levels above";
+ok $ecw.find-step-method("debugger break").defined, "inherited from first half of partial class";
+ok $ecw.find-step-method("click button").defined, "inherited from second half of partial class";
+
+###############
+#my $mvcbw-FileName = $root ~ 'ViewImplementations\\MvcBaseWorkflow.cs';
+#$binder.parse-source($mvcbw-FileName);
+#my Fixture-Class $mvcw = $binder.get-class(?);

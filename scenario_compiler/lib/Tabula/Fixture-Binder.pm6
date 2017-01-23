@@ -77,7 +77,7 @@ class Fixture-Binder does JSON::Class {
     }
 
     my regex class-decl  {
-        ^ \s* public \s+ ([abstract \s+]? [partial \s+]?)
+        ^ \s* public \s+ [abstract \s+]? [partial \s+]?
         class \s+ (\w+)
         [ \s* ':' \s* (\w+) ]?
     }
@@ -100,18 +100,18 @@ class Fixture-Binder does JSON::Class {
             }
 
             if $line ~~ / <class-decl> / {
-                self.add-class($class);
+                #self.add-class($class);
                 $class = Nil;
 
-                my $class-name = ~$<class-decl>[1];
-                my $parent-name = ~($<class-decl>[2] // '');
+                my $class-name = ~$<class-decl>[0];
+                my $parent-name = ~($<class-decl>[1] // '');
 
                 my Fixture-Class $parent = self.ready-parent($parent-name, :$namespace);
-                $class = self.ready-class(:$class-name, :$parent, :$namespace);
+                $class = self.ready-class(:$class-name, :$parent, :$namespace, :add-new);
             }
         }
 
-        self.add-class($class);
+        #self.add-class($class);
         $class = Nil;
     }
 
@@ -147,7 +147,7 @@ class Fixture-Binder does JSON::Class {
             self.add-class($class) if $add-new;
         }
 
-        $class.set-parent(:$parent);
+        $class.set-parent(:$parent) if $parent.defined;
 
         return $class;
     }
@@ -156,10 +156,10 @@ class Fixture-Binder does JSON::Class {
         return unless $class.defined;
 
         if %!classes{$class.key}:exists {
-            # die "Binder contains a different fixture named [$($class.class-name)]."
-            #     unless $class === %!classes{$class.key};
-            # #  When this happens, we may need more code to deal
-            # # with fixture name collisions.
+            die "Binder contains a different fixture named [$($class.class-name)]."
+                unless $class === %!classes{$class.key};
+            #  When this happens, we may need more code to deal
+            # with fixture name collisions.
         }
 
         %!classes{$class.key} = $class;
@@ -168,7 +168,7 @@ class Fixture-Binder does JSON::Class {
     }
 
     method get-class(Str $name --> Fixture-Class) {
-        %!classes{$name}
+        %!classes{$name.lc}
             || %!classes{key-from-command-text($name)}
             || Nil;
     }

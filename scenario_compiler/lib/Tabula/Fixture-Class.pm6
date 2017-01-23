@@ -19,7 +19,7 @@ class Fixture-Class does JSON::Class {
         $!instance-name = $short-name;
         $!key = $short-name.lc;
 
-        self.set-parent(:$parent);
+        self.set-parent(:$parent) if $parent.defined;
     }
 
 
