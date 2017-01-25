@@ -12,11 +12,13 @@ class Fixture-Method does JSON::Class {
     has Str $!key;
     method key() { $!key }
 
+    has @!arg-types;
+
     #  Tabula presumes all methods are public void, and that this information
     # is stripped from the signature before being sent as the definition.
     submethod BUILD(:$!definition is required) {
         ($!name, $!args) = name-and-args-from-signature($!definition);
-        $!key = key-from-name-and-args($!name, $!args);
+        $!key = self.key-from-name-and-args($!name, $!args);
     }
 
     sub name-and-args-from-signature($signature) {
@@ -27,24 +29,58 @@ class Fixture-Method does JSON::Class {
         return (~$<name>, ~$<sig>);
     }
 
-    sub key-from-name-and-args($name, $args) {
+    method key-from-name-and-args($name, $args) {
 
         my $name-key = $name.lc.subst('workflow', '').subst('_', '', :g);
 
         #  Future:  Generic, nullable, optional, default values...
-        if not $args ~~ / '(' \s* $<arg> = ( [ \s* $<t1> = \S \S* \s+ $<argname> = [\S+] ]* % ',') \s* ')' / {
+        if not $args ~~ / '(' \s* $<args> = ( [ \s* $<type> = [\S+] \s+ $<name> = [\S+] ]* % ',' ) \s* ')' / {
             die "    ? I didn't understand the argument list for:  $name$args";
         }
 
-        #  The sig key encodes the method arg types.  For example,
-        # "(sdi)" for (String, DateTime, int).  To differentiate
-        # between overloads while being good for approximate matching.
-        my $sig-brief = '';
-        for $<arg> -> $arg {
-            $sig-brief ~= ~$arg<t1>.lc;
+        for $<args><type> -> $type {
+            @!arg-types.push(~$type);
         }
-        my $sig-key = "($sig-brief)";
 
-        return $name-key ~ $sig-key;
+        return $name-key ~ '()';
     }
+
+
+    method args-from-match($match) {
+        my @args = $match<Symbol>
+            .grep({.<Term>})
+            .map({get-Term-string(.<Term>)});
+
+
+        return self.typed-args(@args);
+        #return join ', ', @args;
+    }
+
+    method typed-args(@args) {
+        my @result;
+
+        for @!arg-types Z @args -> [$type, $arg] {
+            if $type.lc eq 'string' {
+                @result.push( $arg );
+            }
+            else {
+                @result.push( $arg ~ '.To<' ~ $type ~ '>()' );
+            }
+        }
+
+        return @result.join(', ');
+    }
+
+
+    #TODO:  Evaluate Number and Date types as those types when fitting
+    sub get-Term-string($term) {
+        given $term {
+            when .<String>   {return .made};
+            when .<Number>   {return '"' ~ .made ~ '"'};
+            when .<Date>     {return '"' ~ .made ~ '"'};
+            when .<Variable> {return 'var["' ~ .<Variable><Word> ~ '"]'};
+            default          {fail "Unknown Term type"};
+        }
+    }
+
 }

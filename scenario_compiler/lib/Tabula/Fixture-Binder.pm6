@@ -100,7 +100,6 @@ class Fixture-Binder does JSON::Class {
             }
 
             if $line ~~ / <class-decl> / {
-                #self.add-class($class);
                 $class = Nil;
 
                 my $class-name = ~$<class-decl>[0];
@@ -111,7 +110,6 @@ class Fixture-Binder does JSON::Class {
             }
         }
 
-        #self.add-class($class);
         $class = Nil;
     }
 
@@ -124,7 +122,7 @@ class Fixture-Binder does JSON::Class {
         'DocumentStorageProviderFactory', 'Exception',
         'AcadisConfigurationManager', 'CollectionEquivalentConstraint',
         'IFiltersView', 'IStudentListViewRowItem', 'FieldAttribute',
-        'Attribute', 'Is', 'HttpPostedFileBase', # 'MvcBaseWorkflow',
+        'Attribute', 'Is', 'HttpPostedFileBase',
         'IAcadisUserDetailsEditorView'
         );
 

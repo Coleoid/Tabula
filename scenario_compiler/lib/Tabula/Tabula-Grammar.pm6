@@ -7,7 +7,7 @@ grammar Tabula-Grammar {
     token Scenario { <Indentation> [:i scenario] <.ws> ':' <.ws> <String> \h* \n <Section>* }
     token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
 
-    token Break-Line { ^^ \h* <.Comment>? \n }
+    token Break-Line { ^^ \h* \n }
     token Document { start_doc [ \h+ <String> ]? \h* \n .*? \n end_doc }  #  crappy first draft placeholder
 
     token Table { <Table-Label>? <Table-Header> <Table-Row>* }

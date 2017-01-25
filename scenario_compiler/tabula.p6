@@ -11,8 +11,8 @@ my $scribe = $actions.Scribe;
 
 my Bool $debug = False;
 
-#my $root-default = 'k:\\code\\acadis_trunk\\';
-my $root-default = 'd:\\code\\acadis\\';
+my $root-default = 'k:\\code\\acadis_trunk\\';
+#my $root-default = 'd:\\code\\acadis\\';
 
 sub MAIN(Str :$scenario-name is required) {
 

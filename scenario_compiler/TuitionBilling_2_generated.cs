@@ -18,6 +18,7 @@ namespace Tabula
         public ScenarioContext.ViewImplementations.Administration.BillingPreferencesWorkflow BillingPreferences;
         public ScenarioContext.ViewImplementations.Registration.RegisterStudentWorkflow RegisterStudent;
         public ScenarioContext.ViewImplementations.Administration.BillingItemsExportWorkflow BillingItemsExport;
+        public ScenarioContext.Implementations.Registration.RegistrationManagement RegistrationManagement;
         public ScenarioContext.Implementations.Administration.TaskRunnerWorkflow TaskRunner;
         public ScenarioContext.ViewImplementations.Registration.TransferStudentWorkflow TransferStudent;
         public ScenarioContext.ViewImplementations.Curriculum.AddEnrollmentWorkflow AddEnrollment;
@@ -40,6 +41,7 @@ namespace Tabula
             BillingPreferences = new ScenarioContext.ViewImplementations.Administration.BillingPreferencesWorkflow();
             RegisterStudent = new ScenarioContext.ViewImplementations.Registration.RegisterStudentWorkflow();
             BillingItemsExport = new ScenarioContext.ViewImplementations.Administration.BillingItemsExportWorkflow();
+            RegistrationManagement = new ScenarioContext.Implementations.Registration.RegistrationManagement();
             TaskRunner = new ScenarioContext.Implementations.Administration.TaskRunnerWorkflow();
             TransferStudent = new ScenarioContext.ViewImplementations.Registration.TransferStudentWorkflow();
             AddEnrollment = new ScenarioContext.ViewImplementations.Curriculum.AddEnrollmentWorkflow();
@@ -253,7 +255,7 @@ namespace Tabula
         public void paragraph_from_099_to_101()
         {
             Label(  "Enroll person A" );
-            Unfound(     "Enroll \"Agmeier, Armin\" in  \"Highway Pursuit 100\" from registration",     "TuitionBilling_2.tab:101" );
+            Do(() =>     RegistrationManagement.Enroll__in__from_registration("Agmeier, Armin", "Highway Pursuit 100"),     "TuitionBilling_2.tab:101", @"RegistrationManagement.Enroll__in__from_registration(""Agmeier, Armin"", ""Highway Pursuit 100"")" );
         }
 
         public void paragraph_from_103_to_106()
@@ -339,7 +341,7 @@ namespace Tabula
         public void paragraph_from_166_to_168()
         {
             Label(  "Bradley, Blake" );
-            Unfound(     "Enroll \"Bradley, Blake\" in \"Highway Pursuit 101\" from registration",     "TuitionBilling_2.tab:168" );
+            Do(() =>     RegistrationManagement.Enroll__in__from_registration("Bradley, Blake", "Highway Pursuit 101"),     "TuitionBilling_2.tab:168", @"RegistrationManagement.Enroll__in__from_registration(""Bradley, Blake"", ""Highway Pursuit 101"")" );
         }
 
         public void paragraph_from_170_to_173()
@@ -395,7 +397,7 @@ namespace Tabula
         public void paragraph_from_211_to_213()
         {
             Label(  "Enroll person C" );
-            Unfound(     "Enroll \"Chase, Charles\" in \"Highway Pursuit 100\" from registration",     "TuitionBilling_2.tab:213" );
+            Do(() =>     RegistrationManagement.Enroll__in__from_registration("Chase, Charles", "Highway Pursuit 100"),     "TuitionBilling_2.tab:213", @"RegistrationManagement.Enroll__in__from_registration(""Chase, Charles"", ""Highway Pursuit 100"")" );
         }
 
         public void paragraph_from_215_to_218()
@@ -514,7 +516,7 @@ namespace Tabula
         public void paragraph_from_296_to_298()
         {
             Label(  "Cancel a registration" );
-            Unfound(     "Cancel registration for \"Bradley, Blake\" in \"Highway Pursuit 101\"",     "TuitionBilling_2.tab:298" );
+            Do(() =>     RegistrationManagement.Cancel_registration_for__in__("Bradley, Blake", "Highway Pursuit 101"),     "TuitionBilling_2.tab:298", @"RegistrationManagement.Cancel_registration_for__in__(""Bradley, Blake"", ""Highway Pursuit 101"")" );
         }
 
         public void paragraph_from_300_to_303()
@@ -630,14 +632,14 @@ namespace Tabula
         public void paragraph_from_383_to_385()
         {
             Label(  "Delete Registration for Eady, Forrest" );
-            Unfound(     "Delete registration for \"Eady, Forrest\" in \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:385" );
+            Do(() =>     RegistrationManagement.Delete_registration_for__in__("Eady, Forrest", "Highway Pursuit 100"),     "TuitionBilling_2.tab:385", @"RegistrationManagement.Delete_registration_for__in__(""Eady, Forrest"", ""Highway Pursuit 100"")" );
         }
 
         public void paragraph_from_387_to_390()
         {
             Label(  "Move Brown, Wendell from enrolled to registered" );
-            Unfound(     "Move \"Brown, Wendell\" in \"Highway Pursuit 101\" from enrolled to registered",     "TuitionBilling_2.tab:389" );
-            Unfound(     "? Verify \"Brown, Wendell\" is registered for class \"Highway Pursuit 101\"",     "TuitionBilling_2.tab:390" );
+            Do(() =>     RegistrationManagement.Move__in__from_enrolled_to_registered("Brown, Wendell", "Highway Pursuit 101"),     "TuitionBilling_2.tab:389", @"RegistrationManagement.Move__in__from_enrolled_to_registered(""Brown, Wendell"", ""Highway Pursuit 101"")" );
+            Do(() =>     RegistrationManagement.Verify__is_registered_for_class("Brown, Wendell", "Highway Pursuit 101"),     "TuitionBilling_2.tab:390", @"RegistrationManagement.Verify__is_registered_for_class(""Brown, Wendell"", ""Highway Pursuit 101"")" );
         }
 
         public void paragraph_from_392_to_394()
@@ -649,10 +651,10 @@ namespace Tabula
         public void paragraph_from_396_to_401()
         {
             Label(  "Move Murphy, Sam and Johnson, Danny to waitlist" );
-            Unfound(     "Move \"Murphy, Sam\" in \"Highway Pursuit 100\" to waitlist",     "TuitionBilling_2.tab:398" );
-            Unfound(     "? Verify \"Murphy, Sam\" is waitlisted for class \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:399" );
-            Unfound(     "Move \"Johnson, Danny\" in \"Highway Pursuit 100\" to waitlist",     "TuitionBilling_2.tab:400" );
-            Unfound(     "? Verify \"Johnson, Danny\" is waitlisted for class \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:401" );
+            Do(() =>     RegistrationManagement.Move__in__to_waitlist("Murphy, Sam", "Highway Pursuit 100"),     "TuitionBilling_2.tab:398", @"RegistrationManagement.Move__in__to_waitlist(""Murphy, Sam"", ""Highway Pursuit 100"")" );
+            Do(() =>     RegistrationManagement.Verify__is_waitlisted_for_class("Murphy, Sam", "Highway Pursuit 100"),     "TuitionBilling_2.tab:399", @"RegistrationManagement.Verify__is_waitlisted_for_class(""Murphy, Sam"", ""Highway Pursuit 100"")" );
+            Do(() =>     RegistrationManagement.Move__in__to_waitlist("Johnson, Danny", "Highway Pursuit 100"),     "TuitionBilling_2.tab:400", @"RegistrationManagement.Move__in__to_waitlist(""Johnson, Danny"", ""Highway Pursuit 100"")" );
+            Do(() =>     RegistrationManagement.Verify__is_waitlisted_for_class("Johnson, Danny", "Highway Pursuit 100"),     "TuitionBilling_2.tab:401", @"RegistrationManagement.Verify__is_waitlisted_for_class(""Johnson, Danny"", ""Highway Pursuit 100"")" );
         }
 
         public void paragraph_from_403_to_413()
@@ -680,7 +682,7 @@ namespace Tabula
         public void paragraph_from_421_to_423()
         {
             Label(  "Cancel a registration" );
-            Unfound(     "Cancel registration for \"Fairchild, Florence\" in \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:423" );
+            Do(() =>     RegistrationManagement.Cancel_registration_for__in__("Fairchild, Florence", "Highway Pursuit 100"),     "TuitionBilling_2.tab:423", @"RegistrationManagement.Cancel_registration_for__in__(""Fairchild, Florence"", ""Highway Pursuit 100"")" );
         }
 
         public void paragraph_from_426_to_429()

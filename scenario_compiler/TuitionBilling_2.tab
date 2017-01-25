@@ -445,18 +445,18 @@ Export all billing items
     ? Verify "Quantity" is "1"
     ? Verify "Unit Price" is #Amount
 
-[ Num | Name               | ID | Billed At    | Class Item                    | Amount | Cancelled ]
-|   1 | "Bradley, Blake"   | B1 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
-|   2 | "Bradley, Blake"   | B1 | Registration | Driving - Highway Pursuit 101 | 131.45 | Y         |
-|   3 | "Nicholas, Jamila" | N1 | Enrollment   | Driving - Highway Pursuit 103 | 172.55 | N         |
-|   4 | "Chase, Charles"   | C1 | Enrollment   | Driving - Highway Pursuit 100 |  99.99 | N         |
-|   5 | "Doo, Dewbie"      | D1 | Enrollment   | Driving - Highway Pursuit 100 |  99.99 | N         |
-|   6 | "Eady, Forrest"    | E2 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
-|   7 | "Johnson, Danny"   | J1 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
-|   8 | "Worthen, Jorge"   | W1 | Registration | Driving - Highway Pursuit 100 | 104.99 | Y         |
-|   9 | "Murphy, Sam"      | M1 | Enrollment   | Driving - Highway Pursuit 100 | 104.99 | Y         |
-|  10 | "Brown, Wendell"   | B2 | Enrollment   | Driving - Highway Pursuit 100 | 104.99 | Y         |
-|  11 |"Fairchild, Florence"|F1 | Registration | Driving - Highway Pursuit 100 | 200    | Y         |
+[ Num | Name                  | ID | Billed At    | Class Item                    | Amount | Cancelled ]
+|   1 | "Bradley, Blake"      | B1 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
+|   2 | "Bradley, Blake"      | B1 | Registration | Driving - Highway Pursuit 101 | 131.45 | Y         |
+|   3 | "Nicholas, Jamila"    | N1 | Enrollment   | Driving - Highway Pursuit 103 | 172.55 | N         |
+|   4 | "Chase, Charles"      | C1 | Enrollment   | Driving - Highway Pursuit 100 |  99.99 | N         |
+|   5 | "Doo, Dewbie"         | D1 | Enrollment   | Driving - Highway Pursuit 100 |  99.99 | N         |
+|   6 | "Eady, Forrest"       | E2 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
+|   7 | "Johnson, Danny"      | J1 | Registration | Driving - Highway Pursuit 100 | 101.42 | Y         |
+|   8 | "Worthen, Jorge"      | W1 | Registration | Driving - Highway Pursuit 100 | 104.99 | Y         |
+|   9 | "Murphy, Sam"         | M1 | Enrollment   | Driving - Highway Pursuit 100 | 104.99 | Y         |
+|  10 | "Brown, Wendell"      | B2 | Enrollment   | Driving - Highway Pursuit 100 | 104.99 | Y         |
+|  11 | "Fairchild, Florence" | F1 | Registration | Driving - Highway Pursuit 100 | 200    | Y         |
 
 
 "Verify that cancellations are transmitted to an external accounting system":
