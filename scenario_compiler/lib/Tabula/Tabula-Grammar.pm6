@@ -7,7 +7,7 @@ grammar Tabula-Grammar {
     token Scenario { <Indentation> [:i scenario] <.ws> ':' <.ws> <String> \h* \n <Section>* }
     token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
 
-    token Break-Line { ^^ \h* \n }
+    token Break-Line { ^^ \h* <.Comment>? \n }
     token Document { start_doc [ \h+ <String> ]? \h* \n .*? \n end_doc }  #  crappy first draft placeholder
 
     token Table { <Table-Label>? <Table-Header> <Table-Row>* }
@@ -22,10 +22,12 @@ grammar Tabula-Grammar {
     token T-Symbol  { <Word> || <T-Term> }
     token T-Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
-    token Paragraph { <Paragraph-Label>? <Statement>+ }
+    token Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
+    token Para-Open  { <?> }
+    token Para-Close { <?> }
     token Paragraph-Label { <Indentation> <String> \h* ':' \h* \n }
-    token Statement { <Indentation> <Action> \h* <Comment>? \n }
-    token Action    { <Block> || <Step> || <Command> }
+    token Statement  { <Indentation> <Action> \h* <Comment>? \n }
+    token Action     { <Block> || <Step> || <Command> }
 
     token Block { <String>? \h* <Block-Begin> \h* \n <Section>+ <Block-End> }
     token Block-Begin { '...' }

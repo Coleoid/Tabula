@@ -101,6 +101,14 @@ class Target-Testopia does Match-Helper {
         make $!Scribe.compose-paragraph( $name, $label, $statements );
     }
 
+    method Para-Open($) {
+        $!Context.open-scope('');
+    }
+
+    method Para-Close($) {
+        $!Context.close-scope();
+    }
+
     #text
     method Phrase($/) {
         make $<Symbol>.map({.made}).join(' ');
