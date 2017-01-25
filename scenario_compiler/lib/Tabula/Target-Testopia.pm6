@@ -92,11 +92,6 @@ class Target-Testopia does Match-Helper {
         make ""
     }
 
-    #C#
-    method Variable($/) {
-        make 'var["' ~ $<Word>.lc ~ '"]';
-    }
-
     #scribe
     method Paragraph($/) {
         my $name = self.name-section('paragraph', $/);
@@ -108,7 +103,7 @@ class Target-Testopia does Match-Helper {
 
     #text
     method Phrase($/) {
-        make '"' ~ $<Symbol>.join(' ') ~ '"';
+        make $<Symbol>.map({.made}).join(' ');
     }
 
     #text
@@ -158,7 +153,7 @@ class Target-Testopia does Match-Helper {
 
     #echo
     method Symbol($/) {
-        make ($<Word> || $<Term>.made) ~ ' '
+        make $<Word> || $<Term>.made
     }
 
     # mature
@@ -172,7 +167,8 @@ class Target-Testopia does Match-Helper {
 
     #nn?
     method Table-Cell($/) {
-        make ($<Phrases> ?? $<Phrases>.made !! $<Empty-Cell>)
+        if $<T-Phrase> { make '"' ~ $<T-Phrase>.made ~ '"' }
+        else { make $<Empty-Cell> }
     }
 
     #echo
@@ -195,9 +191,35 @@ class Target-Testopia does Match-Helper {
         make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
     }
 
-    #nn?
+
+    #text
+    method T-Phrase($/) {
+        make $<T-Symbol>.map({.made}).join(' ');
+    }
+
+    #echo
+    method T-Symbol($/) {
+        make $<Word> || $<T-Term>.made
+    }
+
+    method T-Term($/) {
+        if    $<Date>   { make $<Date> }
+        elsif $<Number> { make $<Number> }
+        elsif $<String> { make $<String><Body> }
+        else            { make $<Variable>.made }
+    }
+
+
     method Term($/) {
-        make $<Date> || $<Number> || $<String> || $<Variable>.made
+        if    $<Date>   { make '"' ~ $<Date>   ~ '"' }
+        elsif $<Number> { make '"' ~ $<Number> ~ '"' }
+        elsif $<String> { make $<String> }
+        else            { make $<Variable>.made }
+    }
+
+    #C#
+    method Variable($/) {
+        make 'var["' ~ $<Word>.lc ~ '"]';
     }
 
 }

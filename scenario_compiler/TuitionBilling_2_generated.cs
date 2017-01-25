@@ -18,7 +18,6 @@ namespace Tabula
         public ScenarioContext.ViewImplementations.Administration.BillingPreferencesWorkflow BillingPreferences;
         public ScenarioContext.ViewImplementations.Registration.RegisterStudentWorkflow RegisterStudent;
         public ScenarioContext.ViewImplementations.Administration.BillingItemsExportWorkflow BillingItemsExport;
-        public ScenarioContext.Implementations.Registration.RegistrationManagement RegistrationManagement;
         public ScenarioContext.Implementations.Administration.TaskRunnerWorkflow TaskRunner;
         public ScenarioContext.ViewImplementations.Registration.TransferStudentWorkflow TransferStudent;
         public ScenarioContext.ViewImplementations.Curriculum.AddEnrollmentWorkflow AddEnrollment;
@@ -41,7 +40,6 @@ namespace Tabula
             BillingPreferences = new ScenarioContext.ViewImplementations.Administration.BillingPreferencesWorkflow();
             RegisterStudent = new ScenarioContext.ViewImplementations.Registration.RegisterStudentWorkflow();
             BillingItemsExport = new ScenarioContext.ViewImplementations.Administration.BillingItemsExportWorkflow();
-            RegistrationManagement = new ScenarioContext.Implementations.Registration.RegistrationManagement();
             TaskRunner = new ScenarioContext.Implementations.Administration.TaskRunnerWorkflow();
             TransferStudent = new ScenarioContext.ViewImplementations.Registration.TransferStudentWorkflow();
             AddEnrollment = new ScenarioContext.ViewImplementations.Curriculum.AddEnrollmentWorkflow();
@@ -202,18 +200,18 @@ namespace Tabula
             return new Table {
                 Header = new List<string>         { "Name", "ID" },
                 Data = new List<List<string>> {
-                    new List<string>              { "Agmeier", "Armin", "A1" },
-                    new List<string>              { "Bradley", "Blake", "B1" },
-                    new List<string>              { "Brown", "Wendell", "B2" },
-                    new List<string>              { "Chase", "Charles", "C1" },
-                    new List<string>              { "Doo", "Dewbie", "D1" },
-                    new List<string>              { "Easley", "Erwin", "E1" },
-                    new List<string>              { "Eady", "Forrest", "E2" },
-                    new List<string>              { "Fairchild", "Florence", "F1" },
-                    new List<string>              { "Johnson", "Danny", "J1" },
-                    new List<string>              { "Murphy", "Sam", "M1" },
-                    new List<string>              { "Nicholas", "Jamila", "N1" },
-                    new List<string>              { "Worthen", "Jorge", "W1" },
+                    new List<string>              { "Agmeier, Armin", "A1" },
+                    new List<string>              { "Bradley, Blake", "B1" },
+                    new List<string>              { "Brown, Wendell", "B2" },
+                    new List<string>              { "Chase, Charles", "C1" },
+                    new List<string>              { "Doo, Dewbie", "D1" },
+                    new List<string>              { "Easley, Erwin", "E1" },
+                    new List<string>              { "Eady, Forrest", "E2" },
+                    new List<string>              { "Fairchild, Florence", "F1" },
+                    new List<string>              { "Johnson, Danny", "J1" },
+                    new List<string>              { "Murphy, Sam", "M1" },
+                    new List<string>              { "Nicholas, Jamila", "N1" },
+                    new List<string>              { "Worthen, Jorge", "W1" },
                 }
             };
         }
@@ -255,7 +253,7 @@ namespace Tabula
         public void paragraph_from_099_to_101()
         {
             Label(  "Enroll person A" );
-            Do(() =>     RegistrationManagement.Enroll__in__from_registration("Agmeier, Armin", "Highway Pursuit 100"),     "TuitionBilling_2.tab:101", @"RegistrationManagement.Enroll__in__from_registration(""Agmeier, Armin"", ""Highway Pursuit 100"")" );
+            Unfound(     "Enroll \"Agmeier, Armin\" in  \"Highway Pursuit 100\" from registration",     "TuitionBilling_2.tab:101" );
         }
 
         public void paragraph_from_103_to_106()
@@ -341,7 +339,7 @@ namespace Tabula
         public void paragraph_from_166_to_168()
         {
             Label(  "Bradley, Blake" );
-            Do(() =>     RegistrationManagement.Enroll__in__from_registration("Bradley, Blake", "Highway Pursuit 101"),     "TuitionBilling_2.tab:168", @"RegistrationManagement.Enroll__in__from_registration(""Bradley, Blake"", ""Highway Pursuit 101"")" );
+            Unfound(     "Enroll \"Bradley, Blake\" in \"Highway Pursuit 101\" from registration",     "TuitionBilling_2.tab:168" );
         }
 
         public void paragraph_from_170_to_173()
@@ -397,7 +395,7 @@ namespace Tabula
         public void paragraph_from_211_to_213()
         {
             Label(  "Enroll person C" );
-            Do(() =>     RegistrationManagement.Enroll__in__from_registration("Chase, Charles", "Highway Pursuit 100"),     "TuitionBilling_2.tab:213", @"RegistrationManagement.Enroll__in__from_registration(""Chase, Charles"", ""Highway Pursuit 100"")" );
+            Unfound(     "Enroll \"Chase, Charles\" in \"Highway Pursuit 100\" from registration",     "TuitionBilling_2.tab:213" );
         }
 
         public void paragraph_from_215_to_218()
@@ -445,11 +443,11 @@ namespace Tabula
             return new Table {
                 Header = new List<string>     { "Num", "Billed At", "Class Item", "Name", "Amount" },
                 Data = new List<List<string>> {
-                    new List<string>          { "1", "Registration", "Driving - Highway Pursuit 100", ""Bradley, Blake"", "101.42" },
-                    new List<string>          { "2", "Registration", "Driving - Highway Pursuit 101", ""Bradley, Blake"", "131.45" },
-                    new List<string>          { "3", "Enrollment", "Driving - Highway Pursuit 103", ""Nicholas, Jamila"", "172.55" },
-                    new List<string>          { "4", "Enrollment", "Driving - Highway Pursuit 100", ""Chase, Charles"", "99.99" },
-                    new List<string>          { "5", "Enrollment", "Driving - Highway Pursuit 100", ""BDoo, Dewbie"", "99.99" },
+                    new List<string>          { "1", "Registration", "Driving - Highway Pursuit 100", "Bradley, Blake", "101.42" },
+                    new List<string>          { "2", "Registration", "Driving - Highway Pursuit 101", "Bradley, Blake", "131.45" },
+                    new List<string>          { "3", "Enrollment", "Driving - Highway Pursuit 103", "Nicholas, Jamila", "172.55" },
+                    new List<string>          { "4", "Enrollment", "Driving - Highway Pursuit 100", "Chase, Charles", "99.99" },
+                    new List<string>          { "5", "Enrollment", "Driving - Highway Pursuit 100", "BDoo, Dewbie", "99.99" },
                 }
             };
         }
@@ -494,11 +492,11 @@ namespace Tabula
             return new Table {
                 Header = new List<string>     { "Num", "Event name", "BillName", "Amount" },
                 Data = new List<List<string>> {
-                    new List<string>          { "1", "Driving - Highway Pursuit 100", ""Bradley, Blake"", "101.42" },
-                    new List<string>          { "2", "Driving - Highway Pursuit 101", ""Bradley, Blake"", "131.45" },
-                    new List<string>          { "3", "Driving - Highway Pursuit 103", ""Nicholas, Jamila"", "172.55" },
-                    new List<string>          { "4", "Driving - Highway Pursuit 100", ""Chase, Charles"", "99.99" },
-                    new List<string>          { "5", "Driving - Highway Pursuit 100", ""Doo, Dewbie"", "99.99" },
+                    new List<string>          { "1", "Driving - Highway Pursuit 100", "Bradley, Blake", "101.42" },
+                    new List<string>          { "2", "Driving - Highway Pursuit 101", "Bradley, Blake", "131.45" },
+                    new List<string>          { "3", "Driving - Highway Pursuit 103", "Nicholas, Jamila", "172.55" },
+                    new List<string>          { "4", "Driving - Highway Pursuit 100", "Chase, Charles", "99.99" },
+                    new List<string>          { "5", "Driving - Highway Pursuit 100", "Doo, Dewbie", "99.99" },
                 }
             };
         }
@@ -516,7 +514,7 @@ namespace Tabula
         public void paragraph_from_296_to_298()
         {
             Label(  "Cancel a registration" );
-            Do(() =>     RegistrationManagement.Cancel_registration_for__in__("Bradley, Blake", "Highway Pursuit 101"),     "TuitionBilling_2.tab:298", @"RegistrationManagement.Cancel_registration_for__in__(""Bradley, Blake"", ""Highway Pursuit 101"")" );
+            Unfound(     "Cancel registration for \"Bradley, Blake\" in \"Highway Pursuit 101\"",     "TuitionBilling_2.tab:298" );
         }
 
         public void paragraph_from_300_to_303()
@@ -539,11 +537,11 @@ namespace Tabula
             return new Table {
                 Header = new List<string>     { "Num", "Event name", "BillName", "Cancelled" },
                 Data = new List<List<string>> {
-                    new List<string>          { "1", "Driving - Highway Pursuit 100", ""Bradley, Blake"", "Y" },
-                    new List<string>          { "2", "Driving - Highway Pursuit 101", ""Bradley, Blake"", "Y" },
-                    new List<string>          { "3", "Driving - Highway Pursuit 103", ""Nicholas, Jamila"", "N" },
-                    new List<string>          { "4", "Driving - Highway Pursuit 100", ""Chase, Charles"", "N" },
-                    new List<string>          { "5", "Driving - Highway Pursuit 100", ""Doo, Dewbie"", "N" },
+                    new List<string>          { "1", "Driving - Highway Pursuit 100", "Bradley, Blake", "Y" },
+                    new List<string>          { "2", "Driving - Highway Pursuit 101", "Bradley, Blake", "Y" },
+                    new List<string>          { "3", "Driving - Highway Pursuit 103", "Nicholas, Jamila", "N" },
+                    new List<string>          { "4", "Driving - Highway Pursuit 100", "Chase, Charles", "N" },
+                    new List<string>          { "5", "Driving - Highway Pursuit 100", "Doo, Dewbie", "N" },
                 }
             };
         }
@@ -632,14 +630,14 @@ namespace Tabula
         public void paragraph_from_383_to_385()
         {
             Label(  "Delete Registration for Eady, Forrest" );
-            Do(() =>     RegistrationManagement.Delete_registration_for__in__("Eady, Forrest", "Highway Pursuit 100"),     "TuitionBilling_2.tab:385", @"RegistrationManagement.Delete_registration_for__in__(""Eady, Forrest"", ""Highway Pursuit 100"")" );
+            Unfound(     "Delete registration for \"Eady, Forrest\" in \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:385" );
         }
 
         public void paragraph_from_387_to_390()
         {
             Label(  "Move Brown, Wendell from enrolled to registered" );
-            Do(() =>     RegistrationManagement.Move__in__from_enrolled_to_registered("Brown, Wendell", "Highway Pursuit 101"),     "TuitionBilling_2.tab:389", @"RegistrationManagement.Move__in__from_enrolled_to_registered(""Brown, Wendell"", ""Highway Pursuit 101"")" );
-            Do(() =>     RegistrationManagement.Verify__is_registered_for_class("Brown, Wendell", "Highway Pursuit 101"),     "TuitionBilling_2.tab:390", @"RegistrationManagement.Verify__is_registered_for_class(""Brown, Wendell"", ""Highway Pursuit 101"")" );
+            Unfound(     "Move \"Brown, Wendell\" in \"Highway Pursuit 101\" from enrolled to registered",     "TuitionBilling_2.tab:389" );
+            Unfound(     "? Verify \"Brown, Wendell\" is registered for class \"Highway Pursuit 101\"",     "TuitionBilling_2.tab:390" );
         }
 
         public void paragraph_from_392_to_394()
@@ -651,10 +649,10 @@ namespace Tabula
         public void paragraph_from_396_to_401()
         {
             Label(  "Move Murphy, Sam and Johnson, Danny to waitlist" );
-            Do(() =>     RegistrationManagement.Move__in__to_waitlist("Murphy, Sam", "Highway Pursuit 100"),     "TuitionBilling_2.tab:398", @"RegistrationManagement.Move__in__to_waitlist(""Murphy, Sam"", ""Highway Pursuit 100"")" );
-            Do(() =>     RegistrationManagement.Verify__is_waitlisted_for_class("Murphy, Sam", "Highway Pursuit 100"),     "TuitionBilling_2.tab:399", @"RegistrationManagement.Verify__is_waitlisted_for_class(""Murphy, Sam"", ""Highway Pursuit 100"")" );
-            Do(() =>     RegistrationManagement.Move__in__to_waitlist("Johnson, Danny", "Highway Pursuit 100"),     "TuitionBilling_2.tab:400", @"RegistrationManagement.Move__in__to_waitlist(""Johnson, Danny"", ""Highway Pursuit 100"")" );
-            Do(() =>     RegistrationManagement.Verify__is_waitlisted_for_class("Johnson, Danny", "Highway Pursuit 100"),     "TuitionBilling_2.tab:401", @"RegistrationManagement.Verify__is_waitlisted_for_class(""Johnson, Danny"", ""Highway Pursuit 100"")" );
+            Unfound(     "Move \"Murphy, Sam\" in \"Highway Pursuit 100\" to waitlist",     "TuitionBilling_2.tab:398" );
+            Unfound(     "? Verify \"Murphy, Sam\" is waitlisted for class \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:399" );
+            Unfound(     "Move \"Johnson, Danny\" in \"Highway Pursuit 100\" to waitlist",     "TuitionBilling_2.tab:400" );
+            Unfound(     "? Verify \"Johnson, Danny\" is waitlisted for class \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:401" );
         }
 
         public void paragraph_from_403_to_413()
@@ -682,7 +680,7 @@ namespace Tabula
         public void paragraph_from_421_to_423()
         {
             Label(  "Cancel a registration" );
-            Do(() =>     RegistrationManagement.Cancel_registration_for__in__("Fairchild, Florence", "Highway Pursuit 100"),     "TuitionBilling_2.tab:423", @"RegistrationManagement.Cancel_registration_for__in__(""Fairchild, Florence"", ""Highway Pursuit 100"")" );
+            Unfound(     "Cancel registration for \"Fairchild, Florence\" in \"Highway Pursuit 100\"",     "TuitionBilling_2.tab:423" );
         }
 
         public void paragraph_from_426_to_429()
@@ -717,17 +715,17 @@ namespace Tabula
             return new Table {
                 Header = new List<string>     { "Num", "Name", "ID", "Billed At", "Class Item", "Amount", "Cancelled" },
                 Data = new List<List<string>> {
-                    new List<string>          { "1", ""Bradley, Blake"", "B1", "Registration", "Driving - Highway Pursuit 100", "101.42", "Y" },
-                    new List<string>          { "2", ""Bradley, Blake"", "B1", "Registration", "Driving - Highway Pursuit 101", "131.45", "Y" },
-                    new List<string>          { "3", ""Nicholas, Jamila"", "N1", "Enrollment", "Driving - Highway Pursuit 103", "172.55", "N" },
-                    new List<string>          { "4", ""Chase, Charles"", "C1", "Enrollment", "Driving - Highway Pursuit 100", "99.99", "N" },
-                    new List<string>          { "5", ""Doo, Dewbie"", "D1", "Enrollment", "Driving - Highway Pursuit 100", "99.99", "N" },
-                    new List<string>          { "6", ""Eady, Forrest"", "E2", "Registration", "Driving - Highway Pursuit 100", "101.42", "Y" },
-                    new List<string>          { "7", ""Johnson, Danny"", "J1", "Registration", "Driving - Highway Pursuit 100", "101.42", "Y" },
-                    new List<string>          { "8", ""Worthen, Jorge"", "W1", "Registration", "Driving - Highway Pursuit 100", "104.99", "Y" },
-                    new List<string>          { "9", ""Murphy, Sam"", "M1", "Enrollment", "Driving - Highway Pursuit 100", "104.99", "Y" },
-                    new List<string>          { "10", ""Brown, Wendell"", "B2", "Enrollment", "Driving - Highway Pursuit 100", "104.99", "Y" },
-                    new List<string>          { "11", ""Fairchild, Florence"", "F1", "Registration", "Driving - Highway Pursuit 100", "200", "Y" },
+                    new List<string>          { "1", "Bradley, Blake", "B1", "Registration", "Driving - Highway Pursuit 100", "101.42", "Y" },
+                    new List<string>          { "2", "Bradley, Blake", "B1", "Registration", "Driving - Highway Pursuit 101", "131.45", "Y" },
+                    new List<string>          { "3", "Nicholas, Jamila", "N1", "Enrollment", "Driving - Highway Pursuit 103", "172.55", "N" },
+                    new List<string>          { "4", "Chase, Charles", "C1", "Enrollment", "Driving - Highway Pursuit 100", "99.99", "N" },
+                    new List<string>          { "5", "Doo, Dewbie", "D1", "Enrollment", "Driving - Highway Pursuit 100", "99.99", "N" },
+                    new List<string>          { "6", "Eady, Forrest", "E2", "Registration", "Driving - Highway Pursuit 100", "101.42", "Y" },
+                    new List<string>          { "7", "Johnson, Danny", "J1", "Registration", "Driving - Highway Pursuit 100", "101.42", "Y" },
+                    new List<string>          { "8", "Worthen, Jorge", "W1", "Registration", "Driving - Highway Pursuit 100", "104.99", "Y" },
+                    new List<string>          { "9", "Murphy, Sam", "M1", "Enrollment", "Driving - Highway Pursuit 100", "104.99", "Y" },
+                    new List<string>          { "10", "Brown, Wendell", "B2", "Enrollment", "Driving - Highway Pursuit 100", "104.99", "Y" },
+                    new List<string>          { "11", "Fairchild, Florence", "F1", "Registration", "Driving - Highway Pursuit 100", "200", "Y" },
                 }
             };
         }

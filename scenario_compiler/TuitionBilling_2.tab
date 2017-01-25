@@ -52,19 +52,19 @@ Verify text for "Fees" is #fees
 "Create people":
 >use: Person FNH Management
 Create person #name with academy id #id
-    [ Name                | ID ]
-    | Agmeier, Armin      | A1 |
-    | Bradley, Blake      | B1 |
-    | Brown, Wendell      | B2 |
-    | Chase, Charles      | C1 |
-    | Doo, Dewbie         | D1 |
-    | Easley, Erwin       | E1 |
-    | Eady, Forrest       | E2 |
-    | Fairchild, Florence | F1 |
-    | Johnson, Danny      | J1 |
-    | Murphy, Sam         | M1 |
-    | Nicholas, Jamila    | N1 |
-    | Worthen, Jorge      | W1 |
+    [ Name                  | ID ]
+    | "Agmeier, Armin"      | A1 |
+    | "Bradley, Blake"      | B1 |
+    | "Brown, Wendell"      | B2 |
+    | "Chase, Charles"      | C1 |
+    | "Doo, Dewbie"         | D1 |
+    | "Easley, Erwin"       | E1 |
+    | "Eady, Forrest"       | E2 |
+    | "Fairchild, Florence" | F1 |
+    | "Johnson, Danny"      | J1 |
+    | "Murphy, Sam"         | M1 |
+    | "Nicholas, Jamila"    | N1 |
+    | "Worthen, Jorge"      | W1 |
 
 
 "Enable billing":
