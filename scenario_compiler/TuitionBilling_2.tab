@@ -463,163 +463,33 @@ Export all billing items
 >use: Accounting Api Workflow
 Get cancellations
 ? Verify there are "10" cancellations
-Begin verifying cancellation item "1"
+
+>use: Accounting Api Workflow
+Begin verifying cancellation item #Num
     ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Transfer to Different Class"
-    ? Verify cancellation amount is "101.42"
+    ? Verify cancellation reason is #Reason
+    ? Verify cancellation amount is Amount
     ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Bradley, Blake"
-    ? Verify cancellation Bill To is "Bradley, Blake"
+    ? Verify cancellation bill for is #Person
+    ? Verify cancellation Bill To is #Person
     ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Bradley, Blake (B1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
+    ? Verify cancellation event is #Event
+    ? Verify cancellation item is #Event
     ? Verify cancellation period start is blank
     ? Verify cancellation period end is blank
     ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "101.42"
+    ? Verify cancellation unit price is #Amount
     ? Verify cancellation usage is blank
-Begin verifying cancellation item "2"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Deleted Enrollment"
-    ? Verify cancellation amount is "99.99"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Doo, Dewbie"
-    ? Verify cancellation Bill To is "Doo, Dewbie"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Doo, Dewbie (D1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "99.99"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "3"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Cancelled Registration"
-    ? Verify cancellation amount is "131.45"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Bradley, Blake"
-    ? Verify cancellation Bill To is "Bradley, Blake"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Bradley, Blake (B1): Driving - Highway Pursuit 101 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 101"
-    ? Verify cancellation item is "Driving - Highway Pursuit 101"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "131.45"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "4"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Cancelled Class"
-    ? Verify cancellation amount is "99.99"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Chase, Charles"
-    ? Verify cancellation Bill To is "Chase, Charles"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Chase, Charles (C1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "99.99"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "5"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Deleted Registration"
-    ? Verify cancellation amount is "101.42"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Eady, Forrest"
-    ? Verify cancellation Bill To is "Eady, Forrest"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Eady, Forrest (E2): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "101.42"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "6"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Move to Pending"
-    ? Verify cancellation amount is "104.99"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Brown, Wendell"
-    ? Verify cancellation Bill To is "Brown, Wendell"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Brown, Wendell (B2): Driving - Highway Pursuit 101 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 101"
-    ? Verify cancellation item is "Driving - Highway Pursuit 101"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "104.99"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "7"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Deleted Person"
-    ? Verify cancellation amount is "104.99"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Worthen, Jorge"
-    ? Verify cancellation Bill To is "Worthen, Jorge"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Worthen, Jorge (W1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "104.99"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "8"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Move to Waitlist"
-    ? Verify cancellation amount is "104.99"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Murphy, Sam"
-    ? Verify cancellation Bill To is "Murphy, Sam"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Murphy, Sam (M1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "104.99"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "9"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Move to Waitlist"
-    ? Verify cancellation amount is "101.42"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Johnson, Danny"
-    ? Verify cancellation Bill To is "Johnson, Danny"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Johnson, Danny (J1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "101.42"
-    ? Verify cancellation usage is blank
-Begin verifying cancellation item "10"
-    ? Verify cancellation date is "1/1/2023"
-    ? Verify cancellation reason is "Cancelled Registration"
-    ? Verify cancellation amount is "200.00"
-    ? Verify cancellation bill date is "1/1/2023"
-    ? Verify cancellation bill for is "Fairchild, Florence"
-    ? Verify cancellation Bill To is "Fairchild, Florence"
-    ? Verify cancellation category is "Class"
-    ? Verify cancellation description is "TUITION CHARGE for Fairchild, Florence (F1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023)"
-    ? Verify cancellation event is "Driving - Highway Pursuit 100"
-    ? Verify cancellation item is "Driving - Highway Pursuit 100"
-    ? Verify cancellation period start is blank
-    ? Verify cancellation period end is blank
-    ? Verify cancellation quantity is "1"
-    ? Verify cancellation unit price is "200.00"
-    ? Verify cancellation usage is blank
+    ? Verify cancellation description is #Description
+
+[ Num | Reason                      | Amount | Person              | Event                         | Description ]
+|  1  | Transfer to Different Class | 101.42 | Bradley, Blake      | Driving - Highway Pursuit 100 | TUITION CHARGE for Bradley, Blake (B1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |
+|  2  | Deleted Enrollment          |  99.99 | Doo, Dewbie         | Driving - Highway Pursuit 100 | TUITION CHARGE for Doo, Dewbie (D1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |
+|  3  | Cancelled Registration      | 131.45 | Bradley, Blake      | Driving - Highway Pursuit 101 | TUITION CHARGE for Bradley, Blake (B1): Driving - Highway Pursuit 101 (occurring 01/01/2023 - 01/01/2023) |
+|  4  | Cancelled Class             |  99.99 | Chase, Charles      | Driving - Highway Pursuit 100 | TUITION CHARGE for Chase, Charles (C1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |
+|  5  | Deleted Registration        | 101.42 | Eady, Forrest       | Driving - Highway Pursuit 100 | TUITION CHARGE for Eady, Forrest (E2): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |
+|  6  | Move to Pending             | 104.99 | Brown, Wendell      | Driving - Highway Pursuit 101 | TUITION CHARGE for Brown, Wendell (B2): Driving - Highway Pursuit 101 (occurring 01/01/2023 - 01/01/2023) |
+|  7  | Deleted Person              | 104.99 | Worthen, Jorge      | Driving - Highway Pursuit 100 | TUITION CHARGE for Worthen, Jorge (W1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |
+|  8  | Move to Waitlist            | 104.99 | Murphy, Sam         | Driving - Highway Pursuit 100 | TUITION CHARGE for Murphy, Sam (M1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |
+|  9  | Move to Waitlist            | 101.42 | Johnson, Danny      | Driving - Highway Pursuit 100 | TUITION CHARGE for Johnson, Danny (J1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |
+| 10  | Cancelled Registration      | 200.00 | Fairchild, Florence | Driving - Highway Pursuit 100 | TUITION CHARGE for Fairchild, Florence (F1): Driving - Highway Pursuit 100 (occurring 01/01/2023 - 01/01/2023) |

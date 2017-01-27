@@ -137,7 +137,7 @@ say "\n";
 
 }
 
-#if False
+if False
 {   diag "Troublesome Table tests";
     my &parser = curry-parser-emitting-Tabula( 'Table' );
 

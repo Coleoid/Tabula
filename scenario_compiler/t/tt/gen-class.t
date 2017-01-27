@@ -19,6 +19,10 @@ $context.file-name = "ScenarioFilename.scn";
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Acadis.SystemUtilities;
+    using Acadis.Constants.Accounting;
+    using Acadis.Constants.Admin;
+    using Acadis.Domain.Model;
 
     namespace Tabula
     {
@@ -69,6 +73,10 @@ $context.file-name = "ScenarioFilename.scn";
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Acadis.SystemUtilities;
+    using Acadis.Constants.Accounting;
+    using Acadis.Constants.Admin;
+    using Acadis.Domain.Model;
 
     namespace Tabula
     {

@@ -54,24 +54,4 @@ class Scope {
         return $flatName ~ '()';
     }
 
-    # sub args-from-match($match) {
-    #     my @args = $match<Symbol>
-    #         .grep({.<Term>})
-    #         .map({get-Term-string(.<Term>)});
-    #
-    #     return join ', ', @args;
-    # }
-    #
-    #
-    #
-    # #TODO:  Evaluate Number and Date types as those types when fitting
-    # sub get-Term-string($term) {
-    #     given $term {
-    #         when .<String>   {return .made};
-    #         when .<Number>   {return '"' ~ .made ~ '"'};
-    #         when .<Date>     {return '"' ~ .made ~ '"'};
-    #         when .<Variable> {return 'var["' ~ .<Variable><Word> ~ '"]'};
-    #         default          {fail "Unknown Term type"};
-    #     }
-    # }
 }

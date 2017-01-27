@@ -76,8 +76,8 @@ class Fixture-Method does JSON::Class {
     sub get-Term-string($term) {
         given $term {
             when .<String>   {return .made};
-            when .<Number>   {return '"' ~ .made ~ '"'};
-            when .<Date>     {return '"' ~ .made ~ '"'};
+            when .<Number>   {return .made};
+            when .<Date>     {return .made};
             when .<Variable> {return 'var["' ~ .<Variable><Word> ~ '"]'};
             default          {fail "Unknown Term type"};
         }
