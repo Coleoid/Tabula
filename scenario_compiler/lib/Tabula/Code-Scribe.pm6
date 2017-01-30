@@ -31,10 +31,9 @@ class Code-Scribe {
         using System;
         using System.Collections.Generic;
         using System.Linq;
-        using Acadis.SystemUtilities;
         using Acadis.Constants.Accounting;
         using Acadis.Constants.Admin;
-        using Acadis.Domain.Model;
+        using Acadis.SystemUtilities;
 
         namespace Tabula
         {
@@ -50,7 +49,7 @@ class Code-Scribe {
     }
 
     method class-declaration() {
-'    public class ' ~ self.class-name ~ '
+'    public class ' ~ self.class-name ~ '  //  ' ~ $!scenario-title ~ '
         : GeneratedScenarioBase, IGeneratedScenario
     {';
 }
@@ -101,32 +100,35 @@ class Code-Scribe {
     #  A paragraph may run directly, or per-row of tables below it,
     # so we stage each paragraph until we know what comes after it.
     has Str $.staged-paragraph;
+    has Str $!staged-comment;
     has Bool $.paragraph-pending;
 
-    method add-next-section($name) {
-        if $name ~~ /^paragraph/ { self.stage-paragraph($name); }
+    method add-next-section($name, $comment = '') {
+        if $name ~~ /^paragraph/ { self.stage-paragraph($name, $comment); }
         elsif $name ~~ /^table/  { self.add-table-call($name); }
         elsif $name eq ''        { self.flush-pending-paragraph; }
         else { die "I do not know how to add a section named [$name]." }
     }
 
-    method stage-paragraph($name) {
+    method stage-paragraph($name, $comment) {
         self.flush-pending-paragraph();
         $!staged-paragraph = $name;
+        $!staged-comment = $comment;
         $!paragraph-pending = True;
     }
 
     method flush-pending-paragraph() {
-        self.add-paragraph-call($!staged-paragraph) if $!paragraph-pending;
+        self.add-paragraph-call($!staged-paragraph, $!staged-comment) if $!paragraph-pending;
         $!paragraph-pending = False;
     }
 
-    method add-paragraph-call($paragraph-name) {
-        push @body-actions, '            ' ~ $paragraph-name ~ "();";
+    method add-paragraph-call($paragraph-name, $comment) {
+        push @body-actions, '            ' ~ $paragraph-name ~ '();' ~ $comment;
     }
 
-    method add-table-call($table-name) {
-        push @body-actions, '            Run_para_over_table( ' ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );";
+    method add-table-call($table-name, ) {
+        push @body-actions, '            Run_para_over_table( '
+            ~ $!staged-paragraph ~ ', ' ~ $table-name ~ " );" ~ $!staged-comment;
         $!paragraph-pending = False;
     }
 
@@ -152,7 +154,13 @@ class Code-Scribe {
 
 
     method compose-paragraph($name, $label, $statements) {
-        my $label-line = $label eq '' ?? '' !! '            Label(  "' ~ $label ~ '" );';
+        my $label-line = '';
+        my $label-comment = '';
+        if $label ne '' {
+            $label-line = '            Label(  "' ~ $label ~ '" );';
+            $label-comment = "   //  $label";
+        }
+
         my $para = njoin(
             '        public void ' ~ $name ~ "()\n        \{",
             $label-line,
@@ -161,7 +169,7 @@ class Code-Scribe {
         ) ~ "\n";
 
         self.declare-section($para);
-        self.add-next-section($name);
+        self.add-next-section($name, $label-comment);
         return $para;
     }
 
@@ -223,10 +231,10 @@ class Code-Scribe {
         njoin(
             self.get-class-header(),
             njoin( 2,
+                self.compose-method-ExecuteScenario(),
+                @section-declarations,
                 self.compose-fixture-declarations(),
                 self.compose-constructor(),
-                self.compose-method-ExecuteScenario(),
-                @section-declarations
             ),
             self.get-class-footer()
         ) ~ "\n";

@@ -60,11 +60,15 @@ class Fixture-Method does JSON::Class {
         my @result;
 
         for @!arg-types Z @args -> [$type, $arg] {
-            if $type.lc eq 'string' {
-                @result.push( $arg );
-            }
-            else {
-                @result.push( $arg ~ '.To<' ~ $type ~ '>()' );
+            given $type.lc {
+                when 'string' { @result.push( $arg ); }
+                when 'int'    {
+                    my $result = ($arg ~~ /^var/)
+                        ?? $arg ~ '.To<' ~ $type ~ '>()'
+                        !! $arg.subst('"', '', :g);
+                    @result.push( $result );
+                }
+                default       { @result.push( $arg ~ '.To<' ~ $type ~ '>()' ); }
             }
         }
 

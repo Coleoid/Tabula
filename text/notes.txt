@@ -222,3 +222,19 @@ Unfound(     "? Verify label for \"Student Name\" is \"Doo, Dewbie\"",     "Tuit
 Unfound(     "Browse to page",     "TuitionBilling_2.tab:327" );
 Unfound(     "Browse to page",     "TuitionBilling_2.tab:352" );
 Unfound(     "Browse to page",     "TuitionBilling_2.tab:405" );
+
+    (was not searching multiple fixtures in single scope, just first)
+
+---
+
+cd K:\code\Testopia\Testopia.Runner\bin\Debug
+bin\debug\Testopia.Runner.exe assembly:bin\Debug\ScenarioContext.dll launch:tabula scenario:TuitionBilling_generated directory:.
+
+
+---
+
+cd K:\code\Tabula\scenario_compiler
+perl6 -Ilib tabula.p6 --scenario-name=..\..\acadis_trunk\ScenarioTests\ScenarioContext\Scenarios\Accounting\TuitionBilling.tab
+
+
+---

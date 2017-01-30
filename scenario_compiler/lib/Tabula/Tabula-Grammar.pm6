@@ -47,7 +47,7 @@ grammar Tabula-Grammar {
     token Phrases { <Phrase>+ % [',' \h*] }
     token Phrase  { <Symbol>+ % \h+ }
     token Symbol  { <Word> || <Term> }
-    token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }   # using just \w+, numbers were words.
+    token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }
     token Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
     token Number   { <[+-]>? [[\d+ ['.' \d*]?] || ['.' \d+]] }

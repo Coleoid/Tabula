@@ -1,31 +1,23 @@
 =====================================================================
-===  Tabula walking skeleton, remaining work   ===  20 Jan 2017   ===
+===  Tabula walking skeleton, remaining work   ===  26 Jan 2017   ===
 
-Pragmatics and plumbing
-    [ ] Finish translating TuitionBilling into Tabula
-    .25
-.25
-
-Language
-    [ ] Paragraphs get their own scope
-    .25
-.25
-
-Fire that nasty boy up, put out fires, repeat
-    [ ] Comma within string should not cause list
-    [ ] Label(string labelText) in base class
-
+NOTHING!
 
 =====================================================================
 ===  Beyond the skeleton
 
+Better build-time value typing for float, double, decimal
+
+Overload resolution
+
 Testopia runner wired through Tabula
     [ ] split local/MVC into separate axis from Testopia/Tabula
-    [ ] Reporting via existing web-page mechanism
+    [ ] Reporting into existing web-page mechanism
     1.0 - 2.0
 
-Shortcomings
-    [ ] blocks are FUBAR
+Features overall
+    [ ] blocks
+    [ ] aliases
 
 Dev mode vs. Demo mode
     [ ] BDD styled >when: and >then:
@@ -40,6 +32,8 @@ Fixture-Binder
 
 =====================================================================
 ===  Done
+
+String interpolation of variables for the debug message
 
 Testopia runner
     [x] Pathway for running Tabula scenarios
@@ -62,6 +56,8 @@ Pragmatics and plumbing
     [x] Manually add needed code to project for demo
         * Base classes
         * Generated scenario class(es?)
+    .25
+    [x] Finish translating TuitionBilling into Tabula
     .25
 
 Fixture-Binder
@@ -86,6 +82,8 @@ Language
     [x] Start paragraph with string and colon
         String becomes label for Paragraph
     .5
+    [ ] Paragraphs get their own build-time scope
+    .5
 
 Fire that nasty boy up, put out fires, repeat
     [x] several call bugs
@@ -98,3 +96,6 @@ Fire that nasty boy up, put out fires, repeat
     [x] clear prior run's sections from regen
     [x] Fixture-Class fetching problems
     [x] Final handful of unfound (from multiple fixtures in scope)
+    [x] Comma within string should not cause list
+    [x] Label(string labelText) in base class
+    [x] Values correctly typed (DateTime, numerics, enums)
