@@ -1,33 +1,58 @@
 =====================================================================
-===  Tabula walking skeleton, remaining work   ===  26 Jan 2017   ===
+===  Tabula feature picks for February completion,  30 Jan 2017   ===
 
-NOTHING!
+Comment:  // this .tab mechanically generated from Testopia (.5 pt)
+
+Split local/MVC into separate axis from Testopia/Tabula (.5 pt)
+
+Report results to existing web-page mechanism (2 pt)
+
+Value aliases
+    Syntax change:  >set: "foo" means "bar" (.5 pt)
+
+Step aliases
+    Syntax!  Means!  It's so beautiful! (.5 pt)
+
+Update the Big Bad Wolf (1 pt)
+
+Overload resolution (2 pt)
+
+Blocks (5 pt)
+    Stack of code insertion locations (CILs)
+        (where the first is into ExecuteScenario())
+    When a new block opens, the current CIL gets the call
+     to the new block, then the new block is pushed onto the stack
+
+Results in JSON (3 pt)
+    To be styled via mustache?
+
+Labels matching "xxx: details" feed the Table of Contents (1 pt)
+
+Stack trace legibility (2 pt)
+
 
 =====================================================================
-===  Beyond the skeleton
+===  Future
+
+Compiler tools for Studio
 
 Better build-time value typing for float, double, decimal
 
-Overload resolution
+Dev mode vs. Demo mode, different reporting
 
-Testopia runner wired through Tabula
-    [ ] split local/MVC into separate axis from Testopia/Tabula
-    [ ] Reporting into existing web-page mechanism
-    1.0 - 2.0
-
-Features overall
-    [ ] blocks
-    [ ] aliases
-
-Dev mode vs. Demo mode
-    [ ] BDD styled >when: and >then:
-        Raises questions of scope
-        ...which run against the current usage of '>use:'
-        ...perhaps alternate large-scope 'use' is '>install:'
+BDD styled >when: and >then:
+    Raises questions of scope
+    ...which run against the current usage of '>use:'
+    ...perhaps outer-scope 'use' is '>install:'
 
 Fixture-Binder
-    [ ] Cache invalidated when fixtures .dll newer than fixtures.json
-    [ ] Deserialize from fixtures.json
+    Cache dumped when fixtures .dll newer than fixtures.json
+    Deserialize from fixtures.json (tie parents, other init?)
+
+Inner/child workflows
+
+Numeric column indicators (#1, #2, et c.)
+
 
 
 =====================================================================
