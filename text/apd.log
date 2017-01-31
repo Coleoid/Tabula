@@ -1,8 +1,10 @@
 ###  2017 01 31
 
+Update Rakudo to 2017.01
 start build file
 create apd.log to track actions per day
 Straighten plan and houseclean
-
+Update most of Wolf
+Change >alias: and >set: arrow to 'means'
 
 ###  2017 02 01

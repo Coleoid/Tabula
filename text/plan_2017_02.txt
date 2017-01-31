@@ -6,12 +6,6 @@ Update the Big Bad Wolf (1 pt)
 Testopia runner:
     Split local/MVC into separate axis from Testopia/Tabula (.5 pt)
 
-Value aliases
-    Syntax change:  >set: "foo" means "bar" (.5 pt)
-
-Step aliases
-    Syntax!  Means!  It's so beautiful! (.5 pt)
-
 Update to_tabula.pl conversion script (2 pt)
     Add  // this .tab mechanically generated from Testopia
     Resulting scripts compile on first pass
@@ -40,3 +34,9 @@ Blocks (5 pt)
 
 =====================================================================
 ===  Done
+
+Value aliases
+    Syntax change:  >set: "foo" means "bar" (.5 pt)
+
+Step aliases
+    Syntax!  Means!  It's so beautiful! (.5 pt)

@@ -62,7 +62,7 @@ say "\n";
     Enable Duty Locations
 
     "What we'll call our people in this scenario"
-    >set: #handle => #FullNameLF
+    >set: #handle means #FullNameLF
     [ handle | FullNameLF             ]
     | Lina   | "Frixell, Rorolina"    |
     | Gio    | "Arland, Giovanni"     |
@@ -70,7 +70,7 @@ say "\n";
     | Mimi   | "Schwarzlang, Mimi"    |
 
     "What we'll call the organizations they work for":
-    >set: #TLA => #OrganizationName
+    >set: #TLA means #OrganizationName
     [ TLA | OrganizationName             ]
     | HPD | Hometown Police Department   |
     | OPD | Otherville Police Department |
@@ -220,7 +220,7 @@ say "\n";
     [ Between   | And        | Location   | Organization | EmpType | Num | Found          ]
     | 1/01/2013 | 03/14/2013 |            |              | Reserve | 2   | #Lina, #Mimi   |
     | 1/01/2013 | 03/14/2013 | #HPD, #OPD | #HPD, #OPD   |         | 2   | #Lina, #Sterky |
-    .
+
     EOS
 
 }

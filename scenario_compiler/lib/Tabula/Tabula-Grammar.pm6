@@ -36,8 +36,8 @@ grammar Tabula-Grammar {
     token Step { $<OptQ> = '? '? <Phrase> }
 
     token Command { <Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use> }
-    token Command-Alias { '>' alias ':' \h* <Phrase> \h* '=>' \h* <Action> }  # build time
-    token Command-Set   { '>' set   ':' \h* [ <Word> || <Variable> ] \h* '=>' \h* <Term> }  # run time
+    token Command-Alias { '>' alias ':' \h* <Phrase> \h* means \h* <Action> }  # build time
+    token Command-Set   { '>' set   ':' \h* [ <Word> || <Variable> ] \h* means \h* <Term> }  # run time
     token Command-Tag   { '>' tags? ':' \h* <Phrases> \h* }
     token Command-Use   { '>' use   ':' \h* <Phrases> \h* }
 
