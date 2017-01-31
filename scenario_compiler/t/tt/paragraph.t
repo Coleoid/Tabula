@@ -1,5 +1,6 @@
 use Test;
 use Tabula::Grammar-Testing;
+use Tabula::Fixture-Class;
 
 my (&parser, $actions) = curry-parser-emitting-Testopia( "Paragraph" );
 my $context = $actions.Context;

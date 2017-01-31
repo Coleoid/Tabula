@@ -1,6 +1,7 @@
 use Test;
 use Tabula::Grammar-Testing;
 use Tabula::Fixture-Binder;
+use Tabula::Fixture-Class;
 
 my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
 my $context = $composer.Context;

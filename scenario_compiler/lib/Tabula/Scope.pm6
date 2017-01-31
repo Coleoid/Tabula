@@ -1,5 +1,6 @@
 use v6;
 use Tabula::Fixture-Class;
+use Tabula::Fixture-Method;
 
 #  Holding fixtures, labels, and aliases for a portion of the scenario.
 class Scope {
