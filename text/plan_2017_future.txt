@@ -1,0 +1,23 @@
+=====================================================================
+===  Future
+
+Compiler tools for Studio
+    Language highlighting?
+    Auto-complete for steps (in scope?)
+
+Better build-time value typing for float, double, decimal
+
+Dev mode vs. Demo mode, different reporting
+
+BDD styled >when: and >then:
+    Raises questions of scope
+    ...which run against the current usage of '>use:'
+    ...perhaps outer-scope 'use' is '>install:'
+
+Fixture-Binder
+    Cache dumped when fixtures .dll newer than fixtures.json
+    Deserialize from fixtures.json (tie parents, other init?)
+
+Inner/child workflows
+
+Numeric column indicators (#1, #2, et c.)
