@@ -21,3 +21,41 @@ Fixture-Binder
 Inner/child workflows
 
 Numeric column indicators (#1, #2, et c.)
+
+
+---  Atomization
+
+For setting up a P6 build system
+    https://atom.io/packages/build
+    https://atom.io/packages/language-perl6
+    https://atom.io/packages/atom-perl6-editor-tools
+
+Run P6 in Atom
+    https://atom.io/packages/script
+    https://github.com/rgbkrk/atom-script
+    https://atom.io/packages/script-runner
+
+Tabula
+    Sample for tsv to Tabula Table
+        https://atom.io/packages/tsv-to-md
+
+    Align selection on '=' char (potential for tables)
+        https://atom.io/packages/aligner
+        https://atom.io/packages/alinement
+        https://atom.io/packages/simple-align
+
+    Gherkin / Cucumber niche and syntax similar to Tabula
+        https://atom.io/packages/cucumber-step
+        https://atom.io/packages/gherkin-table-formatter
+        https://atom.io/packages/gherkin-autocomplete
+
+
+Atom without direct application to those projects
+    YAML to JSON
+        https://atom.io/packages/atom-yamljson
+
+    Annotations displayed when clicked
+        https://atom.io/packages/code-annotations
+
+    https://atom.io/packages/atom-dynamic-macro
+    https://atom.io/packages/hyperclick
