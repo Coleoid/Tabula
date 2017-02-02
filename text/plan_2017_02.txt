@@ -17,7 +17,12 @@ Results in JSON (3 pt)
     To be styled via mustache?
 
 Labels matching "xxx: details" feed a Table of Contents (1 pt)
+    / '"' (<-[:]>+) ':' \h+ (<-["]>+) '"' /
     Same with "set \h* up ':'? \h* '-'* \h*"
+    Catch comments, too?
+
+Colon optional after paragraph label
+    (then steps must not start with string?)
 
 Tabula internal stack trace getting solid and clear (2 pt)
 
