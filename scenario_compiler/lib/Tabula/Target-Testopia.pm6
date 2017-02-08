@@ -6,20 +6,23 @@ use Tabula::Match-Helper;
 
 class Target-Testopia does Match-Helper {
     has Execution-Context $.Context;
-    has Code-Scribe $.Scribe;
-    has Fixture-Binder $.Binder;
+    has Code-Scribe       $.Scribe;
+    has Fixture-Binder    $.Binder;
 
     submethod BUILD {
         $!Context = Execution-Context.new;
-        $!Scribe = Code-Scribe.new;
-        $!Binder = Fixture-Binder.new;
+        $!Scribe  = Code-Scribe.new;
+        $!Binder  = Fixture-Binder.new;
     }
 
+    #REFAC:  Get this out, into Target-Testopia
     sub get-Do-statement( $code, $source-location ) {
         my $quoted-code = '@"' ~ $code.subst('"', '""', :g) ~ '"';
 
-        'Do(() =>     ' ~ $code
-            ~ ',     "' ~ $source-location ~ '", ' ~ $quoted-code ~ ' );';
+        'Do(() =>     '
+            ~ $code ~ ',     "'
+            ~ $source-location ~ '", '
+            ~ $quoted-code ~ ' );';
     }
 
     method normalized-name-CSharp() {
@@ -175,7 +178,8 @@ class Target-Testopia does Match-Helper {
 
     #nn?
     method Table-Cell($/) {
-        if $<T-Phrase> { make '"' ~ $<T-Phrase>.made ~ '"' }
+        #if $<T-Phrase> { make '"' ~ $<T-Phrase>.made ~ '"' }
+        if $<Phrases> { make $<Phrases>.made }
         else { make $<Empty-Cell> }
     }
 

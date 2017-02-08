@@ -100,7 +100,7 @@ class Code-Scribe {
     #  A paragraph may run directly, or per-row of tables below it,
     # so we stage each paragraph until we know what comes after it.
     has Str $.staged-paragraph;
-    has Str $!staged-comment;
+    has Str $!staged-comment = '';
     has Bool $.paragraph-pending;
 
     method add-next-section($name, $comment = '') {
@@ -110,7 +110,7 @@ class Code-Scribe {
         else { die "I do not know how to add a section named [$name]." }
     }
 
-    method stage-paragraph($name, $comment) {
+    method stage-paragraph($name, $comment = '') {
         self.flush-pending-paragraph();
         $!staged-paragraph = $name;
         $!staged-comment = $comment;

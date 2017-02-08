@@ -39,7 +39,7 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 }
 
 #if False
-{  #TODO:  Space-aligning the generated code to match input scenario
+{
     my $scenario = q:to/EOS/;
     Scenario:  "This and That"
 

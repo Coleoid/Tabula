@@ -7,11 +7,13 @@ Testopia runner:
     Split local/MVC into separate axis from Testopia/Tabula (.5 pt)
 
 Update to_tabula.pl conversion script (2 pt)
-    Add  // this .tab mechanically generated from Testopia
     Resulting scripts compile on first pass
         Running correctly is out of scope
         Perhaps we collect failure results for later?
-    Obsolete features commented out (whole step or part)
+    Obsolete features commented out (whole step or part?)
+        <== fails (with message)
+        parens as comments
+
 
 Results in JSON (3 pt)
     To be styled via mustache?
@@ -39,6 +41,9 @@ Blocks (5 pt)
 
 =====================================================================
 ===  Done
+
+Update to_tabula.pl conversion script
+    Add  // this .tab mechanically generated from Testopia (.5 pt)
 
 Value aliases
     Syntax change:  >set: "foo" means "bar" (.5 pt)

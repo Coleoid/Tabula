@@ -8,19 +8,20 @@ grammar Tabula-Grammar {
     token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
 
     token Break-Line { ^^ \h* <.Comment>? \n }
-    token Document { start_doc [ \h+ <String> ]? \h* \n .*? \n end_doc }  #  crappy first draft placeholder
+    token Document { 'start_doc' [ \h+ <String> ]? \h* \n .*? \n 'end_doc' }  #  crappy first draft placeholder
 
     token Table { <Table-Label>? <Table-Header> <Table-Row>* }
     token Table-Label  { <Indentation> '===' \h* <Phrase> \h* '===' \h* \n }
     token Table-Header { <Indentation> '[' <Table-Cells> ']' \h* \n }
     token Table-Row    { <Indentation> '|' <Table-Cells> '|' \h* \n }
     token Table-Cells  { <Table-Cell>+ % '|' }
-    token Table-Cell   { [\h* <T-Phrase> \h*] || <Empty-Cell> }
+    #token Table-Cell   { [\h* <T-Phrase> \h*] || <Empty-Cell> }
+    token Table-Cell   { <Phrases> || <Empty-Cell> }
     token Empty-Cell   { \h+ }
 
-    token T-Phrase  { <T-Symbol>+ % \h+ }
-    token T-Symbol  { <Word> || <T-Term> }
-    token T-Term    { [ <Date> || <Number> || <String> || <Variable> ] }
+    # token T-Phrase  { <T-Symbol>+ % \h+ }
+    # token T-Symbol  { <Word> || <T-Term> }
+    # token T-Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
     token Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
     token Para-Open  { <?> }
@@ -44,7 +45,7 @@ grammar Tabula-Grammar {
     token Indentation { \h* }
     token Comment { '//' \N* }
 
-    token Phrases { <Phrase>+ % [',' \h*] }
+    token Phrases { \h* <Phrase>+ % [',' \h*] \h* }
     token Phrase  { <Symbol>+ % \h+ }
     token Symbol  { <Word> || <Term> }
     token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }

@@ -26,11 +26,11 @@ class Target-Echo {
 
     method Command-Set($/) {
         my $lhs = $<Word> || $<Variable>;
-        make ">set: $lhs => $<Term>"
+        make ">set: $lhs means $<Term>"
     }
 
     method Command-Alias($/) {
-        make ">alias: $<Phrase> => $<Action>"
+        make ">alias: $<Phrase> means $<Action>"
     }
 
     method Command-Tag($/) {
