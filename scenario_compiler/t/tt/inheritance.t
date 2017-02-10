@@ -8,8 +8,8 @@ my $binder = $actions.Binder;
 
 $context.file-name = "SampleScenario.scn";
 
-#my $install-location = 'k:\\code\\acadis_trunk\\';
-my $install-location = 'd:\\code\\acadis\\';
+my $install-location = 'k:\\code\\acadis_trunk\\';
+#my $install-location = 'd:\\code\\acadis\\';
 
 my $root = $install-location ~ 'ScenarioTests\\ScenarioContext\\';
 my $cdfw-FileName  = $root ~ 'ViewImplementations\\Curriculum\\ClassDescriptiveFieldsWorkflow.cs';

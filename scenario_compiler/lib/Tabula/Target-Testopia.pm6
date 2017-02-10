@@ -112,9 +112,19 @@ class Target-Testopia does Match-Helper {
         $!Context.close-scope();
     }
 
-    #text
+    # mature
     method Phrase($/) {
-        make $<Symbol>.map({.made}).join(' ');
+        my $for-Cell = ($*Phrase-Context.defined and $*Phrase-Context eq 'Cell');
+        my $single-Term = $<Symbol>.elems == 1 && (! $<Symbol>[0]<Word>.defined);
+
+        my $symbols = $<Symbol>.map({.made}).join(' ');
+
+        if $single-Term or not $for-Cell {
+            make $symbols;
+            return;
+        }
+
+        make '"' ~ $symbols.subst('"', '\"', :g) ~ '"';
     }
 
     #text
@@ -170,15 +180,14 @@ class Target-Testopia does Match-Helper {
     # mature
     method Table($/) {
         my $name = self.name-section('table', $/);
-        my $header = $<Table-Header>.made.chomp;
-        my @rows = $<Table-Row>.map({.made.chomp});
+        my $header = $<Table-Header>.made;
+        my @rows = $<Table-Row>.map({.made});
 
         make $!Scribe.compose-table($name, $header, @rows);
     }
 
     #nn?
     method Table-Cell($/) {
-        #if $<T-Phrase> { make '"' ~ $<T-Phrase>.made ~ '"' }
         if $<Phrases> { make $<Phrases>.made }
         else { make $<Empty-Cell> }
     }
@@ -190,7 +199,7 @@ class Target-Testopia does Match-Helper {
 
     #inline C#
     method Table-Header($/) {
-        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
+        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ ' }'
     }
 
     #echo
@@ -200,27 +209,8 @@ class Target-Testopia does Match-Helper {
 
     #inline C#
     method Table-Row($/) {
-        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ " \}\n"
+        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ ' }'
     }
-
-
-    #text
-    method T-Phrase($/) {
-        make $<T-Symbol>.map({.made}).join(' ');
-    }
-
-    #echo
-    method T-Symbol($/) {
-        make $<Word> || $<T-Term>.made
-    }
-
-    method T-Term($/) {
-        if    $<Date>   { make $<Date> }
-        elsif $<Number> { make $<Number> }
-        elsif $<String> { make $<String><Body> }
-        else            { make $<Variable>.made }
-    }
-
 
     method Term($/) {
         if    $<Date>   { make '"' ~ $<Date>   ~ '"' }

@@ -15,13 +15,8 @@ grammar Tabula-Grammar {
     token Table-Header { <Indentation> '[' <Table-Cells> ']' \h* \n }
     token Table-Row    { <Indentation> '|' <Table-Cells> '|' \h* \n }
     token Table-Cells  { <Table-Cell>+ % '|' }
-    #token Table-Cell   { [\h* <T-Phrase> \h*] || <Empty-Cell> }
-    token Table-Cell   { <Phrases> || <Empty-Cell> }
+    token Table-Cell   { :my $*Phrase-Context = 'Cell'; <Phrases> || <Empty-Cell> }
     token Empty-Cell   { \h+ }
-
-    # token T-Phrase  { <T-Symbol>+ % \h+ }
-    # token T-Symbol  { <Word> || <T-Term> }
-    # token T-Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
     token Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
     token Para-Open  { <?> }

@@ -9,7 +9,7 @@ say "\n";
 #if False
 {   diag "A set command adds a variable to the current scope";
 
-    my $parse = parser( "simple alias", '>alias: "go" means "go like gangbusters"' );
+    my $parse = parser( "simple alias", '>alias: "go" means "go like gangbusters"' ~ "\n" );
 
     my $alias = q:to/EOA/;
     >alias: "Add employment actions for #employeeName at #orgName" means ...
@@ -27,8 +27,6 @@ say "\n";
     EOA
 
     $parse = parser( "alias to a block", $alias );
-
-
 
 }
 
