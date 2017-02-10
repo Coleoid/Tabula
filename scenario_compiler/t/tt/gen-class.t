@@ -20,24 +20,23 @@ $context.file-name = "ScenarioFilename.scn";
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Acadis.SystemUtilities;
     using Acadis.Constants.Accounting;
     using Acadis.Constants.Admin;
-    using Acadis.Domain.Model;
+    using Acadis.SystemUtilities;
 
     namespace Tabula
     {
-        public class ScenarioFilename_generated
+        public class ScenarioFilename_generated  //  "This and That"
             : GeneratedScenarioBase, IGeneratedScenario
         {
+            public void ExecuteScenario()
+            {
+            }
+
             public ScenarioFilename_generated()
                 : base()
             {
                 ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
-            }
-
-            public void ExecuteScenario()
-            {
             }
         }
     }
@@ -74,25 +73,15 @@ $context.file-name = "ScenarioFilename.scn";
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Acadis.SystemUtilities;
     using Acadis.Constants.Accounting;
     using Acadis.Constants.Admin;
-    using Acadis.Domain.Model;
+    using Acadis.SystemUtilities;
 
     namespace Tabula
     {
-        public class ScenarioFilename_generated
+        public class ScenarioFilename_generated  //  "This and That"
             : GeneratedScenarioBase, IGeneratedScenario
         {
-            public ScenarioContext.ActionWorkflow Action;
-
-            public ScenarioFilename_generated()
-                : base()
-            {
-                ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
-                Action = new ScenarioContext.ActionWorkflow();
-            }
-
             public void ExecuteScenario()
             {
                 Run_para_over_table( paragraph_from_003_to_005, table_from_006_to_008 );
@@ -113,6 +102,15 @@ $context.file-name = "ScenarioFilename.scn";
                         new List<string>          { "zesty", "green", "lively" },
                     }
                 };
+            }
+
+            public ScenarioContext.ActionWorkflow Action;
+
+            public ScenarioFilename_generated()
+                : base()
+            {
+                ScenarioLabel = @"ScenarioFilename.scn:  ""This and That""";
+                Action = new ScenarioContext.ActionWorkflow();
             }
         }
     }
