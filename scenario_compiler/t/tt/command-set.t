@@ -3,7 +3,6 @@ use Tabula::Grammar-Testing;
 
 my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
 $composer.Context.file-name = "SampleScenario.scn";
-my $binder = $composer.Binder;
 say "\n";
 
 #if False

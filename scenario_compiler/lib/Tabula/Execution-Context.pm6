@@ -26,6 +26,10 @@ class Execution-Context does Match-Helper {
         $!current-scope.add-fixture($fixture);
     }
 
+    method add-alias($alias) {
+        $!current-scope.add-alias($alias);
+    }
+
     #  Given an action match, finds step method it fits
     method resolve-step($match) {
         return $!current-scope.resolve-step($match<Phrase>);

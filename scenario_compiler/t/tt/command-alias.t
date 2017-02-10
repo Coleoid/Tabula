@@ -1,17 +1,18 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
+my (&parser, $composer) = curry-parser-emitting-Testopia( "Command-Alias" );
 $composer.Context.file-name = "SampleScenario.scn";
-my $binder = $composer.Binder;
 say "\n";
 
 #if False
-{   diag "A set command adds a variable to the current scope";
+{   diag "An alias command adds a findable step to the current scope";
 
-    my $parse = parser( "simple alias", '>alias: "go" means "go like gangbusters"' ~ "\n" );
+    my $parse = parser( "simple alias", '>alias: "go #speed" means go at #speed for 4 hours' );
+    ok $parse.defined, 'simple alias worked';
 
-    my $alias = q:to/EOA/;
+
+    my $alias = q:to/EOA/.chomp;
     >alias: "Add employment actions for #employeeName at #orgName" means ...
         >use: Employment Action Edit
         Browse to Add Employment Action for #employeeName at #orgName
@@ -27,6 +28,8 @@ say "\n";
     EOA
 
     $parse = parser( "alias to a block", $alias );
+    ok $parse.defined, 'block alias worked';
+    is $parse.made, 'alias', 'block alias worked';
 
 }
 
