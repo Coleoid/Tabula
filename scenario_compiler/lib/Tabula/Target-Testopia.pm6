@@ -70,7 +70,7 @@ class Target-Testopia does Match-Helper {
 
     #--
     method Command-Alias($/) {
-        $Context.add-alias($/);
+        $!Context.add-alias($/);
     }
 
     #NI

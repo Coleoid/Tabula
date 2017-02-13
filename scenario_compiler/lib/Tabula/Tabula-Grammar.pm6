@@ -2,46 +2,47 @@
 
 grammar Tabula-Grammar {
     rule TOP { <Scenario> }
-    # TODO:70 rule Module { [Scenario || Library] + }
+    # TODO: rule Module { [Scenario || Library] + }
+    token ws { \h* }
 
-    token Scenario { <Indentation> [:i scenario] <.ws> ':' <.ws> <String> \h* \n <Section>* }
+    rule  Scenario { <Indentation> [:i scenario] ':' <String> \n <Section>* }
     token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
 
-    token Break-Line { ^^ \h* <.Comment>? \n }
-    token Document { 'start_doc' [ \h+ <String> ]? \h* \n .*? \n 'end_doc' }  #  crappy first draft placeholder
+    token Break-Line { ^^ <.Comment>? \n }
+    rule  Document { 'start_doc' <String>? \n .*? \n 'end_doc' }  #  crappy first draft placeholder
 
-    token Table { <Table-Label>? <Table-Header> <Table-Row>* }
-    token Table-Label  { <Indentation> '===' \h* <Phrase> \h* '===' \h* \n }
-    token Table-Header { <Indentation> '[' <Table-Cells> ']' \h* \n }
-    token Table-Row    { <Indentation> '|' <Table-Cells> '|' \h* \n }
-    token Table-Cells  { <Table-Cell>+ % '|' }
+    rule Table { <Table-Label>? <Table-Header> <Table-Row>* }
+    rule Table-Label  { <Indentation> '===' <Phrase> '===' \n }
+    rule Table-Header { <Indentation> '[' <Table-Cells> ']' \n }
+    rule Table-Row    { <Indentation> '|' <Table-Cells> '|' \n }
+    rule Table-Cells  { <Table-Cell>+ % '|' }
     token Table-Cell   { :my $*Phrase-Context = 'Cell'; <Phrases> || <Empty-Cell> }
     token Empty-Cell   { \h+ }
 
     token Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
     token Para-Open  { <?> }
     token Para-Close { <?> }
-    token Paragraph-Label { <Indentation> <String> \h* ':' \h* \n }
-    token Statement  { <Indentation> <Action> \h* <Comment>? \n }
+    rule Paragraph-Label { <Indentation> <String> ':' \n }
+    rule Statement  { <Indentation> <Action> <Comment>? \n }
     token Action     { <Block> || <Step> || <Command> }
 
-    token Block { <String>? \h* <Block-Begin> \h* \n <Section>+ <Block-End> }
+    rule Block { <String>? <Block-Begin> \n <Section>+ <Block-End> }
     token Block-Begin { '...' }
     token Block-End   { <Indentation> '.' }
 
     token Step { $<OptQ> = '? '? <Phrase> }
 
-    token Command { <Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use> }
-    token Command-Alias { '>' alias ':' \h* <String> \h* means \h* <Action> }  # build time
-    token Command-Set   { '>' set   ':' \h* [ <Word> || <Variable> ] \h* means \h* <Term> }  # run time
-    token Command-Tag   { '>' tags? ':' \h* <Phrases> \h* }
-    token Command-Use   { '>' use   ':' \h* <Phrases> \h* }
+    rule Command { '>' <Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use> }
+    rule Command-Alias { alias ':' <String> means <Action> }  # build time
+    rule Command-Set   { set   ':' [ <Word> || <Variable> ] means <Term> }  # run time
+    rule Command-Tag   { tags? ':' <Phrases> }
+    rule Command-Use   { use   ':' <Phrases> }
 
     token Indentation { \h* }
-    token Comment { '//' \N* }
+    rule  Comment { '//' \N* }
 
-    token Phrases { \h* <Phrase>+ % [',' \h*] \h* }
-    token Phrase  { <Symbol>+ % \h+ }
+    rule Phrases { <Phrase>+ % ',' }
+    rule Phrase  { <Symbol> + }
     token Symbol  { <Word> || <Term> }
     token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }
     token Term    { [ <Date> || <Number> || <String> || <Variable> ] }
