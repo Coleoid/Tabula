@@ -3,11 +3,13 @@
 grammar Tabula-Grammar {
     rule TOP { <Scenario> }
     # TODO: rule Module { [Scenario || Library] + }
+
     token ws { \h* }
+    token Indentation { \h* }
+    rule  Comment { '//' \N* }
 
     rule  Scenario { <Indentation> [:i scenario] ':' <String> \n <Section>* }
     token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
-
     token Break-Line { ^^ <.Comment>? \n }
     rule  Document { 'start_doc' <String>? \n .*? \n 'end_doc' }  #  crappy first draft placeholder
 
@@ -16,15 +18,15 @@ grammar Tabula-Grammar {
     rule Table-Header { <Indentation> '[' <Table-Cells> ']' \n }
     rule Table-Row    { <Indentation> '|' <Table-Cells> '|' \n }
     rule Table-Cells  { <Table-Cell>+ % '|' }
-    token Table-Cell   { :my $*Phrase-Context = 'Cell'; <Phrases> || <Empty-Cell> }
-    token Empty-Cell   { \h+ }
+    rule Table-Cell   { :my $*Phrase-Context = 'Cell'; <Phrases> || <Empty-Cell> }
+    rule Empty-Cell   { \h+ }
 
-    token Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
+    rule  Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
     token Para-Open  { <?> }
     token Para-Close { <?> }
-    rule Paragraph-Label { <Indentation> <String> ':' \n }
-    rule Statement  { <Indentation> <Action> <Comment>? \n }
-    token Action     { <Block> || <Step> || <Command> }
+    rule  Paragraph-Label { <Indentation> <String> ':' \n }
+    rule  Statement  { <Indentation> <Action> <Comment>? \n }
+    rule  Action     { <Block> || <Step> || <Command> }
 
     rule Block { <String>? <Block-Begin> \n <Section>+ <Block-End> }
     token Block-Begin { '...' }
@@ -32,17 +34,39 @@ grammar Tabula-Grammar {
 
     token Step { $<OptQ> = '? '? <Phrase> }
 
-    rule Command { '>' <Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use> }
-    rule Command-Alias { alias ':' <String> means <Action> }  # build time
-    rule Command-Set   { set   ':' [ <Word> || <Variable> ] means <Term> }  # run time
-    rule Command-Tag   { tags? ':' <Phrases> }
-    rule Command-Use   { use   ':' <Phrases> }
+    rule Command {
+        '>'
+            [<Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use>
+            || <parse-failure("Current commands are: alias, set, tag, and use")>]
+    }
+    rule Command-Alias {
+        alias ':' [
+            [<String> means <Action>]
+            || <parse-failure('Misformed "alias", should look like: >alias: "verify all" means verify sections 1 through 99')>
+        ]
+    }
+    rule Command-Set {
+        set ':' [
+            [[<Word> || <Variable>] means <Term>]
+            || <parse-failure('Misformed "set", should look like: >set: nickname means "Frankie-Boy"')>
+        ]
+    }
+    rule Command-Tag {
+        tags? ':' [
+            <Phrases>
+            || <parse-failure('Misformed "tag", should look like: >tag: AC-24027, Housing, Maintenance')>
+        ]
+    }
+    rule Command-Use {
+        use ':' [
+            <Phrases>
+            || <parse-failure('Misformed "use", should look like: >use: Person Management, Employment')>
+        ]
+    }
 
-    token Indentation { \h* }
-    rule  Comment { '//' \N* }
 
-    rule Phrases { <Phrase>+ % ',' }
-    rule Phrase  { <Symbol> + }
+    rule  Phrases { <Phrase>+ % ',' }
+    rule  Phrase  { <Symbol> + }
     token Symbol  { <Word> || <Term> }
     token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }
     token Term    { [ <Date> || <Number> || <String> || <Variable> ] }
@@ -51,4 +75,10 @@ grammar Tabula-Grammar {
     token String   { '"' $<Body> = [ <-["]>* ] '"' }  # TODO: single quotes, quote escaping
     token Variable { '#' <Word> }
     token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }
+
+    method parse-failure($message = 'Parse failure') {
+        my $parsed-so-far = self.target.substr(0, self.pos);
+        my @lines = $parsed-so-far.lines;
+        die $message ~ " at line @lines.elems(), after '@lines[*-1]'";
+    }
 }

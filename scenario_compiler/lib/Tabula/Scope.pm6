@@ -24,6 +24,10 @@ class Scope {
         ...
     }
 
+    method find-alias($alias) {
+        ...
+    }
+
 
     method resolve-step($step) {
         my $method-call = self.find-step-method($step);
