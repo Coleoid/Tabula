@@ -5,7 +5,7 @@ my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
 $composer.Context.file-name = "SampleScenario.scn";
 say "\n";
 
-#if False
+if False
 {   diag "A set command adds a variable to the current scope";
 
     my $parse = parser( "simple value set", '>set: this means "that"' );
@@ -20,6 +20,27 @@ say "\n";
     is $parse.made, 'Do(() =>     var[var["nickname"]] = var["fullname"],     "SampleScenario.scn:1", @"var[var[""nickname""]] = var[""fullname""]" );',
         "variables can be set using other variables";
 
+}
+
+sub try-error($command, $message, $description) {
+    try {
+        my $parse = parser( "not a command", $command );
+        ok False, 'parsing a Syntax error should throw';
+        CATCH {
+            default {
+                is .Str, $message, $description;
+            }
+        }
+    }
+
+}
+
+#if False
+{   diag "Syntax errors get good messages";
+
+    try-error( '>seet: this means "that"', 'Current commands are: alias, set, tag, and use at line 1, after \'>\'', 'bad command, good message' );
+    try-error( '>set: "this" means "that"', 'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when key was quoted' );
+    try-error( '>set: this means that', 'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when value was not a term' );
 }
 
 done-testing;
