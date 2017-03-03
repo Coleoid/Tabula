@@ -31,3 +31,5 @@ $context.add-fixture($fixture);
     ok $parse.defined, "recognizes number with decimal as Number";
     is $parse.made, '"514.02"', 'symbol:Number is quoted';
 }
+
+done-testing;

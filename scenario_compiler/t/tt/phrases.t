@@ -19,3 +19,5 @@ my (&parser, $actions) = curry-parser-emitting-Testopia( "Phrases" );
 
     #is $parse.made, '"why not?"', 'Phrase:String should be quoted';
 }
+
+done-testing;

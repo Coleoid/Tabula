@@ -190,27 +190,39 @@ class Target-Testopia does Match-Helper {
     #nn?
     method Table-Cell($/) {
         if $<Phrases> { make $<Phrases>.made }
-        else { make $<Empty-Cell> }
+        else { make ' ' }
     }
 
     #echo
     method Table-Cells($/) {
-        make $<Table-Cell>.map({.made}).join(', ')
+        my @cells = $<Table-Cell>;
+        @cells.pop if ($*Cells-Context.defined and $*Cells-Context eq 'Row');
+        make @cells.map({.made}).join(', ')
     }
 
     #inline C#
     method Table-Header($/) {
-        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ ' }'
+        if $<Table-Cells>.made eq ' ' {
+            make '{ }'
+        }
+        else {
+            make '{ ' ~ $<Table-Cells>.made ~ ' }'
+        }
     }
 
     #echo
     method Table-Label($/) {
-        make "$<Indentation>=== $<Step> ===\n"
+        make "=== $<Step> ===\n"
     }
 
     #inline C#
     method Table-Row($/) {
-        make $<Indentation> ~ '{ ' ~ $<Table-Cells>.made ~ ' }'
+        if $<Table-Cells>.made eq ' ' {
+            make '{ }'
+        }
+        else {
+            make '{ ' ~ $<Table-Cells>.made ~ ' }'
+        }
     }
 
     method Term($/) {

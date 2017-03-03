@@ -22,25 +22,17 @@ if False
 
 }
 
-sub try-error($command, $message, $description) {
-    try {
-        my $parse = parser( "not a command", $command );
-        ok False, 'parsing a Syntax error should throw';
-        CATCH {
-            default {
-                is .Str, $message, $description;
-            }
-        }
-    }
-
-}
-
 #if False
 {   diag "Syntax errors get good messages";
+    my &assert-parse-fail = curry-expect-parse-error(&parser);
 
-    try-error( '>seet: this means "that"', 'Current commands are: alias, set, tag, and use at line 1, after \'>\'', 'bad command, good message' );
-    try-error( '>set: "this" means "that"', 'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when key was quoted' );
-    try-error( '>set: this means that', 'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when value was not a term' );
+    assert-parse-fail( '>seet: this means "that"',
+        'Current commands are: alias, set, tag, and use at line 1, after \'>\'', 'bad command, good message' );
+
+    assert-parse-fail( '>set: "this" means "that"',
+        'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when key was quoted' );
+    assert-parse-fail( '>set: this means that',
+        'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when value was not a term' );
 }
 
 done-testing;

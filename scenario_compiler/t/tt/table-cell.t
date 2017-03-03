@@ -33,6 +33,10 @@ my (&parser, $actions) = curry-parser-emitting-Testopia( "Table-Cell" );
     $parse = parser( "Table-Cell: String", '89.95' );
     ok $parse.defined, "Number";
     is $parse.made, '"89.95"', 'Number gets quoted!';
+
+    $parse = parser( "Table-Cell: Ympty", '' );
+    ok $parse.defined, "Ympte";
+    is $parse.made, ' ', 'Empte cell is space!';
 }
 
 #if False
@@ -42,3 +46,5 @@ my (&parser, $actions) = curry-parser-emitting-Testopia( "Table-Cell" );
     ok $parse.defined, "recognizes lists";
     is $parse.made, 'var["this"], var["that"]', 'expresses a list tolerably';
 }
+
+done-testing;

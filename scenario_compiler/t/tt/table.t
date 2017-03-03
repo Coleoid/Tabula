@@ -28,3 +28,5 @@ my (&parser, $actions) = curry-parser-emitting-Testopia( "Table" );
     ok $parse<Table-Header>.defined, 'I see the header';
     is $parse<Table-Row>.elems, 2, "two rows";
 }
+
+done-testing;

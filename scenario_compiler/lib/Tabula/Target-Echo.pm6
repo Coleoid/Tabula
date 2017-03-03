@@ -13,7 +13,7 @@ class Target-Echo {
         make
             ($<String> // "") ~ "...\n"
             ~ ($<Section> ?? [~] $<Section>.map({.made}) !! "")
-            ~ $<Block-End><Indentation> ~ '.'
+            ~ '.'
     }
 
     method Break-Line($/) {
@@ -43,11 +43,11 @@ class Target-Echo {
     }
 
     method Document($/) {
-        make "crappy first draft"
+        make "crappy first draft placeholder"
     }
 
     method Empty-Cell($/) {
-        make $/
+        make ' '
     }
 
     method Paragraph($/) {
@@ -60,11 +60,11 @@ class Target-Echo {
     }
 
     method Phrases($/) {
-        make $<Phrase>.join(', ')
+        make $<Phrase>.map({.made}).join(', ')
     }
 
     method Phrase($/) {
-        make $<Symbol>.join(' ')
+        make $<Symbol>.map({.made}).join(' ')
     }
 
     method Scenario($/) {
@@ -77,49 +77,50 @@ class Target-Echo {
 
     method Statement($/) {
         make
-            ($<Indentation> // "")
-            ~ $<Action>.made
+            $<Action>.made
             ~ ($<Comment> ?? "  " ~ $<Comment> !! "")
             ~ "\n"
     }
 
     method Step($/) {
-        make "$<OptQ>$<Phrase>".trim
+        (make $<OptQ> ~ $<Phrase>.made).trim
     }
 
     method Symbol($/) {
-        make ($<Word> || $<Term>.made) ~ ' '
+        make ($<Word> ?? $<Word>.trim !! $<Term>.made)
     }
 
     method Table($/) {
         make
-            ($<Table-Label> || "")
-            ~ ($<Table-Header> || "")
+            ($<Table-Label> ?? $<Table-Label>.made !! "")
+            ~ ($<Table-Header> ?? $<Table-Header>.made !! "")
             ~ [~] $<Table-Row>.map({.made})
     }
 
     method Table-Cell($/) {
-        make ($<Phrases> || $<Empty-Cell>).made
+        if $<Phrases> { make $<Phrases>.made }
+        else { make ' ' }
     }
 
     method Table-Cells($/) {
-        make $<Table-Cell>.join('|')
+        my @cells = $<Table-Cell>;
+        @cells.pop if ($*Cells-Context.defined and $*Cells-Context eq 'Row');
+        make @cells.map({.made}).join(' | ')
     }
 
     method Table-Header($/) {
-        make $<Indentation> ~ "[ $<Table-Cells>]\n"
+        make "[ $($<Table-Cells>.made) ]\n"
     }
 
     method Table-Label($/) {
-        make "$<Indentation>=== $<Phrase> ===\n"
+        make "=== $<Phrase>.made ===\n"
     }
 
     method Table-Row($/) {
-        make "$<Indentation>|$<Table-Cells>|\n"
+        make "| $($<Table-Cells>.made) |\n"
     }
 
     method Term($/) {
         make $<Date> || $<Number> || $<String> || $<Variable>
     }
-
 }

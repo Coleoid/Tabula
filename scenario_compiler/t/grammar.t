@@ -3,7 +3,7 @@ use Tabula::Grammar-Testing;
 
 say "\n";
 
-#if False
+if False
 {   diag "Section tests";
     my &parser = curry-parser-emitting-Tabula( 'Scenario' );
 
@@ -22,18 +22,18 @@ say "\n";
     ok $parse<Section>[2]<Paragraph>, "Then our second Paragraph";
 }
 
-#if False
+if False
 {   diag "Command tests";
     my &parser = curry-parser-emitting-Tabula( 'Command' );
     my $parse;
 
     $parse = parser( 'use', ">use: Mail Server" );
     $parse = parser( 'tags', ">tags: Housing, Person Search, AC-20341" );
-    $parse = parser( 'set', '>set: JR => "Jackie Robinson"' );
+    $parse = parser( 'set', '>set: JR means "Jackie Robinson"' );
 }
 
 
-#if False
+if False
 {   diag "Parameterized Step tests";
     my &parser = curry-parser-emitting-Tabula( 'Step' );
 
@@ -55,7 +55,7 @@ say "\n";
 }
 
 
-#if False
+if False
 {   diag "Statement tests -- Note that Statements are newline terminated.";
     my &parser = curry-parser-emitting-Tabula( "Statement" );
 
@@ -68,7 +68,7 @@ say "\n";
 }
 
 
-#if False
+if False
 {   diag "Block tests";
     my &parser = curry-parser-emitting-Tabula( "Block" );
 
@@ -91,7 +91,7 @@ say "\n";
 }
 
 
-#if False
+if False
 {   diag "Table-Cells tests";
     my &parser = curry-parser-emitting-Tabula( 'Table-Cells' );
 
@@ -104,19 +104,24 @@ say "\n";
 #if False
 {   diag "Table tests";
     my &parser = curry-parser-emitting-Tabula( 'Table' );
+    my $table;
+    my $parse;
 
-    my $table = q:to/EOT/;
-        ===   Chirality Today   ===
-        [ Left        | Right     ]
-        | Sinister    | Dexter    |
-        | Port        | Starboard |
-        | Exceptional | Standard  |
-        EOT
-
-    my $parse = parser( 'small full', $table );
-    is $parse<Table-Label><Phrase>.made, "Chirality Today", "Get the label";
-    is $parse<Table-Header><Table-Cells><Table-Cell>.elems, 2, "Find two columns in the header";
-    is $parse<Table-Row>.elems, 3, "Found two rows";
+    # $table = q:to/EOT/;
+    #     ===   Chirality Today   ===
+    #     [ Left        | Right     ]
+    #     | Sinister    | Dexter    |
+    #     | Port        | Starboard |
+    #     | Exceptional | Standard  |
+    #     EOT
+    #
+    # $parse = parser( 'small full', $table );
+    # is $parse.defined, "we have a Table";
+    # is $parse<Table-Label>.defined, "we have a Table-Label";
+    # is $parse<Table-Label><Phrase>.defined, "we have a Table-Label Phrase";
+    # is $parse<Table-Label><Phrase>.made, "Chirality Today", "Get the label";
+    # is $parse<Table-Header><Table-Cells><Table-Cell>.elems, 2, "Find two columns in the header";
+    # is $parse<Table-Row>.elems, 3, "Found two rows";
 
 
     $table = q:to/EOT/;
@@ -150,7 +155,7 @@ if False
 }
 
 
-#if False
+if False
 {   diag "Paragraph tests";
     my &parser = curry-parser-emitting-Tabula( 'Paragraph' );
 
@@ -179,7 +184,7 @@ if False
 }
 
 
-#if False
+if False
 {   diag "Scenario tests";
     my &parser = curry-parser-emitting-Tabula( 'Scenario' );
 

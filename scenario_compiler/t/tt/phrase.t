@@ -22,3 +22,5 @@ my (&parser, $actions) = curry-parser-emitting-Testopia( "Phrase" );
     ok $parse.defined, "Recognizes quoted string with comma as single String Phrase";
     is $parse.made, '"why, or why not?"', 'Phrase with String containing comma is still only one string';
 }
+
+done-testing;

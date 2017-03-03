@@ -52,3 +52,5 @@ ok $ecw.find-step-method("click button").defined, "inherited from second half of
 #my $mvcbw-FileName = $root ~ 'ViewImplementations\\MvcBaseWorkflow.cs';
 #$binder.parse-source($mvcbw-FileName);
 #my Fixture-Class $mvcw = $binder.get-class(?);
+
+done-testing;
