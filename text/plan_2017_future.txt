@@ -1,61 +1,96 @@
 =====================================================================
 ===  Future
 
-Compiler tools for Studio
-    Language highlighting?
-    Auto-complete for steps (in scope?)
+Clarify Tabula internal stack trace  [e2 v2]
 
-Better build-time value typing for float, double, decimal
+Generate C# step code into multiple places  [e5 v5]
+    Blocks:  Aliases
+    Stack of code insertion locations (CILs)
+        (where the first is body of ExecuteScenario())
+    When a new block opens, the current CIL gets the call
+     to the new block, then the new block is pushed onto the stack
+
+Aliases of new steps to blocks of code, with variable binding  [e8 v8]
+    Blocked by:  Gen code into multiple places
+
+Parse value lists correctly  [e2 v3]
+    Blocks:  Update the Big Bad Wolf  [e1 v1]
+    Affects:  Better build-time value typing for float, double, decimal
 
 Dev mode vs. Demo mode, different reporting
+    Dev mode:
+        Quick report of unrecognized steps  [e1 v3]
+            with Levenshtein suggestions of near matches  [e3 v3]
+        Catalog of steps with named arguments in likely places
+    Demo mode:
+        ToC spike
+        Write results in existing style
+
+Table of Contents spike  [e2 v3]
+    Build a linked prelude for demo mode
+    Minimal required intervention
+    Labels matching "xxx: details" feed a Table of Contents  [e1]
+        / '"' (<-[:]>+) ':' \h+ (<-["]>+) '"' /
+        Same with "set \h* up ':'? \h* '-'* \h*"
+        Catch comments, too?
+
+Inner/child workflows transparent to scenarios  [e5 v8] [Acadis]
+    Auto-inclusion of child workflow steps in namespace, generating
+     correct pass-through code
+
+
+---  Mechanics of interconnection
+
+Scenario .scn -> .tab conversion script updates to_tabula.pl  [e2 v5]
+    Resulting scripts compile on first pass
+        Running correctly is out of scope
+        Perhaps we collect failure results for later?
+    Obsolete features commented out (whole step or part?)
+        append extra findable comment like:  // OBSO_FEAT
+        <== fails (with message)
+        parens as comments
+    Unlocks:  New script to .scn -> .tab -> .cs -> .dll  [e2 v3]
+
+Testopia runner:
+    Split local/MVC into separate axis from Testopia/Tabula  [e.6 v1]
+
+Visual Studio Project System  [e?, v?]
+    Generate (and add to version control) new .cs to match new .tab
+    Rebuild existing .cs on update of .tab
+    Auto-rebuild methods JSON when fixture file saved
+    Language highlighting?
+    Auto-complete for steps (in scope?)
+    VSopia behavior?
+    https://github.com/Microsoft/VSProjectSystem/blob/master/doc/overview/intro.md
+
+Fixture-Binder speed optimization
+    Serialize to JSON  [done]
+    Deserialize, resolve parents  [e2, v2]
+    Rebuild when .json older than .dll
+        Crossover:  VS
+        Possible to rebuild only per fixture class .cs file?
+
+Write run results in existing web-page style  [e2 v3]
+
+Write run results in JSON  [e3 v5]
+    Accessible via web service?
+    To be styled via mustache?
+
+
+---  Speculating
 
 BDD styled >when: and >then:
     Raises questions of scope
     ...which run against the current usage of '>use:'
     ...perhaps outer-scope 'use' is '>install:'
 
-Fixture-Binder
-    Cache dumped when fixtures .dll newer than fixtures.json
-    Deserialize from fixtures.json (tie parents, other init?)
 
-Inner/child workflows
+---  Low value cold file
 
-Numeric column indicators (#1, #2, et c.)
+Overload resolution  [e3 v0?]
+    Quite possibly unused
 
+Numeric column indicators (#1, #2, et c.)  [e1 v1]
 
----  Atomization
-
-For setting up a P6 build system
-    https://atom.io/packages/build
-    https://atom.io/packages/language-perl6
-    https://atom.io/packages/atom-perl6-editor-tools
-
-Run P6 in Atom
-    https://atom.io/packages/script
-    https://github.com/rgbkrk/atom-script
-    https://atom.io/packages/script-runner
-
-Tabula
-    Sample for tsv to Tabula Table
-        https://atom.io/packages/tsv-to-md
-
-    Align selection on '=' char (potential for tables)
-        https://atom.io/packages/aligner
-        https://atom.io/packages/alinement
-        https://atom.io/packages/simple-align
-
-    Gherkin / Cucumber niche and syntax similar to Tabula
-        https://atom.io/packages/cucumber-step
-        https://atom.io/packages/gherkin-table-formatter
-        https://atom.io/packages/gherkin-autocomplete
-
-
-Atom without direct application to those projects
-    YAML to JSON
-        https://atom.io/packages/atom-yamljson
-
-    Annotations displayed when clicked
-        https://atom.io/packages/code-annotations
-
-    https://atom.io/packages/atom-dynamic-macro
-    https://atom.io/packages/hyperclick
+Colon optional after paragraph label  [e1 v0]
+    (then steps cannot start with string, not a biggie)
