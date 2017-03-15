@@ -27,7 +27,7 @@ if False
     my &assert-parse-fail = curry-expect-parse-error(&parser);
 
     assert-parse-fail( '>seet: this means "that"',
-        'Current commands are: alias, set, tag, and use at line 1, after \'>\'', 'bad command, good message' );
+        '"seet" is not a command.  Commands are: alias, set, tag, and use at line 1', 'bad command, good message' );
 
     assert-parse-fail( '>set: "this" means "that"',
         'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when key was quoted' );

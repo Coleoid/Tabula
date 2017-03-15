@@ -18,7 +18,7 @@ grammar Tabula-Grammar {
     rule Table-Row    { :my $*Cells-Context = 'Row'; '|' <Table-Cells> \n }
     rule Table-Cells  { <Table-Cell>+ % '|' }
     rule Table-Cell   { :my $*Phrase-Context = 'Cell'; <Phrases> || <Empty-Cell> }
-    token Empty-Cell   { \h* }
+    token Empty-Cell  { \h* }
 
     rule  Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
     token Para-Open  { <?> }
@@ -32,11 +32,14 @@ grammar Tabula-Grammar {
     token Block-End   { '.' }
 
     token Step { $<OptQ> = '? '? <Phrase> }
+    token Step-Phrase { <Step-Symbol>+ % \h+ }
+    token Step-Symbol { <Word> || <Terms> }
+    token Terms { <Term>+ % [',' \h*] }      # it could be tighter, but payoff is dubious...
 
     rule Command {
         '>'
             [<Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use>
-            || <parse-failure("Current commands are: alias, set, tag, and use")>]
+            || <Command-Failure>]
     }
     rule Command-Alias {
         alias ':' [
@@ -49,7 +52,7 @@ grammar Tabula-Grammar {
             [
                 [   || <Word>
                     || <Variable>
-                    || <parse-failure("Misuse of 'set', the value %s should be a  a value on a word or a variable, like >set: today is 07/04/1976")>
+                    || <parse-failure("Misuse of 'set', the value %s should be single word or a variable, like >set: today is 07/04/1976")>
                 ]
                 [   || means
                     || is
@@ -73,6 +76,10 @@ grammar Tabula-Grammar {
             <Phrases>
             || <parse-failure('Misformed "use", should look like: >use: Person Management, Employment')>
         ]
+    }
+    rule Command-Failure {
+        # catch the word, fold it into message
+        
     }
 
 
