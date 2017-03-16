@@ -1,45 +1,61 @@
 =====================================================================
-===  Future
+===  Possible future work, with [effort N, value M] fibo estimates
+
+---------------------------------------------------------------------
+---  Internal to Tabula xpiler and runtime engine
 
 Clarify Tabula internal stack trace  [e2 v2]
 
-Generate C# step code into multiple places  [e5 v5]
-    Blocks:  Aliases
+Generate C# step code into multiple buckets  [e5 v5]
+    Blocks:  Aliasing
     Stack of code insertion locations (CILs)
         (where the first is body of ExecuteScenario())
     When a new block opens, the current CIL gets the call
      to the new block, then the new block is pushed onto the stack
 
-Aliases of new steps to blocks of code, with variable binding  [e8 v8]
-    Blocked by:  Gen code into multiple places
+Alias new steps to blocks of code, with variable binding  [e8 v8]
+    Blocked by:  Multi-bucket code gen
 
-Parse value lists correctly  [e2 v3]
-    Blocks:  Update the Big Bad Wolf  [e1 v1]
-    Affects:  Better build-time value typing for float, double, decimal
-
-Dev mode vs. Demo mode, different reporting
-    Dev mode:
-        Quick report of unrecognized steps  [e1 v3]
-            with Levenshtein suggestions of near matches  [e3 v3]
-        Catalog of steps with named arguments in likely places
-    Demo mode:
-        ToC spike
-        Write results in existing style
-
-Table of Contents spike  [e2 v3]
-    Build a linked prelude for demo mode
-    Minimal required intervention
-    Labels matching "xxx: details" feed a Table of Contents  [e1]
-        / '"' (<-[:]>+) ':' \h+ (<-["]>+) '"' /
-        Same with "set \h* up ':'? \h* '-'* \h*"
-        Catch comments, too?
+Fix value lists parsing  [e2 v3]
+    Blocks:  Update the Big Bad Wolf to passing again  [e1 v1]
+    Affects:  Better build-time typing for float, double, decimal
 
 Inner/child workflows transparent to scenarios  [e5 v8] [Acadis]
     Auto-inclusion of child workflow steps in namespace, generating
      correct pass-through code
 
 
----  Mechanics of interconnection
+---------------------------------------------------------------------
+---  Reporting
+
+Dev reporting
+    Quick report of unrecognized steps  [e1 v3]
+        with Levenshtein suggestions of near matches  [e3 v3]
+    Utility query:  Catalog of steps in fixtures
+        Display:  When we have '__', interleave argument names
+
+Demo reporting
+    First, write results in existing style  [e2 v5]
+    Then, build new style report
+        ToC
+        Highlight by story?
+
+Table of Contents spike  [e2 v3]
+    Build a linked prelude for demo mode
+    Minimal required intervention
+    When parsing labels, if text matches "xxx: details", add the
+     pre-colon text and its location to ToC list  [e1]
+        / '"' (<-[:]>+) ':' \h+ (<-["]>+) '"' /
+        Same with "set \h* up ':'? \h* '-'* \h*"
+        Catch comments, too?
+
+Write run results in JSON  [e3 v5]
+    Accessible via web service?
+    To be styled via mustache?
+
+
+---------------------------------------------------------------------
+---  External pragmatics/tool/workflow support
 
 Scenario .scn -> .tab conversion script updates to_tabula.pl  [e2 v5]
     Resulting scripts compile on first pass
@@ -51,17 +67,20 @@ Scenario .scn -> .tab conversion script updates to_tabula.pl  [e2 v5]
         parens as comments
     Unlocks:  New script to .scn -> .tab -> .cs -> .dll  [e2 v3]
 
-Testopia runner:
-    Split local/MVC into separate axis from Testopia/Tabula  [e.6 v1]
+Testopia runner local/MVC separate from Testopia/Tabula  [e.6 v1]
+    Blocks:  Running Tabula on FirstForward
 
-Visual Studio Project System  [e?, v?]
+
+Visual Studio interactivity  [e?, v?]
     Generate (and add to version control) new .cs to match new .tab
     Rebuild existing .cs on update of .tab
-    Auto-rebuild methods JSON when fixture file saved
+    Rebuild JSON of fixture when fixture .cs file saved
     Language highlighting?
     Auto-complete for steps (in scope?)
-    VSopia behavior?
-    https://github.com/Microsoft/VSProjectSystem/blob/master/doc/overview/intro.md
+    VSopia behavior?  Or keep using VSopia?
+    Possibly via Visual Studio Project System?
+        https://github.com/Microsoft/VSProjectSystem/blob/master/doc/overview/intro.md
+        For VS 2017...
 
 Fixture-Binder speed optimization
     Serialize to JSON  [done]
@@ -70,13 +89,8 @@ Fixture-Binder speed optimization
         Crossover:  VS
         Possible to rebuild only per fixture class .cs file?
 
-Write run results in existing web-page style  [e2 v3]
 
-Write run results in JSON  [e3 v5]
-    Accessible via web service?
-    To be styled via mustache?
-
-
+---------------------------------------------------------------------
 ---  Speculating
 
 BDD styled >when: and >then:
@@ -85,6 +99,7 @@ BDD styled >when: and >then:
     ...perhaps outer-scope 'use' is '>install:'
 
 
+---------------------------------------------------------------------
 ---  Low value cold file
 
 Overload resolution  [e3 v0?]

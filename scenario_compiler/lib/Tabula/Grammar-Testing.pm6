@@ -28,8 +28,8 @@ module Grammar-Testing {
 
     sub norm( $input ) is export {
         $input.trim
-            .subst( /^^\h+/, '', :g )
-            .subst( /\h\h+ || \t/, ' ', :g )
+            .subst( /^^\h+/, '', :g )        # leading ws on lines -> gone
+            .subst( /\h\h+ || \t/, ' ', :g ) # runs of ws -> single space
     }
 
     sub curry-parser-emitting-Testopia( $rule ) is export {
@@ -50,17 +50,36 @@ module Grammar-Testing {
         );
     }
 
-    sub curry-expect-parse-error(&parser) is export {
+    sub curry-parser-expecting-parse-fail( $rule ) is export {
+        use Test;
+        my $grammar = Tabula-Grammar.new;
+        my $actions = Target-Testopia.new;
+
         return (
+            sub ( $command ) {
+                try {
+                    my $out = $grammar.parse( $command, :rule($rule), :actions($actions) );
+                    ok False, 'The text [' ~ $command ~ '] parsed as $rule, and it should not have.';
+                    CATCH {
+                        default { return $out; }
+                    }
+                }
+            },
+            $actions
+        );
+    }
+
+
+    sub curry-expect-parse-error(&parser) is export {
+        return
             sub ($command, $message, $description) {
                 try {
-                    my $parse = parser( "not a command", $command );
+                    my $parse = parser( "expect parse failure of [$command]", $command );
                     ok False, 'The text [' ~ $command ~ '] parsed, when it should not have.';
                     CATCH {
                         default { is .Str, $message, $description; }
                     }
                 }
-            }
-        );
+            };
     }
 }

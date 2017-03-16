@@ -79,7 +79,7 @@ grammar Tabula-Grammar {
     }
     rule Command-Failure {
         # catch the word, fold it into message
-        
+        hooga chaka
     }
 
 

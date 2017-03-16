@@ -24,9 +24,12 @@ if False
 
 #if False
 {   diag "Syntax errors get good messages";
+    my (&parse-failer, $actions) = curry-parser-expecting-parse-fail( "Command" );
+
     my &assert-parse-fail = curry-expect-parse-error(&parser);
 
-    assert-parse-fail( '>seet: this means "that"',
+    my $msg = assert-parse-fail( '>seet: this means "that"' );
+    ,
         '"seet" is not a command.  Commands are: alias, set, tag, and use at line 1', 'bad command, good message' );
 
     assert-parse-fail( '>set: "this" means "that"',
