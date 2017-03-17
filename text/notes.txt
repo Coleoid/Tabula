@@ -20,8 +20,9 @@ Please enjoy this chewy stack trace:
 
 ---------------------------------------------------------------------
 Scenario:  "Badge management, discounts, and capabilities" (Badge_basics.tab)
-PASS:      148 story steps, 218 setup, 18 uncategorized
+Result:    PASS
 Run on:    Friday, 30 Dec 2016  10:48:35
+Tally:     148 story steps, 218 setup, 18 uncategorized
 
 ---------------------------------------------------------------------
 Stories:
