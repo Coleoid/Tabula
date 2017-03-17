@@ -34,7 +34,8 @@ grammar Tabula-Grammar {
     token Step { $<OptQ> = '? '? <Phrase> }
     token Step-Phrase { <Step-Symbol>+ % \h+ }
     token Step-Symbol { <Word> || <Terms> }
-    token Terms { <Term>+ % [',' \h*] }      # it could be tighter, but payoff is dubious...
+    token Terms { <Term>+ % [',' \h*] }
+        # could force each set to be same type of Term, but payoff is dubious...
 
     rule Command {
         '>'
@@ -43,8 +44,17 @@ grammar Tabula-Grammar {
     }
     rule Command-Alias {
         alias ':' [
-            [<String> means <Action>]
-            || <rule-failure('>alias: command', 'you to do it right')>
+            [   || <String>
+                || <rule-failure('>alias: command', 'you to do it right')>
+            ]
+            [   || means
+                || is
+                || to
+                || <rule-failure('>alias: command', "'means', 'is', or 'to'")>
+            ]
+            [   || <Term>
+                || <rule-failure('>alias: command', 'either a single step or a block')>
+            ]
         ]
     }
     rule Command-Set {
