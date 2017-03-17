@@ -5,7 +5,7 @@ my (&parser, $composer) = get-parser-emitting-Testopia( "Command" );
 $composer.Context.file-name = "SampleScenario.scn";
 say "\n";
 
-if False
+#if False
 {   diag "A set command adds a variable to the current scope";
 
     my $parse = parser( '>set: this means "that"' );
@@ -26,14 +26,37 @@ if False
 {   diag "Syntax errors get good messages";
     my (&not-a-command, $actions) = get-parser-expecting-parse-fail( "Command" );
 
-    my $msg = not-a-command( '>seet: this means "that"' );
-    is $msg, "waow that's wrong";
-#        '"seet" is not a command.  Commands are: alias, set, tag, and use at line 1', 'bad command, good message' );
+    my $msg = not-a-command( '>sudo: make me a sandwich' );
+    my $expected = q:to/EOE/;
+        Did not parse as a Command: line 1 at column 2:
+        >[here->]sudo: make me a sandwich
+        (expected 'alias', 'set', 'tag', or 'use')
+        EOE
+    is $msg, $expected, "clear complaint about unrecognized command verb";
 
-    # assert-parse-fail( '>set: "this" means "that"',
-    #     'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when key was quoted' );
-    # assert-parse-fail( '>set: this means that',
-    #     'Misformed "set", should look like: >set: nickname means "Frankie-Boy" at line 1, after \'>set: \'', 'recognized \'>set:\' when value was not a term' );
+    $msg = not-a-command( '>set: "this" means "that"' );
+    $expected = q:to/EOE/;
+        Did not parse as a >set: command: line 1 at column 7:
+        >set: [here->]"this" means "that"
+        (expected an unquoted word or a variable)
+        EOE
+    is $msg, $expected, "clear complaint about wrong sort of target";
+
+    $msg = not-a-command( '>set: this = "that"' );
+    $expected = q:to/EOE/;
+        Did not parse as a >set: command: line 1 at column 12:
+        >set: this [here->]= "that"
+        (expected 'means', 'is', or 'to')
+        EOE
+    is $msg, $expected, "clear complaint about wrong conjunctive verb";
+
+    $msg = not-a-command( '>set: this means that' );
+    $expected = q:to/EOE/;
+        Did not parse as a >set: command: line 1 at column 18:
+        >set: this means [here->]that
+        (expected a string, number, date, or variable to store)
+        EOE
+    is $msg, $expected, "clear complaint about unsuitable value";
 }
 
 done-testing;

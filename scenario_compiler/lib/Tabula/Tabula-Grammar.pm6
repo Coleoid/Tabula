@@ -39,47 +39,42 @@ grammar Tabula-Grammar {
     rule Command {
         '>'
             [<Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use>
-            || <Command-Failure>]
+            || <rule-failure('Command', "'alias', 'set', 'tag', or 'use'")> ]
     }
     rule Command-Alias {
         alias ':' [
             [<String> means <Action>]
-            || <parse-failure('Misformed "alias", should look like: >alias: "verify all" means verify sections 1 through 99')>
+            || <rule-failure('>alias: command', 'you to do it right')>
         ]
     }
     rule Command-Set {
         set ':' [
-            [
-                [   || <Word>
-                    || <Variable>
-                    || <parse-failure("Misuse of 'set', the value %s should be single word or a variable, like >set: today is 07/04/1976")>
-                ]
-                [   || means
-                    || is
-                    || to
-                ]
-                [   || <Term>
-                    || <parse-failure("Can only 'set' a value which is a string, number, date, or variable, like >set: today is 07/04/1976")>
-                ]
+            [   || <Word>
+                || <Variable>
+                || <rule-failure('>set: command', 'an unquoted word or a variable')>
             ]
-            || <parse-failure('Misformed "set", should look like: >set: nickname to "Frankie-Boy"')>
+            [   || means
+                || is
+                || to
+                || <rule-failure('>set: command', "'means', 'is', or 'to'")>
+            ]
+            [   || <Term>
+                || <rule-failure('>set: command', 'a string, number, date, or variable to store')>
+            ]
         ]
     }
     rule Command-Tag {
         tags? ':' [
             <Phrases>
-            || <parse-failure('Misformed "tag", should look like: >tag: AC-24027, Housing, Maintenance')>
+            || <rule-failure('>tag: command', 'one or more comma-separated phrases')>
         ]
     }
     rule Command-Use {
         use ':' [
             <Phrases>
-            || <parse-failure('Misformed "use", should look like: >use: Person Management, Employment')>
+            || <rule-failure('>use: command', 'one or more comma-separated phrases')>
         ]
     }
-    # rule Command-Failure {
-    #     \N*
-    # }
 
 
     rule  Phrases { <Phrase>+ % ',' }
@@ -93,13 +88,24 @@ grammar Tabula-Grammar {
     token Variable { '#' <Word> }
     token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }
 
-    method Command-Failure($/) {
-        self.parse-failure('not a command: [>' ~ ~$/ ~ ']');
-    }
 
-    method parse-failure($message = 'Parse failure') {
+    method rule-failure($rule, $expected = '') {
         my $parsed-so-far = self.target.substr(0, self.pos);
         my @lines = $parsed-so-far.lines;
-        die $message ~ " at line @lines.elems(), after '@lines[*-1]'";
+        my $line-of-failure = @lines.elems();
+        my $line-before-failure = @lines[*-1];
+        my $column-of-failure = $line-before-failure.chars() + 1;
+        my $line-after-failure = self.target.substr(self.pos);
+
+        my $expectation-line = ($expected eq '')
+            ?? ''
+            !! "(expected $expected)\n";
+
+        my $message =
+            "Did not parse as a $rule: line $line-of-failure at column $column-of-failure:\n"
+            ~ $line-before-failure ~ '[here->]' ~ $line-after-failure ~ "\n"
+            ~ $expectation-line;
+
+        die $message;
     }
 }

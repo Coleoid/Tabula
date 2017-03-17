@@ -63,7 +63,7 @@ module Grammar-Testing {
                     CATCH {
                         default {
                             ok True, 'The text [' ~ $input ~ "] is not a $rule.";
-                            return .Str;
+                            return .message;
                         }
                     }
                 }
