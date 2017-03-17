@@ -3,7 +3,7 @@ use Tabula::Grammar-Testing;
 use Tabula::Fixture-Binder;
 use Tabula::Fixture-Class;
 
-my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
+my (&parser, $composer) = get-parser-emitting-Testopia( "Command" );
 my $context = $composer.Context;
 my $binder = $composer.Binder;
 say "\n";
@@ -25,16 +25,16 @@ $binder.add-class($check-class);
 
     is $context.current-scope.fixtures.elems, 0, "begin with no fixtures in scope";
 
-    my $parse = parser( "use a workflow", ">use: Advice workflow" );
+    my $parse = parser( ">use: Advice workflow" );
     is $context.current-scope.fixtures.elems, 1, "after a use command, fixture is in scope";
 
-    $parse = parser( "another workflow", ">use: Check workflow" );
+    $parse = parser( ">use: Check workflow" );
     is $context.current-scope.fixtures.elems, 2, "a different use command will add another fixture to scope";
 
-    $parse = parser( "duplicate workflow", ">use: Advice workflow" );
+    $parse = parser( ">use: Advice workflow" );
     is $context.current-scope.fixtures.elems, 2, "a duplicate use command does not add fixture again";
 
-    $parse = parser( "unfound workflow", ">use: No Such workflow" );
+    $parse = parser( ">use: No Such workflow" );
     is $context.current-scope.fixtures.elems, 2, "a use command not finding a workflow will (le duh) not add one";
 }
 
@@ -42,7 +42,7 @@ $binder.add-class($check-class);
     $context.open-scope("multi");
     is $context.current-scope.fixtures.elems, 0, "begin with no fixtures in scope";
 
-    my $parse = parser( "use comma-separated workflows", ">use: Advice workflow, check" );
+    my $parse = parser( ">use: Advice workflow, check" );
     is $context.current-scope.fixtures.elems, 2, "after use command with multiple elements, all fixtures are in scope";
 }
 

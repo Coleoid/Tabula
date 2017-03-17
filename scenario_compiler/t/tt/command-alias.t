@@ -1,7 +1,7 @@
 use Test;
 use Tabula::Grammar-Testing;
 
-my (&parser, $composer) = curry-parser-emitting-Testopia( "Command" );
+my (&parser, $composer) = get-parser-emitting-Testopia( "Command" );
 $composer.Context.file-name = "SampleScenario.scn";
 say "\n";
 
@@ -11,7 +11,7 @@ say "\n";
     #TODO: this becomes a file of checks
     #my $arse = parser( "unrecognized command", '>format c:' );
 
-    my $parse = parser( "simple alias", '>alias: "go #speed" means go at #speed for 4 hours' );
+    my $parse = parser( '>alias: "go #speed" means go at #speed for 4 hours' );
     ok $parse.defined, 'simple alias worked';
 
 
@@ -30,7 +30,7 @@ say "\n";
     .
     EOA
 
-    $parse = parser( "alias to a block", $alias-text );
+    $parse = parser( $alias-text );
     ok $parse.defined, 'block alias worked';
 
     my $alias = $composer.Context.find-alias('add employment actions for at');

@@ -2,7 +2,7 @@ use Test;
 use Tabula::Grammar-Testing;
 use Tabula::Fixture-Class;
 
-my (&parser, $actions) = curry-parser-emitting-Testopia( "Step" );
+my (&parser, $actions) = get-parser-emitting-Testopia( "Step" );
 my $context = $actions.Context;
 my $binder = $actions.Binder;
 

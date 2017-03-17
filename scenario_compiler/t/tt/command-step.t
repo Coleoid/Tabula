@@ -2,7 +2,7 @@ use Test;
 use Tabula::Grammar-Testing;
 use Tabula::Fixture-Class;
 
-my (&parser, $actions) = curry-parser-emitting-Testopia( "Action" );
+my (&parser, $actions) = get-parser-emitting-Testopia( "Action" );
 my $context = $actions.Context;
 say "\n";
 
@@ -15,11 +15,11 @@ if False  # Fantasy/Hypothetical code
     $context.RegisterLibrary($fixture);
     $context.AddLibraryToScope($fixture);
 
-    my $parse = parser( "simple step definition", '>step: foo => this is a step' );
+    my $parse = parser( '>step: foo => this is a step' );
 
     #TODO:  test that it exists where and as expected (not yet determined)
 
-    $parse = parser( "use the defined step", 'foo' );
+    $parse = parser( 'foo' );
     is $parse.made, 'Do(() =>     Advice.This_is_a_step(),     "SampleScenario.scn:1", @"Advice.This_is_a_step()" );',
         "a single-step definition is directly replaced with its target call";
 

@@ -2,7 +2,7 @@ use Test;
 use Tabula::Grammar-Testing;
 use Tabula::Code-Scribe :test-content;
 
-my (&parser, $actions) = curry-parser-emitting-Testopia("Scenario");
+my (&parser, $actions) = get-parser-emitting-Testopia("Scenario");
 my $context = $actions.Context;
 $context.file-name = "ScenarioFilename.scn";
 
@@ -12,7 +12,7 @@ sub are-SectionDeclarations($sequence, $outcome, $scenario, $expected-SDs) {
 
     my $scribe = $actions.Scribe;
     $scribe.clear-work();
-    my $parse = parser( $sequence, $scenario );
+    my $parse = parser( $scenario );
 
     is $scribe.show-sections, $expected-SDs, $expectation;
 }

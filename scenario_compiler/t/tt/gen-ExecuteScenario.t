@@ -2,7 +2,7 @@ use Test;
 use Tabula::Grammar-Testing;
 use Tabula::Code-Scribe :test-content;
 
-my (&parser, $actions) = curry-parser-emitting-Testopia("Scenario");
+my (&parser, $actions) = get-parser-emitting-Testopia("Scenario");
 my $context = $actions.Context;
 $context.file-name = "ScenarioFilename.scn";
 
@@ -16,7 +16,7 @@ sub does-scenario-contain($scenario, $expected-code, $outcome) {
     #  The slate is left dirty so that teacher (the unit tests) can
     # see the student's work.
 
-    my $parse = parser( $outcome, $scenario );
+    my $parse = parser( $scenario );
 
     is $scribe.trimmed-body-actions, $expected-code, $expectation;
 }

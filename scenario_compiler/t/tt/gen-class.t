@@ -3,7 +3,7 @@ use Tabula::Grammar-Testing;
 use Tabula::Fixture-Class;
 
 
-my (&parser, $actions) = curry-parser-emitting-Testopia("Scenario");
+my (&parser, $actions) = get-parser-emitting-Testopia("Scenario");
 my $context = $actions.Context;
 my $binder = $actions.Binder;
 $context.file-name = "ScenarioFilename.scn";
@@ -42,7 +42,7 @@ $context.file-name = "ScenarioFilename.scn";
     }
     EOC
 
-    my $parse = parser( "empty scenario", $scenario );
+    my $parse = parser( $scenario );
     my $output-class = $parse.made;
 
     is $output-class, $expected-class-output, "empty scenario creates compilable empty class";
@@ -116,7 +116,7 @@ $context.file-name = "ScenarioFilename.scn";
     }
     EOC
 
-    my $parse = parser( "empty scenario", $scenario );
+    my $parse = parser( $scenario );
     my $output-class = $parse.made;
 
     is $output-class, $expected-class-output, "simple scenario with paragraph and table works";

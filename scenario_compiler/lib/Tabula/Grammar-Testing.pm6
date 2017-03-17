@@ -8,7 +8,7 @@ module Grammar-Testing {
 
     multi sub skip( $desc, &code ) is export { skip $desc }
 
-    sub curry-parser-emitting-Tabula( $rule ) is export {
+    sub get-parser-emitting-Tabula( $rule ) is export {
         use Test;
         state $grammar = Tabula-Grammar.new;
         state $actions = Target-Echo.new;
@@ -32,16 +32,16 @@ module Grammar-Testing {
             .subst( /\h\h+ || \t/, ' ', :g ) # runs of ws -> single space
     }
 
-    sub curry-parser-emitting-Testopia( $rule ) is export {
+    sub get-parser-emitting-Testopia( $rule ) is export {
         use Test;
         my $grammar = Tabula-Grammar.new;
         my $actions = Target-Testopia.new;
 
         return (
-            sub ( $label, $input ) {
+            sub ( $input ) {
                 my $out = $grammar.parse( $input, :rule($rule), :actions($actions) );
                 if $out !~~ Match {
-                    ok $out, "[$label] $rule expected to parse";
+                    ok False, "The text [$input] did not parse as a $rule.";
                     return;
                 }
                 return $out;
@@ -50,18 +50,21 @@ module Grammar-Testing {
         );
     }
 
-    sub curry-parser-expecting-parse-fail( $rule ) is export {
+    sub get-parser-expecting-parse-fail( $rule ) is export {
         use Test;
         my $grammar = Tabula-Grammar.new;
         my $actions = Target-Testopia.new;
 
         return (
-            sub ( $command ) {
+            sub ( $input ) {
                 try {
-                    my $out = $grammar.parse( $command, :rule($rule), :actions($actions) );
-                    ok False, 'The text [' ~ $command ~ '] parsed as $rule, and it should not have.';
+                    my $out = $grammar.parse( $input, :rule($rule), :actions($actions) );
+                    ok False, 'The text [' ~ $input ~ "] parsed as a $rule, and it should not have.";
                     CATCH {
-                        default { return $out; }
+                        default {
+                            ok True, 'The text [' ~ $input ~ "] is not a $rule.";
+                            return .Str;
+                        }
                     }
                 }
             },
@@ -69,17 +72,4 @@ module Grammar-Testing {
         );
     }
 
-
-    sub curry-expect-parse-error(&parser) is export {
-        return
-            sub ($command, $message, $description) {
-                try {
-                    my $parse = parser( "expect parse failure of [$command]", $command );
-                    ok False, 'The text [' ~ $command ~ '] parsed, when it should not have.';
-                    CATCH {
-                        default { is .Str, $message, $description; }
-                    }
-                }
-            };
-    }
 }

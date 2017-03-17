@@ -2,7 +2,7 @@ use Test;
 use Tabula::Grammar-Testing;
 use Tabula::Fixture-Class;
 
-my (&parser, $actions) = curry-parser-emitting-Testopia( "Paragraph" );
+my (&parser, $actions) = get-parser-emitting-Testopia( "Paragraph" );
 my $context = $actions.Context;
 $context.file-name = "SampleScenario.scn";
 say "\n";
@@ -68,36 +68,36 @@ say "\n";
             }
     EO_testo
 
-    my $parse = parser( "Paragraph", $paragraph-source );
+    my $parse = parser( $paragraph-source );
     is $parse.made, $found-one-method, "paragraph output is a public method";
 
     $context.add-fixture($another-fixture);
-    $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( $paragraph-source );
     is $parse.made, $found-two-methods, "a second fixure in the same scope finds a second step";
 
     $context.open-scope('should not hide our Advice fixture');
-    $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( $paragraph-source );
     is $parse.made, $found-two-methods, "new scope does not hide outer scope fixtures";
 
     $context.add-fixture($check-fixture);
-    $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( $paragraph-source );
     is $parse.made, $found-three-methods, "the third step is now found in the child scope";
 
     $context.close-scope();
-    $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( $paragraph-source );
     is $parse.made, $found-two-methods, "third fixture went out of scope so we don't find third step";
 
     $context.open-scope('can override parent scope steps with a child scope');
     $context.add-fixture($overriding-fixture);
-    $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( $paragraph-source );
     is $parse.made, $found-two-different-methods, "can override parent scope steps with a child scope";
 
     $context.close-scope();
-    $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( $paragraph-source );
     is $parse.made, $found-two-methods, "overriding fixture went out of scope so we find the original methods";
 
     $context.add-fixture($overriding-fixture);
-    $parse = parser( "Paragraph", $paragraph-source );
+    $parse = parser( $paragraph-source );
     is $parse.made, $found-two-different-methods, "last fixture added wins signature collisions";
 }
 
@@ -121,7 +121,7 @@ say "\n";
             }
     EO_testo
 
-    my $parse = parser( "Paragraph", $paragraph-source );
+    my $parse = parser( $paragraph-source );
     is $parse.made, $labeled-para, "label represented in generated method";
 
 }

@@ -77,10 +77,9 @@ grammar Tabula-Grammar {
             || <parse-failure('Misformed "use", should look like: >use: Person Management, Employment')>
         ]
     }
-    rule Command-Failure {
-        # catch the word, fold it into message
-        hooga chaka
-    }
+    # rule Command-Failure {
+    #     \N*
+    # }
 
 
     rule  Phrases { <Phrase>+ % ',' }
@@ -93,6 +92,10 @@ grammar Tabula-Grammar {
     token String   { '"' $<Body> = [ <-["]>* ] '"' }  # TODO: single quotes, quote escaping
     token Variable { '#' <Word> }
     token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }
+
+    method Command-Failure($/) {
+        self.parse-failure('not a command: [>' ~ ~$/ ~ ']');
+    }
 
     method parse-failure($message = 'Parse failure') {
         my $parsed-so-far = self.target.substr(0, self.pos);

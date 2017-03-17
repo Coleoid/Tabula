@@ -29,7 +29,7 @@ my $method = $workflow.find-step-method('log out');
 ok $method.defined, "Found preloaded method";
 
 
-#   Really, these belong in fixture-class.t, just lazily piggybacking on setup here.
+#   Really, these belong in fixture-class.t, I'm just lazily piggybacking on the setup already done here.
 my $horse = Fixture-Class.new(class-name => "HorseWorkflow", parent => $workflow, namespace => 'foo');
 $method = $horse.find-step-method('log out');
 ok $method.defined, "Found inherited method";
