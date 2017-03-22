@@ -25,16 +25,16 @@ try {
 
 $workflow.add-method('Log_out()');
 
-my $method = $workflow.find-step-method('log out');
+my $method = $workflow.find-step-method-from-text('log out');
 ok $method.defined, "Found preloaded method";
 
 
 #   Really, these belong in fixture-class.t, I'm just lazily piggybacking on the setup already done here.
 my $horse = Fixture-Class.new(class-name => "HorseWorkflow", parent => $workflow, namespace => 'foo');
-$method = $horse.find-step-method('log out');
+$method = $horse.find-step-method-from-text('log out');
 ok $method.defined, "Found inherited method";
 
-$method = $horse.find-step-method('saw logs');
+$method = $horse.find-step-method-from-text('saw logs');
 nok $method.defined, "Correct behavior when no method to find";
 
 

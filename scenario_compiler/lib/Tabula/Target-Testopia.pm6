@@ -15,16 +15,6 @@ class Target-Testopia does Match-Helper {
         $!Binder  = Fixture-Binder.new;
     }
 
-    #REFAC:  Get this out, into Target-Testopia
-    sub get-Do-statement( $code, $source-location ) {
-        my $quoted-code = '@"' ~ $code.subst('"', '""', :g) ~ '"';
-
-        'Do(() =>     '
-            ~ $code ~ ',     "'
-            ~ $source-location ~ '", '
-            ~ $quoted-code ~ ' );';
-    }
-
     method normalized-name-CSharp() {
         $!Context.file-name.subst('.scn', '').subst('.tab', '')
     }
@@ -158,20 +148,45 @@ class Target-Testopia does Match-Helper {
         }
     }
 
-    #inline C#
-    method Step($match) {
-        my $source-location = $!Context.source-location($match);
+    my @words = Empty;
+    my @terms = Empty;
 
-        my $result = $!Context.resolve-step($match);
-        if $result {
-            $match.make( get-Do-statement( $result, $source-location ) );
+    # mature
+    method Step($match) {
+        my $location = $!Context.source-location($match);
+
+        my $key = key-from-words();
+        my ($fixture, $method) = $!Context.resolve-step($key);
+
+        if $method.defined {
+            my $call = $method.generate-call($fixture.instance-name, @terms);
+            my $step = $!Scribe.compose-step-statement($call, $location);
+            $match.make($step);
         }
         else {
-            #TODO: this is where suggestions of near-matches will go
-            my $stepText = $match.subst('"', '\"', :g);
-            $match.make( 'Unfound(     "' ~ $stepText ~ '",     "' ~ $source-location ~ '" );' );
+            $match.make($!Scribe.compose-unfound(~$match, $location));
         }
+
+        @words = Empty;
+        @terms = Empty;
     }
+
+    sub key-from-words() {
+        return @words.join() ~ '()';
+        #TODO: include and discriminate on the argument types
+        #return $flatName ~ '(' ~ 's' x $arg-count ~ ')';
+    }
+
+    method Step-Symbol($/) {
+
+        if $<Word>  {@words.push(~$<Word>.lc.subst("'", '', :g))}
+        if $<Terms> {@terms.push($<Terms><Term>[0].made)}
+            # Step-Symbol makes a (type, value) Pair?
+            # or simply a typed value, and later I snoof its type?
+        #TODO: write tests and code to actually handle multiple terms,
+        # now that I've got the grammar level prep work done.
+    }
+
 
     #echo
     method Symbol($/) {

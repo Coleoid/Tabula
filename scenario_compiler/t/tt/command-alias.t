@@ -5,7 +5,7 @@ my (&parser, $composer) = get-parser-emitting-Testopia( "Command" );
 $composer.Context.file-name = "SampleScenario.scn";
 say "\n";
 
-#if False
+if False
 {   diag "An alias command adds a findable step to the current scope";
 
     #TODO: this becomes a file of checks

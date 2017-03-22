@@ -137,19 +137,31 @@ class Code-Scribe {
     #  Composing code for paragraphs and tables of the scenario class,
     # and adding them to the ExecuteScenario() plan.
 
-    sub get-Do-statement( $code, $source-location ) {
+    sub get-Do-statement($code, $source-location) {
         my $quoted-code = '@"' ~ $code.subst('"', '""', :g) ~ '"';
         'Do(() =>     ' ~ $code
             ~ ',     "' ~ $source-location ~ '", ' ~ $quoted-code ~ ' );';
     }
 
+    method compose-step-statement($call, $location) {
+        return get-Do-statement($call, $location);
+    }
+
+    method compose-unfound($step-text, $location) {
+        my $text = $step-text.subst('"', '\"', :g);
+
+        #TODO: suggest near-matches
+        return 'Unfound(     "' ~ $text ~ '",     "' ~ $location ~ '" );';
+    }
+
+    #TODO
     method compose-not-implemented($messsage, $location) {
         return '';
     }
 
     method compose-set-statement($lhs, $rhs, $location) {
         my $command = 'var[' ~ $lhs ~ '] = ' ~ $rhs;
-        return get-Do-statement( $command, $location );
+        return get-Do-statement($command, $location);
     }
 
 

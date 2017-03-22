@@ -19,50 +19,26 @@ class Scope {
         }
     }
 
+    #TODO: you know it--aliases.
     has @.aliases;
-    method add-alias($alias) {
-        ...
+    method add-alias($alias)  { ... }
+    method find-alias($alias) { ... }
+
+
+    multi method resolve-step(Str $key) {
+        my ($fixture, $method) = self.find-step-method($key);
+        return ($fixture, $method) if $fixture.defined;
+
+        return self.parent.defined
+            ?? self.parent.resolve-step($key)
+            !! (Nil, Nil);
     }
 
-    method find-alias($alias) {
-        ...
-    }
-
-
-    method resolve-step($step) {
-        my $method-call = self.find-step-method($step);
-
-        return $method-call || (self.parent
-            ?? self.parent.resolve-step($step)
-            !! fail "No method matching ($step) found in scope.");
-    }
-
-    method find-step-method($match) {
-        my $key = key-from-match($match);
-
+    method find-step-method($key) {
         for @!fixtures -> $fixture {
-            my Fixture-Method $method = $fixture.find-step-method($key);# $fixture.methods{$key};
-            if $method.defined {
-                my $methodName = $method.name;
-                my $args = $method.args-from-match($match);
-                return $fixture.instance-name ~ '.' ~ $methodName ~ '(' ~ $args ~ ')';
-            }
+            my Fixture-Method $method = $fixture.find-step-method-from-key($key);
+            return ($fixture, $method) if $method.defined;
         }
-    }
-
-    sub key-from-match($match) {
-        my $arg-count = 0;
-        my $flatName = '';
-        for $match<Symbol> {
-            when .<Word> {$flatName ~= .<Word>.lc.subst("'", '', :g)}
-            when .<Term> {$arg-count++}
-        }
-
-        # say $flatName if $flatName ~~ /verify/;
-
-        #TODO: include and discriminate on the argument types
-        #return $flatName ~ '(' ~ 's' x $arg-count ~ ')';
-        return $flatName ~ '()';
     }
 
 }

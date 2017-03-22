@@ -15,11 +15,11 @@ $class.add-method($please);
 is $class.methods<pleasedontthe()>.definition, $please,
     "stores a method with string arguments";
 
-my $found = $class.find-step-method('This is a Step');
+my $found = $class.find-step-method-from-text('This is a Step');
 ok $found, "finds a method with no arguments";
 is $found.definition, $method.definition, "finds the _right_ method";
 
-my $unfound = $class.find-step-method('there is no such thing');
+my $unfound = $class.find-step-method-from-text('there is no such thing');
 nok $unfound, 'properly returns no method for no such method';
 
 done-testing;

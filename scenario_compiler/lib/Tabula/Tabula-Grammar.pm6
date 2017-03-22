@@ -31,11 +31,11 @@ grammar Tabula-Grammar {
     token Block-Begin { '...' }
     token Block-End   { '.' }
 
-    token Step { $<OptQ> = '? '? <Phrase> }
+    token Step { $<OptQ> = '? '? <Step-Phrase> }
     token Step-Phrase { <Step-Symbol>+ % \h+ }
     token Step-Symbol { <Word> || <Terms> }
     token Terms { <Term>+ % [',' \h*] }
-        # could force each set to be same type of Term, but payoff is dubious...
+        # could further constrain so that each set of terms were to be same type of Term, but payoff is dubious...
 
     rule Command {
         '>'

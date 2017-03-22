@@ -21,6 +21,11 @@ class Fixture-Method does JSON::Class {
         $!key = self.key-from-name-and-args($!name, $!args);
     }
 
+    method generate-call($fixture-name, @terms) {
+        my $args = @terms.join(', ');
+        return $fixture-name ~ '.' ~ $!name ~ '(' ~ $args ~ ')';
+    }
+
     sub name-and-args-from-signature($signature) {
         unless $signature ~~ / $<name> = [ \w+ ] $<sig> = ['(' .* ')'] / {
             die "I didn't understand the method signature:  $signature";

@@ -34,8 +34,8 @@ is $mvbw.class-name, 'MVBaseWorkflow', "got 'MVBaseWorkflow'";
 my Fixture-Class $work = $binder.get-class('workflow');
 is $work.class-name, 'Workflow', "got 'Workflow'";
 ok $work.methods.elems > 20, 'parsed Workflow methods properly';
-ok $work.find-step-method("verify proctor login failed").defined, "can find method directly in Workflow";
-ok $mvbw.find-step-method("verify proctor login failed").defined, "can find method on parent";
+ok $work.find-step-method-from-text("verify proctor login failed").defined, "can find method directly in Workflow";
+ok $mvbw.find-step-method-from-text("verify proctor login failed").defined, "can find method on parent";
 
 
 ok $cdfw.parent-name eq 'MVBaseWorkflow', "parent of ClassDescriptive is MVBaseWorkflow";
@@ -43,10 +43,10 @@ ok $ecw.parent-name eq 'MVBaseWorkflow', "parent of EditClass is MVBaseWorkflow"
 ok $mvbw.parent-name eq 'Workflow', "parent of MVBaseWorkflow is Workflow";
 nok $work.parent-name.defined, "parent of Workflow is undefined";
 
-ok $ecw.find-step-method("verify proctor login failed").defined, "can find method inherited two levels above";
-ok $ecw.find-step-method("Wait seconds").defined, "can find method inherited two levels above";
-ok $ecw.find-step-method("debugger break").defined, "inherited from first half of partial class";
-ok $ecw.find-step-method("click button").defined, "inherited from second half of partial class";
+ok $ecw.find-step-method-from-text("verify proctor login failed").defined, "can find method inherited two levels above";
+ok $ecw.find-step-method-from-text("Wait seconds").defined, "can find method inherited two levels above";
+ok $ecw.find-step-method-from-text("debugger break").defined, "inherited from first half of partial class";
+ok $ecw.find-step-method-from-text("click button").defined, "inherited from second half of partial class";
 
 ###############
 #my $mvcbw-FileName = $root ~ 'ViewImplementations\\MvcBaseWorkflow.cs';
