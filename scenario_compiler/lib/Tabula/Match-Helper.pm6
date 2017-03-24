@@ -11,7 +11,8 @@ role Match-Helper {
     }
 
     method source-location($match) {
-        self.file-name ~ ':' ~ self.line-of-match-start($match);
+        'no file' ~ ':' ~ self.line-of-match-start($match);
+        #(self.file-name // 'no file') ~ ':' ~ self.line-of-match-start($match);
     }
 
     method name-section($section-shape, $/) {

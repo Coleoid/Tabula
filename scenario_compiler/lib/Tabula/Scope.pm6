@@ -25,7 +25,7 @@ class Scope {
     method find-alias($alias) { ... }
 
 
-    multi method resolve-step(Str $key) {
+    method resolve-step(Str $key) {
         my ($fixture, $method) = self.find-step-method($key);
         return ($fixture, $method) if $fixture.defined;
 
@@ -36,7 +36,7 @@ class Scope {
 
     method find-step-method($key) {
         for @!fixtures -> $fixture {
-            my Fixture-Method $method = $fixture.find-step-method-from-key($key);
+            my Fixture-Method $method = $fixture.find-step-method($key);
             return ($fixture, $method) if $method.defined;
         }
     }

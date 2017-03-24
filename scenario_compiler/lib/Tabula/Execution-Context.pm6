@@ -26,15 +26,11 @@ class Execution-Context does Match-Helper {
         $!current-scope.add-fixture($fixture);
     }
 
-    method add-alias($alias) {
-        $!current-scope.add-alias($alias);
-    }
-
-    method find-alias($alias) {
-        $!current-scope.find-alias($alias);
-    }
-
     method resolve-step($key) {
         return $!current-scope.resolve-step($key);
     }
+
+    #TODO:  Aliasing
+    method add-alias($alias)  { $!current-scope.add-alias($alias); }
+    method find-alias($alias) { $!current-scope.find-alias($alias); }
 }

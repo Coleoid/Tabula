@@ -23,7 +23,7 @@ $context.add-fixture($fixture);
         "prefixed '?' is no problem";
 }
 
-#if False
+if False
 {   diag "Emitting arguments into fixture calls";
 
     my $parse = parser( 'please don\'t "kick" the "alligators"' );

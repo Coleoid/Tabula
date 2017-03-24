@@ -7,64 +7,73 @@ class Fixture-Method does JSON::Class {
 
     has Str $!name;
     method name() { $!name }
-    has Str $!args;
 
     has Str $!key;
     method key() { $!key }
 
-    has @!arg-types;
+    has @!param-types;
 
     #  Tabula presumes all methods are public void, and that this information
     # is stripped from the signature before being sent as the definition.
     submethod BUILD(:$!definition is required) {
-        ($!name, $!args) = name-and-args-from-signature($!definition);
-        $!key = self.key-from-name-and-args($!name, $!args);
+        @!param-types = param-types-from-definition($!definition);
+        $!name = name-from-definition($!definition);
+        $!key = self.key-from-name($!name);
     }
+
+    sub param-types-from-definition($definition) {
+
+        #TODO:  parse generics
+        #TODO:  recognize collections (List<T>, string [], et c.)
+        #TODO:  parse nullable as base type
+        #TODO:  parse default values
+        #TODO:  recognize defaulted args as optional
+        if not $definition ~~ / '(' \s*
+            $<args> = ( [ \s*
+                $<type> = [\S+] \s+
+                $<name> = [\S+]
+            ]* % ',' ) \s* ')' / {
+            die "    ? I didn't understand the argument list for:  $definition";
+        }
+
+        my @param-types = [];
+        for $<args><type> -> $type {
+            @param-types.push(~$type);
+        }
+
+        return @param-types;
+    }
+
+    sub name-from-definition($signature) {
+        unless $signature ~~ / $<name> = [ \w+ ] $<args> = ['(' .* ')'] / {
+            die "I didn't understand the method signature:  $signature";
+        }
+
+        return (~$<name>, ~$<args>);
+    }
+
+    method key-from-name($name) {
+        $name.lc.subst('workflow', '').subst('_', '', :g) ~ '()';
+    }
+
 
     method generate-call($fixture-name, @terms) {
         my $args = @terms.join(', ');
         return $fixture-name ~ '.' ~ $!name ~ '(' ~ $args ~ ')';
     }
 
-    sub name-and-args-from-signature($signature) {
-        unless $signature ~~ / $<name> = [ \w+ ] $<sig> = ['(' .* ')'] / {
-            die "I didn't understand the method signature:  $signature";
-        }
-
-        return (~$<name>, ~$<sig>);
-    }
-
-    method key-from-name-and-args($name, $args) {
-
-        my $name-key = $name.lc.subst('workflow', '').subst('_', '', :g);
-
-        #  Future:  Generic, nullable, optional, default values...
-        if not $args ~~ / '(' \s* $<args> = ( [ \s* $<type> = [\S+] \s+ $<name> = [\S+] ]* % ',' ) \s* ')' / {
-            die "    ? I didn't understand the argument list for:  $name$args";
-        }
-
-        for $<args><type> -> $type {
-            @!arg-types.push(~$type);
-        }
-
-        return $name-key ~ '()';
-    }
-
-
     method args-from-match($match) {
         my @args = $match<Symbol>
             .grep({.<Term>})
             .map({get-Term-string(.<Term>)});
 
-
-        return self.typed-args(@args);
-        #return join ', ', @args;
+        return self.typed-arg-text(@args);
     }
 
-    method typed-args(@args) {
+    method typed-arg-text(@args) {
         my @result;
 
-        for @!arg-types Z @args -> [$type, $arg] {
+        for @!param-types Z @args -> [$type, $arg] {
             given $type.lc {
                 when 'string' { @result.push( $arg ); }
                 when 'int'    {
@@ -80,7 +89,6 @@ class Fixture-Method does JSON::Class {
         return @result.join(', ');
     }
 
-
     #TODO:  Evaluate Number and Date types as those types when fitting
     sub get-Term-string($term) {
         given $term {
@@ -91,5 +99,4 @@ class Fixture-Method does JSON::Class {
             default          {fail "Unknown Term type"};
         }
     }
-
 }

@@ -184,7 +184,7 @@ class Target-Testopia does Match-Helper {
             # Step-Symbol makes a (type, value) Pair?
             # or simply a typed value, and later I snoof its type?
         #TODO: write tests and code to actually handle multiple terms,
-        # now that I've got the grammar level prep work done.
+        # now that I've got the grammar-level prep work done.
     }
 
 

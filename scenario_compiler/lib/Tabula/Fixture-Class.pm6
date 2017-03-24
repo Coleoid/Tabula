@@ -57,7 +57,7 @@ class Fixture-Class does JSON::Class {
     }
 
     method find-step-method-from-text($text) {
-        return self.find-step-method-from-key(key-from-step($text));
+        return self.find-step-method(key-from-step($text));
     }
 
     sub key-from-step($step) {
@@ -65,9 +65,9 @@ class Fixture-Class does JSON::Class {
         return $step.lc.subst(' ', '', :g) ~ '()';
     }
 
-    method find-step-method-from-key($key) {
+    method find-step-method($key) {
         return %.methods{$key} if %.methods{$key}.defined;
-        return $!parent.find-step-method-from-key($key) if $!parent.defined;
+        return $!parent.find-step-method($key) if $!parent.defined;
         return Nil;
     }
 }
