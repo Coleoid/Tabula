@@ -1,5 +1,5 @@
 =====================================================================
-===  Possible future work, with [effort N, value M] fibo estimates
+===  Possible future work, with [effort N, value M] poker estimates
 
 ---------------------------------------------------------------------
 ---  Internal to Tabula xpiler and runtime engine
@@ -21,8 +21,50 @@ Fix value lists parsing  [e2 v3]
     Affects:  Better build-time typing for float, double, decimal
 
 Inner/child workflows transparent to scenarios  [e5 v8] [Acadis]
-    Auto-inclusion of child workflow steps in namespace, generating
-     correct pass-through code
+    Include child workflow steps in parent workflow namespace
+        Identify child workflows
+        Store them in parent as children
+        Generate pass-through code
+    Eliminates boilerplate passthrough code for child workflows
+
+
+---------------------------------------------------------------------
+---  Main toolchain and core workflow
+
+Scenario .scn -> .tab conversion script updates to_tabula.pl  [e2 v5]
+    Resulting scripts compile on first pass
+        Running correctly is out of scope
+        Perhaps we collect failure results for later?
+    Obsolete features commented out (whole step or part?)
+        append extra findable comment like:  // OBSO_FEAT
+        <== fails (with message)
+        parens as comments
+    Unlocks:  New script to .scn -> .tab -> .cs -> .dll  [e2 v3]
+
+Visual Studio interactivity  [e?, v?]
+    Generate (and add to version control) new .cs to match new .tab
+    Rebuild existing .cs on update of .tab
+    Rebuild JSON of fixture when fixture .cs file saved
+    Language highlighting?
+    Auto-complete for steps (in scope?)
+    VSopia behavior?  Or keep using VSopia?
+    Possibly via Visual Studio Project System?
+        https://github.com/Microsoft/VSProjectSystem/blob/master/doc/overview/intro.md
+        For VS 2017...
+
+
+---------------------------------------------------------------------
+---  Further pragmatics/tool/workflow support
+
+Testopia runner local/MVC separate from Testopia/Tabula  [e.6 v1]
+    Blocks:  Running Tabula on FirstForward
+
+Fixture-Binder speed optimization
+    Serialize to JSON  [done]
+    Deserialize, resolve parents  [e2, v2]
+    Rebuild when .json older than .dll
+        Crossover:  VS
+        Even better to rebuild only per fixture class .cs file change
 
 
 ---------------------------------------------------------------------
@@ -55,42 +97,6 @@ Write run results in JSON  [e3 v5]
 
 
 ---------------------------------------------------------------------
----  External pragmatics/tool/workflow support
-
-Scenario .scn -> .tab conversion script updates to_tabula.pl  [e2 v5]
-    Resulting scripts compile on first pass
-        Running correctly is out of scope
-        Perhaps we collect failure results for later?
-    Obsolete features commented out (whole step or part?)
-        append extra findable comment like:  // OBSO_FEAT
-        <== fails (with message)
-        parens as comments
-    Unlocks:  New script to .scn -> .tab -> .cs -> .dll  [e2 v3]
-
-Testopia runner local/MVC separate from Testopia/Tabula  [e.6 v1]
-    Blocks:  Running Tabula on FirstForward
-
-
-Visual Studio interactivity  [e?, v?]
-    Generate (and add to version control) new .cs to match new .tab
-    Rebuild existing .cs on update of .tab
-    Rebuild JSON of fixture when fixture .cs file saved
-    Language highlighting?
-    Auto-complete for steps (in scope?)
-    VSopia behavior?  Or keep using VSopia?
-    Possibly via Visual Studio Project System?
-        https://github.com/Microsoft/VSProjectSystem/blob/master/doc/overview/intro.md
-        For VS 2017...
-
-Fixture-Binder speed optimization
-    Serialize to JSON  [done]
-    Deserialize, resolve parents  [e2, v2]
-    Rebuild when .json older than .dll
-        Crossover:  VS
-        Possible to rebuild only per fixture class .cs file?
-
-
----------------------------------------------------------------------
 ---  Speculating
 
 BDD styled >when: and >then:
@@ -102,10 +108,10 @@ BDD styled >when: and >then:
 ---------------------------------------------------------------------
 ---  Low value cold file
 
-Overload resolution  [e3 v0?]
-    Quite possibly unused
+Overload resolution  [e3 v0]
+    Seems unused--more value if used.
 
 Numeric column indicators (#1, #2, et c.)  [e1 v1]
 
-Colon optional after paragraph label  [e1 v0]
+Colon optional after paragraph label  [e1 v.6]
     (then steps cannot start with string, not a biggie)
