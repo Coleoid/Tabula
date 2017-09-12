@@ -1,1 +1,2 @@
-cmd: echo Hello, world!
+cwd: k:\code\Tabula\scenario_compiler
+cmd: perl6 -c tabula.p6

@@ -95,13 +95,8 @@ class Target-Testopia does Match-Helper {
         make $!Scribe.compose-paragraph( $name, $label, $statements );
     }
 
-    method Para-Open($) {
-        $!Context.open-scope('');
-    }
-
-    method Para-Close($) {
-        $!Context.close-scope();
-    }
+    method Para-Open($)  { $!Context.open-scope('Paragraph'); }
+    method Para-Close($) { $!Context.close-scope(); }
 
     # mature
     method Phrase($/) {

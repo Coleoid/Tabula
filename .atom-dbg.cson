@@ -1,0 +1,3 @@
+tabula:
+  debugger: 'dbg-p6'
+  cwd: 'scenario_compiler\\tabula'

@@ -7,12 +7,12 @@ grammar Tabula-Grammar {
     token ws { \h* }
     rule  Comment { '//' \N* }
 
-    rule  Scenario { [:i scenario] ':' <String> \n <Section>* }
-    token Section { <Break-Line> || <Document> || <Table> || <Paragraph> }
+    rule  Scenario   { [:i scenario] ':' <String> \n <Section>* }
+    token Section    { <Break-Line> || <Document> || <Table> || <Paragraph> }
     token Break-Line { ^^ <.Comment>? \n }
-    rule  Document { 'start_doc' <String>? \n .*? \n 'end_doc' }  #  crappy first draft placeholder
+    rule  Document   { 'start_doc' <String>? \n .*? \n 'end_doc' }  #  crappy first draft placeholder
 
-    rule Table { <Table-Label>? <Table-Header> <Table-Row>* }
+    rule Table        { <Table-Label>? <Table-Header> <Table-Row>* }
     rule Table-Label  { '===' <Phrase> '===' \n }
     rule Table-Header { '[' <Table-Cells> ']' \n }
     rule Table-Row    { :my $*Cells-Context = 'Row'; '|' <Table-Cells> \n }

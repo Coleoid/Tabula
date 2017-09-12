@@ -1,8 +1,9 @@
 use v6;
 use MONKEY-SEE-NO-EVAL;
-use JSON::Class;
+#use JSON::Class;
 
-class Fixture-Method does JSON::Class {
+#class Fixture-Method does JSON::Class {
+class Fixture-Method {
     has Str $.definition is rw;
 
     has Str $!name;
@@ -23,8 +24,8 @@ class Fixture-Method does JSON::Class {
 
     sub param-types-from-definition($definition) {
 
-        #TODO:  parse generics
-        #TODO:  recognize collections (List<T>, string [], et c.)
+        #TODO:  parse generics (I know of no nested generics in Testopia...)
+        #TODO:  recognize collection types (List<T>, string [], et c.)
         #TODO:  parse nullable as base type
         #TODO:  parse default values
         #TODO:  recognize defaulted args as optional
@@ -56,7 +57,6 @@ class Fixture-Method does JSON::Class {
         $name.lc.subst('workflow', '').subst('_', '', :g) ~ '()';
     }
 
-
     method generate-call($fixture-name, @terms) {
         my $args = @terms.join(', ');
         return $fixture-name ~ '.' ~ $!name ~ '(' ~ $args ~ ')';
@@ -73,17 +73,17 @@ class Fixture-Method does JSON::Class {
     method typed-arg-text(@args) {
         my @result;
 
-        for @!param-types Z @args -> [$type, $arg] {
+        for @!param-types Z @args -> [$type, $val] {
+            my Str $arg;
             given $type.lc {
-                when 'string' { @result.push( $arg ); }
-                when 'int'    {
-                    my $result = ($arg ~~ /^var/)
-                        ?? $arg ~ '.To<' ~ $type ~ '>()'
-                        !! $arg.subst('"', '', :g);
-                    @result.push( $result );
+                when 'int'    { $arg = ($val ~~ /^var/)
+                    ?? $val ~ '.To<int>()'
+                    !! $val.subst('"', '', :g);
                 }
-                default       { @result.push( $arg ~ '.To<' ~ $type ~ '>()' ); }
+                when 'string' { $arg = $val }
+                default       { $arg = $val ~ '.To<' ~ $type ~ '>()' }
             }
+            @result.push( $arg );
         }
 
         return @result.join(', ');
