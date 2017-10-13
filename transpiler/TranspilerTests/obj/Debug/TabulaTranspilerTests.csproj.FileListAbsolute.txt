@@ -1,0 +1,9 @@
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\bin\Debug\TabulaTranspilerTests.dll
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\bin\Debug\TabulaTranspilerTests.pdb
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\bin\Debug\nunit.framework.dll
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\bin\Debug\TabulaTranspiler.dll
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\bin\Debug\TabulaTranspiler.pdb
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\obj\Debug\TabulaTranspilerTests.csprojResolveAssemblyReference.cache
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\obj\Debug\TabulaTranspilerTests.csproj.CoreCompileInputs.cache
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\obj\Debug\TabulaTranspilerTests.dll
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspilerTests\obj\Debug\TabulaTranspilerTests.pdb

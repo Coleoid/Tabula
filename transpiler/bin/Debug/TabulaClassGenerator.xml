@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TabulaClassGenerator</name>
+    </assembly>
+    <members>
+        <member name="T:Tabula.BaseCodeGenerator">
+            <summary>
+            A managed wrapper for VS's IVsSingleFileGenerator, which is
+            a custom tool invoked at design time which takes a file as input
+            and provide a new file's text as output.
+            </summary>
+        </member>
+        <member name="M:Tabula.BaseCodeGenerator.Microsoft#VisualStudio#Shell#Interop#IVsSingleFileGenerator#DefaultExtension(System.String@)">
+            <summary>
+            Implements the IVsSingleFileGenerator.DefaultExtension method. 
+            Returns the extension of the generated file
+            </summary>
+            <param name="pbstrDefaultExtension">Out parameter, will hold the extension that is to be given to the output file name. The returned extension must include a leading period</param>
+            <returns>S_OK if successful, E_FAIL if not</returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGenerator.Microsoft#VisualStudio#Shell#Interop#IVsSingleFileGenerator#Generate(System.String,System.String,System.String,System.IntPtr[],System.UInt32@,Microsoft.VisualStudio.Shell.Interop.IVsGeneratorProgress)">
+            <summary>
+            Implements the IVsSingleFileGenerator.Generate method.
+            Executes the transformation and returns the newly generated output file, whenever a custom tool is loaded, or the input file is saved
+            </summary>
+            <param name="wszInputFilePath">The full path of the input file. May be a null reference (Nothing in Visual Basic) in future releases of Visual Studio, so generators should not rely on this value</param>
+            <param name="bstrInputFileContents">The contents of the input file. This is either a UNICODE BSTR (if the input file is text) or a binary BSTR (if the input file is binary). If the input file is a text file, the project system automatically converts the BSTR to UNICODE</param>
+            <param name="wszDefaultNamespace">This parameter is meaningful only for custom tools that generate code. It represents the namespace into which the generated code will be placed. If the parameter is not a null reference (Nothing in Visual Basic) and not empty, the custom tool can use the following syntax to enclose the generated code</param>
+            <param name="rgbOutputFileContents">[out] Returns an array of bytes to be written to the generated file. You must include UNICODE or UTF-8 signature bytes in the returned byte array, as this is a raw stream. The memory for rgbOutputFileContents must be allocated using the .NET Framework call, System.Runtime.InteropServices.AllocCoTaskMem, or the equivalent Win32 system call, CoTaskMemAlloc. The project system is responsible for freeing this memory</param>
+            <param name="pcbOutput">[out] Returns the count of bytes in the rgbOutputFileContent array</param>
+            <param name="pGenerateProgress">A reference to the IVsGeneratorProgress interface through which the generator can report its progress to the project system</param>
+            <returns>If the method succeeds, it returns S_OK. If it fails, it returns E_FAIL</returns>
+        </member>
+        <member name="P:Tabula.BaseCodeGenerator.FileNameSpace">
+            <summary> Namespace for the file </summary>
+        </member>
+        <member name="P:Tabula.BaseCodeGenerator.InputFilePath">
+            <summary> File-path for the input file </summary>
+        </member>
+        <member name="P:Tabula.BaseCodeGenerator.CodeGeneratorProgress">
+            <summary> Interface to the VS shell object for reporting our progress while generating </summary>
+        </member>
+        <member name="M:Tabula.BaseCodeGenerator.GetDefaultExtension">
+            <summary> Get the default extension for this generator </summary>
+            <returns>String with the default extension for this generator</returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGenerator.GenerateCode(System.String)">
+            <summary> Generate code given the input file </summary>
+            <param name="inputFileContent">File contents as a string</param>
+            <returns>The generated code file as a byte-array</returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGenerator.GeneratorError(System.UInt32,System.String,System.UInt32,System.UInt32)">
+            <summary> Communicate an error via the shell callback mechanism </summary>
+            <param name="level">Level or severity</param>
+            <param name="message">Text displayed to the user</param>
+            <param name="line">Line number of error</param>
+            <param name="column">Column number of error</param>
+        </member>
+        <member name="M:Tabula.BaseCodeGenerator.GeneratorWarning(System.UInt32,System.String,System.UInt32,System.UInt32)">
+            <summary> Communicate a warning via the shell callback mechanism </summary>
+            <param name="level">Level or severity</param>
+            <param name="message">Text displayed to the user</param>
+            <param name="line">Line number of warning</param>
+            <param name="column">Column number of warning</param>
+        </member>
+        <member name="T:Tabula.BaseCodeGeneratorWithSite">
+            <summary>
+            Base code generator with site implementation
+            </summary>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.Microsoft#VisualStudio#OLE#Interop#IObjectWithSite#SetSite(System.Object)">
+            <summary> SetSite method of IOleObjectWithSite </summary>
+            <param name="pUnkSite">site for this object to use</param>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.Microsoft#VisualStudio#OLE#Interop#IObjectWithSite#GetSite(System.Guid@,System.IntPtr@)">
+            <summary>GetSite method of IOleObjectWithSite</summary>
+            <param name="riid">interface to get</param>
+            <param name="ppvSite">IntPtr in which to stuff return value</param>
+        </member>
+        <member name="P:Tabula.BaseCodeGeneratorWithSite.SiteServiceProvider">
+            <summary>Demand-creates a ServiceProvider</summary>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetService(System.Guid)">
+            <summary>Get a service by its GUID</summary>
+            <param name="serviceGuid">GUID of service to retrieve</param>
+            <returns>An object that implements the requested service</returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetService(System.Type)">
+            <summary>
+            Pass-through to the SiteServiceProvider
+            </summary>
+            <param name="serviceType">Type of service to retrieve</param>
+            <returns>An implementation of the requested service</returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetCodeProvider">
+            <summary> Lazy init a C# CodeDomProvider </summary>
+            <returns> This code generator's CodeDomProvider instance </returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetDefaultExtension">
+            <summary>
+            Gets the default extension of the output file from the CodeDomProvider
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetProjectItem">
+            <summary>
+            Returns the EnvDTE.ProjectItem object that corresponds to the project item the code 
+            generator was called on
+            </summary>
+            <returns>The EnvDTE.ProjectItem of the project item the code generator was called on</returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetProject">
+            <summary>
+            Returns the EnvDTE.Project object of the project containing the project item the code 
+            generator was called on
+            </summary>
+            <returns>
+            The EnvDTE.Project object of the project containing the project item the code generator was called on
+            </returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetVSProjectItem">
+            <summary>
+            Returns the VSLangProj.VSProjectItem object that corresponds to the project item the code 
+            generator was called on
+            </summary>
+            <returns>The VSLangProj.VSProjectItem of the project item the code generator was called on</returns>
+        </member>
+        <member name="M:Tabula.BaseCodeGeneratorWithSite.GetVSProject">
+            <summary>
+            Returns the VSLangProj.VSProject object of the project containing the project item the code 
+            generator was called on
+            </summary>
+            <returns>
+            The VSLangProj.VSProject object of the project containing the project item 
+            the code generator was called on
+            </returns>
+        </member>
+        <member name="T:Tabula.TabulaClassGenerator">
+            <summary>
+            This is the generator class. 
+            Set the 'Custom Tool' property of a Tabula scenario to "TabulaClassGenerator". 
+            The GenerateCode function will be called on scenario save, receiving the text of the scenario,
+            and returning byte[] of the text of the generated class to the VS project system.
+            </summary>
+        </member>
+        <member name="M:Tabula.TabulaClassGenerator.GenerateCode(System.String)">
+            <summary>
+            Connector between VS Custom Tool extensibility point and the Tabula transpiler
+            </summary>
+            <param name="inputFileContent">Content of the input file</param>
+            <returns>Generated file as a byte array</returns>
+        </member>
+    </members>
+</doc>

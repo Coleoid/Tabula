@@ -1,0 +1,8 @@
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\bin\Debug\TabulaTranspiler.dll
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\bin\Debug\TabulaTranspiler.pdb
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\obj\Debug\TabulaTranspiler.csprojResolveAssemblyReference.cache
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\obj\Debug\TabulaTranspiler.csproj.CoreCompileInputs.cache
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\obj\Debug\TabulaTranspiler.dll
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\obj\Debug\TabulaTranspiler.pdb
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\bin\Debug\System.ValueTuple.dll
+K:\code\Testopia\TabulaClassGenerator\TabulaTranspiler\bin\Debug\System.ValueTuple.xml

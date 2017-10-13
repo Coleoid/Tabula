@@ -1,0 +1,8 @@
+K:\code\Tabula\transpiler\Transpiler\bin\Debug\Transpiler.dll
+K:\code\Tabula\transpiler\Transpiler\bin\Debug\Transpiler.pdb
+K:\code\Tabula\transpiler\Transpiler\bin\Debug\System.ValueTuple.dll
+K:\code\Tabula\transpiler\Transpiler\bin\Debug\System.ValueTuple.xml
+K:\code\Tabula\transpiler\Transpiler\obj\Debug\Transpiler.csprojResolveAssemblyReference.cache
+K:\code\Tabula\transpiler\Transpiler\obj\Debug\Transpiler.csproj.CoreCompileInputs.cache
+K:\code\Tabula\transpiler\Transpiler\obj\Debug\Transpiler.dll
+K:\code\Tabula\transpiler\Transpiler\obj\Debug\Transpiler.pdb
