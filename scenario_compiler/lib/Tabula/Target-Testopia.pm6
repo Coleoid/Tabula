@@ -5,12 +5,12 @@ use Tabula::Fixture-Binder;
 use Tabula::Match-Helper;
 
 class Target-Testopia does Match-Helper {
-    has Execution-Context $.Context;
-    has Code-Scribe       $.Scribe;
-    has Fixture-Binder    $.Binder;
+    has Compile-Context $.Context;
+    has Code-Scribe     $.Scribe;
+    has Fixture-Binder  $.Binder;
 
     submethod BUILD {
-        $!Context = Execution-Context.new;
+        $!Context = Compile-Context.new;
         $!Scribe  = Code-Scribe.new;
         $!Binder  = Fixture-Binder.new;
     }
@@ -42,11 +42,17 @@ class Target-Testopia does Match-Helper {
 
     #nn?
     method Command($/) {
-        # Set emits code back into the streams
         make ($<Command-Use> || $<Command-Tag> || $<Command-Set>).made
     }
 
-    # mature
+    # 'Alias' creates a compile-time alias which is expanded to step(s)
+    #  during compilation
+    method Command-Alias($/) {
+        $!Context.add-alias($/);
+    }
+
+    # 'Set' places a value in the current scope each time it is executed
+    #  at run-time
     method Command-Set($/) {
         my $source-location = $!Context.source-location($/);
 
@@ -58,19 +64,16 @@ class Target-Testopia does Match-Helper {
         make $!Scribe.compose-set-statement($lhs, $rhs, $source-location);
     }
 
-    #--
-    method Command-Alias($/) {
-        $!Context.add-alias($/);
-    }
-
-    #NI
+    # 'Tag' will add tags to the current scenario, paragraph, step,
+    #  table, or row, for future effects
     method Command-Tag($/) {
         my $source-location = $!Context.source-location($/);
         my $cmd = $<PhraseList>.elems == 1 ?? 'tag' !! 'tags';
         make $!Scribe.compose-not-implemented(">$cmd: $<Phrases>", $source-location);
     }
 
-    # mature
+    # 'Use' imports a fixture's methods into the current
+    #  compile-time scope for step resolution
     method Command-Use($/) {
         for $<Phrases><Phrase> -> $fixture-label {
             my $fixture = $!Binder.get-class(~$fixture-label);
@@ -95,8 +98,8 @@ class Target-Testopia does Match-Helper {
         make $!Scribe.compose-paragraph( $name, $label, $statements );
     }
 
-    method Para-Open($)  { $!Context.open-scope('Paragraph'); }
-    method Para-Close($) { $!Context.close-scope(); }
+    method Para-Open($)  { $!Context.open-paragraph('Paragraph'); }
+    method Para-Close($) { $!Context.close-paragraph(); }
 
     # mature
     method Phrase($/) {

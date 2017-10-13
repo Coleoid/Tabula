@@ -19,7 +19,7 @@ role Match-Helper {
         my $start-line = self.line-of-match-start($/);
         my $end-line = $start-line + self.lines-in-match($/) - 2;
 
-        sprintf("%s_from_%03d_to_%03d", $section-shape, $start-line, $end-line);
+        sprintf("%s_lines_%03d_to_%03d", $section-shape, $start-line, $end-line);
     }
 
 }

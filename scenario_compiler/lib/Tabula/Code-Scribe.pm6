@@ -1,6 +1,7 @@
 use v6;
 
-#  Normalizing join, to improve output sanity
+#  Normalizing join, to improve output sanity, because generated code
+#   doesn't have to look like crap.
 multi sub njoin( Int $count, *@elements, :$delim = "\n" )
     is export(:njoin) {
     return njoin( @elements, delim => $delim x $count );

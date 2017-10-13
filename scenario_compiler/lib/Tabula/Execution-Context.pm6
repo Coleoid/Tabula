@@ -2,7 +2,7 @@ use v6;
 use Tabula::Scope;
 use Tabula::Match-Helper;
 
-class Execution-Context does Match-Helper {
+class Compile-Context does Match-Helper {
     has str $.file-name is rw;
 
     submethod BUILD {
@@ -16,10 +16,16 @@ class Execution-Context does Match-Helper {
             parent => $!current-scope
         );
     }
+    method open-paragraph() {
+        open-scope('Paragraph');
+    }
 
     method close-scope() {
-        $!current-scope // fail "trying to end a scope where there is none.";
+        $!current-scope.parent // fail "trying to end a scope where there is none.";
         $!current-scope = $!current-scope.parent;
+    }
+    method close-paragraph() {
+        close-scope();
     }
 
     method add-fixture($fixture) {

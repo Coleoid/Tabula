@@ -7,10 +7,10 @@ grammar Tabula-Grammar {
     token ws { \h* }
     rule  Comment { '//' \N* }
 
-    rule  Scenario   { [:i scenario] ':' <String> \n <Section>* }
-    token Section    { <Break-Line> || <Document> || <Table> || <Paragraph> }
-    token Break-Line { ^^ <.Comment>? \n }
-    rule  Document   { 'start_doc' <String>? \n .*? \n 'end_doc' }  #  crappy first draft placeholder
+    rule  Scenario    { [:i scenario] ':' <String> \n <Section>* }
+    token Section     { <Break-Line> || <Document> || <Table> || <Paragraph> }
+    token Break-Line  { ^^ <.Comment>? \n }
+    rule  Document    { 'start_doc' <String>? \n .*? \n 'end_doc' }  #  crappy first draft placeholder
 
     rule Table        { <Table-Label>? <Table-Header> <Table-Row>* }
     rule Table-Label  { '===' <Phrase> '===' \n }
@@ -20,21 +20,22 @@ grammar Tabula-Grammar {
     rule Table-Cell   { :my $*Phrase-Context = 'Cell'; <Phrases> || <Empty-Cell> }
     token Empty-Cell  { \h* }
 
-    rule  Paragraph  { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
-    token Para-Open  { <?> }
-    token Para-Close { <?> }
+    rule  Paragraph   { <Paragraph-Label>? <.Para-Open> <Statement>+ <.Para-Close> }
+    token Para-Open   { <?> }
+    token Para-Close  { <?> }
     rule  Paragraph-Label { <String> ':' \n }
-    rule  Statement  { <Action> <Comment>? \n }
-    rule  Action     { <Block> || <Step> || <Command> }
+    rule  Statement   { <Action> <Comment>? \n }
+    rule  Action      { <Block> || <Step> || <Command> }
+    rule  Executable  { <Block> || <Step> }
 
     rule Block { <String>? <Block-Begin> \n <Section>+ <Block-End> }
     token Block-Begin { '...' }
     token Block-End   { '.' }
 
-    token Step { $<OptQ> = '? '? <Step-Phrase> }
+    token Step        { $<OptQ> = '? '? <Step-Phrase> }
     token Step-Phrase { <Step-Symbol>+ % \h+ }
     token Step-Symbol { <Word> || <Terms> }
-    token Terms { <Term>+ % [',' \h*] }
+    token Terms       { <Term>+ % [',' \h*] }
         # could further constrain so that each set of terms were to be same type of Term, but payoff is dubious...
 
     rule Command {
@@ -45,15 +46,15 @@ grammar Tabula-Grammar {
     rule Command-Alias {
         alias ':' [
             [   || <String>
-                || <rule-failure('>alias: command', 'you to do it right')>
+                || <rule-failure('>alias: command', 'a quoted string for the alias name')>
             ]
             [   || means
                 || is
                 || to
-                || <rule-failure('>alias: command', "'means', 'is', or 'to'")>
+                || <rule-failure('>alias: command', "'means', 'is', or 'to' separating the name from its value")>
             ]
-            [   || <Term>
-                || <rule-failure('>alias: command', 'either a single step or a block')>
+            [   || <Executable;>
+                || <rule-failure('>alias: command', 'either a single step or a block for the alias value')>
             ]
         ]
     }
@@ -90,7 +91,7 @@ grammar Tabula-Grammar {
     rule  Phrases { <Phrase>+ % ',' }
     rule  Phrase  { <Symbol>+ % \h+ }
     token Symbol  { <Word> || <Term> }
-    token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }
+    token Word    { [<:Letter> || <[ _ ]> ] [\w || <[ _ \' \- ]>] * }
     token Term    { [ <Date> || <Number> || <String> || <Variable> ] }
 
     token Number   { <[+-]>? [[\d+ ['.' \d*]?] || ['.' \d+]] }
