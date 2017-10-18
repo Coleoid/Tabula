@@ -57,19 +57,43 @@ namespace Tabula
 
         public CST.Section ParseSection(ParserState state)
         {
-            CST.Section section = new CST.Section();
+            int rollback = state.Position;
+            CST.Section section;
 
             var tags = ParseTags(state);
+
+            var header = ParseSectionHeader(state);
+            if (header == null)
+            {
+                state.Position = rollback;
+                return null;
+            }
 
             section = ParseParagraph(state);
 
             if (section == null)
                 section = ParseTable(state);
 
-            //TODO stick the tags on
+            if (section == null)
+            {
+                state.Position = rollback;
+                return null;
+            }
+
+            section.Label = header.Text;
+            section.Tags = tags;
 
             return section;
         }
+
+        public CST.Header ParseSectionHeader(ParserState state)
+        {
+            if (state.NextIs(TokenType.SectionHeader))
+                return new CST.Header(state.Take());
+            else
+                return null;
+        }
+
 
         public CST.Paragraph ParseParagraph(ParserState state)
         {

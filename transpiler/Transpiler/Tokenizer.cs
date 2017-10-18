@@ -15,7 +15,7 @@ namespace Tabula
         Number,
         String,
         Variable,
-
+        SectionHeader,
     }
 
     public class Token

@@ -42,17 +42,31 @@ namespace Tabula.CST
         public List<Symbol> Symbols { get; }
     }
 
-    public class Symbol
+    public class TokenWrap
     {
         //  starting down a slippery slope!  EEK and such.
         private Token token;
 
-        public Symbol(Token token)
+        public TokenWrap(Token token)
         {
             this.token = token;
         }
 
         public TokenType Type { get => token.Type; }
         public string Text { get => token.Text; }
+    }
+
+    public class Symbol : TokenWrap
+    {
+        public Symbol(Token token)
+            : base(token)
+        { }
+    }
+
+    public class Header : TokenWrap
+    {
+        public Header(Token token)
+            : base(token)
+        { }
     }
 }
