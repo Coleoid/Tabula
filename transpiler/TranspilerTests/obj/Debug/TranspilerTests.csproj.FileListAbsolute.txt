@@ -1,8 +1,0 @@
-K:\code\Tabula\transpiler\TranspilerTests\bin\Debug\TranspilerTests.dll
-K:\code\Tabula\transpiler\TranspilerTests\bin\Debug\TranspilerTests.pdb
-K:\code\Tabula\transpiler\TranspilerTests\bin\Debug\Transpiler.dll
-K:\code\Tabula\transpiler\TranspilerTests\bin\Debug\Transpiler.pdb
-K:\code\Tabula\transpiler\TranspilerTests\obj\Debug\TranspilerTests.csprojResolveAssemblyReference.cache
-K:\code\Tabula\transpiler\TranspilerTests\obj\Debug\TranspilerTests.csproj.CoreCompileInputs.cache
-K:\code\Tabula\transpiler\TranspilerTests\obj\Debug\TranspilerTests.dll
-K:\code\Tabula\transpiler\TranspilerTests\obj\Debug\TranspilerTests.pdb

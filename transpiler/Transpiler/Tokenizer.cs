@@ -29,22 +29,49 @@ namespace Tabula
             this.Type = type;
             this.Text = text;
         }
+
+        public Token(TokenType type, List<string> parts)
+        {
+            this.Type = type;
+            this.Parts = parts;
+        }
     }
 
     public class Tokenizer
     {
-        Regex rxScenarioLabel = new Regex("Scenario: *(.*)");
+        public List<string> Warnings { get; set; }
+
+        //  Token regexes need to be start-anchored
+        Regex rxWS = new Regex("^(\\s*)");
+        Regex rxScenarioLabel = new Regex("^Scenario: *(.*)");
+        Regex rxString = new Regex("^'([^']*)'");
+
+        public Tokenizer()
+        {
+            Warnings = new List<string>();
+        }
 
         public List<Token> Tokenize(string inputText)
         {
             var Tokens = new List<Token>();
             int position = 0;
 
+            string remainingText = inputText.Substring(position);
 
             while (position < inputText.Length)
             {
-                //  A series something like...
-                var match = rxScenarioLabel.Match(inputText, position);
+                remainingText = inputText.Substring(position);
+
+                //  First, nibble off leading whitespace
+                var match = rxWS.Match(remainingText);
+                position += match.Length;
+                remainingText = inputText.Substring(position);
+
+
+                //  Then, a series of patterns try to match at the cursor position.
+                //  On a match, we create the token, advance the cursor, and start again.
+
+                match = rxScenarioLabel.Match(remainingText);
                 if (match.Success)
                 {
                     Tokens.Add(new Token(TokenType.ScenarioLabel, match.Groups[1].Value));
@@ -52,7 +79,24 @@ namespace Tabula
                     continue;
                 }
 
+                match = rxString.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.String, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
+                //  Finally, if none of the token patterns matched at the cursor position, fail.
+                //  Right now, that's simply 'advance to end of input', to ignore everything
+                //  at and after the unrecognized input.
+                Warnings.Add($"Unrecognized token at position {position}.");
                 position = inputText.Length;
+
+                //TODO: Fail softer.
+                //  Make it consume one 'word' instead, and insert an "Unrecognized" token,
+                //  as an attempt to recover from the problem.  Needs some mature problem reporting,
+                //  first, or it will cause "hilarious" scenario-writer agony.
             }
 
             return Tokens;

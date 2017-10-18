@@ -1,2 +1,0 @@
-K:\code\Tabula\transpiler\StudioExtension\obj\Debug\StudioExtension.csprojResolveAssemblyReference.cache
-K:\code\Tabula\transpiler\StudioExtension\obj\Debug\StudioExtension.csproj.CoreCompileInputs.cache
