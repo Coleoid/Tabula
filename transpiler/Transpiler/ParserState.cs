@@ -24,38 +24,27 @@ namespace Tabula
             return AtEnd ? null : Tokens[Position];
         }
 
+        public bool NextIs(TokenType tokenType)
+        {
+            return Peek()?.Type == tokenType;
+        }
+
         public Token Take()
         {
             return AtEnd ? null : Tokens[Position++];
         }
 
-        public bool NextIs(string text)
+        internal Token Take(TokenType tokenType)
         {
-            return Peek().Text == text;
-        }
-        public bool NextIs(TokenType tokenType)
-        {
-            return Peek().Type == tokenType;
+            return NextIs(tokenType)
+                ? Take()
+                : null;
         }
 
-        internal Token TakeNextIs(TokenType tokenType, string exceptionMessage)
+        internal Token Take(TokenType tokenType, string exceptionMessage)
         {
             if (NextIs(tokenType)) return Take();
             throw new Exception(exceptionMessage);
-        }
-
-        internal string TextIfType(TokenType tokenType)
-        {
-            return NextIs(tokenType)
-                ? Take().Text
-                : null;
-        }
-
-        internal List<string> PartsIfType(TokenType tokenType)
-        {
-            return NextIs(tokenType)
-                ? Take().Parts
-                : null;
         }
     }
 }

@@ -3,17 +3,20 @@ using System.Collections.Generic;
 
 namespace Tabula
 {
-    [TestFixture]
-    public class ParserTests
+    public class ParserTestBase
     {
-        Parser parser;
+        protected Parser parser;
 
         [SetUp]
         public void SetUp()
         {
             parser = new Parser();
         }
+    }
 
+    [TestFixture]
+    public class ParserTests : ParserTestBase
+    {
         [Test]
         public void Term()
         {
@@ -25,6 +28,5 @@ namespace Tabula
             Assert.That(cst.Type, Is.EqualTo(TokenType.Date));
             Assert.That(cst.Text, Is.EqualTo("09/30/1966"));
         }
-
     }
 }

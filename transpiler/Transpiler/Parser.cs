@@ -24,7 +24,7 @@ namespace Tabula
         {
             var scenario = new CST.Scenario();
             scenario.Tags = ParseTags(state);
-            var token = state.TakeNextIs(TokenType.ScenarioLabel,
+            var token = state.Take(TokenType.ScenarioLabel,
                 "Scenario should start with a label like  'Scenario: Student departure sends mail'");
 
             scenario.Label = token.Text;
@@ -94,17 +94,21 @@ namespace Tabula
             CST.Table table = new CST.Table();
 
             //  Optional Label
-            table.Label = state.TextIfType(TokenType.TableLabel);
+            table.Label = state.Take(TokenType.TableLabel)?.Text;
 
-            //  Mandatory Header
-            table.Header = state.PartsIfType(TokenType.TableRow);
-            if (table.Header == null)
+            //  If we get no row of column names, we aren't looking at a table.  Rollback.
+            if (!state.NextIs(TokenType.TableRow))
             {
+                //  ...unless we already found a table label, which can only go on a table.  Abort.
+                if (table.Label != null)
+                    throw new Exception("A table must have a row of column names");
+
                 state.Position = rollbackPosition;
                 return null;
             }
+            table.ColumnNames = state.Take(TokenType.TableRow).Parts;
 
-            //  Zero or more rows
+            //  Zero or more data rows
             table.Rows = ParseTableRows(state);
 
             return table;

@@ -33,7 +33,7 @@ namespace Tabula.CST
 
     public class Table : Section
     {
-        public List<string> Header { get; set; }
+        public List<string> ColumnNames { get; set; }
         public List<List<string>> Rows { get; set; }
     }
 
