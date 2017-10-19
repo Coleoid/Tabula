@@ -16,6 +16,9 @@ namespace Tabula
         String,
         Variable,
         SectionHeader,
+        Word,
+        TableCellSeparator,
+        NewLine
     }
 
     public class Token
@@ -42,9 +45,17 @@ namespace Tabula
         public List<string> Warnings { get; set; }
 
         //  Token regexes need to be start-anchored
-        Regex rxWS = new Regex("^(\\s*)");
-        Regex rxScenarioLabel = new Regex("^Scenario: *(.*)");
-        Regex rxString = new Regex("^'([^']*)'");
+        Regex rxWS = new Regex(@"^([\t ]*)");
+        Regex rxScenarioLabel = new Regex(@"^Scenario: *(.*)", RegexOptions.IgnoreCase);
+        Regex rxWord = new Regex(@"^([a-zA-Z_]\w*)"); //    token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }
+        Regex rxString = new Regex(@"^'([^']*)'");
+        Regex rxUseCommand = new Regex(@"^>use: ?([^\n]*)\n");  //>use: Global Setting Management
+        Regex rxTag = new Regex(@"^\[([^]]+)\]");
+        Regex rxNumber = new Regex(@"^(-?(?:\d+(?:\.\d*)?)|-?\.\d+)");
+        Regex rxDate = new Regex(@"^(\d\d?/\d\d?/\d\d\d?\d?)");
+        Regex rxTableCellSeparator = new Regex(@"^\|");
+        Regex rxNewLine = new Regex(@"^\n");
+        Regex rxSectionHeader = new Regex(@"^'([^']*)':[\t ]*\n");
 
         public Tokenizer()
         {
@@ -79,10 +90,79 @@ namespace Tabula
                     continue;
                 }
 
+                match = rxSectionHeader.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.SectionHeader, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxWord.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.Word, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
                 match = rxString.Match(remainingText);
                 if (match.Success)
                 {
                     Tokens.Add(new Token(TokenType.String, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxTag.Match(remainingText);
+                if (match.Success)
+                {
+                    var insideBrackets = match.Groups[1].Value;
+                    var result = Regex.Split(insideBrackets, ", *");
+                    foreach (var tag in result)
+                    {
+                        Tokens.Add(new Token(TokenType.Tag, tag));
+                    }
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxDate.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.Date, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxNumber.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.Number, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxUseCommand.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.UseCommand, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxTableCellSeparator.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.TableCellSeparator, "|"));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxNewLine.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.NewLine, "\n"));
                     position += match.Length;
                     continue;
                 }
@@ -92,6 +172,7 @@ namespace Tabula
                 //  at and after the unrecognized input.
                 Warnings.Add($"Unrecognized token at position {position}.");
                 position = inputText.Length;
+                //TODO: Warn better.  Line and column.
 
                 //TODO: Fail softer.
                 //  Make it consume one 'word' instead, and insert an "Unrecognized" token,
@@ -145,48 +226,19 @@ grammar Tabula-Grammar {
         # could further constrain so that each set of terms were to be same type of Term, but payoff is dubious...
 
     rule Command {
-        '>'
-            [<Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use>
-            || <rule-failure('Command', "'alias', 'set', 'tag', or 'use'")> ]
+        '>' [ <Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use> ]
     }
     rule Command-Alias {
-        alias ':' [
-            [   || <String>
-                || <rule-failure('>alias: command', 'a quoted string for the alias name')>
-            ]
-            [   || means || is || to
-                || <rule-failure('>alias: command', "'means', 'is', or 'to' separating the name from its value")>
-            ]
-            [   || <Executable;>
-                || <rule-failure('>alias: command', 'either a single step or a block for the alias value')>
-            ]
-        ]
+        alias ':' <String> [ means || is || to ] <Executable;>
     }
     rule Command-Set {
-        set ':' [
-            [   || <Word> || <Variable>
-                || <rule-failure('>set: command', 'an unquoted word or a variable')>
-            ]
-            [   || means || is || to
-                || <rule-failure('>set: command', "'means', 'is', or 'to'")>
-            ]
-            [   || <Term>
-                || <rule-failure('>set: command', 'a string, number, date, or variable to store')>
-            ]
-        ]
+        set ':' 
+            [ <Word> || <Variable> ]
+            [ means || is || to ]
+            <Term>
     }
-    rule Command-Tag {
-        tags? ':' [
-            <Phrases>
-            || <rule-failure('>tag: command', 'one or more comma-separated phrases')>
-        ]
-    }
-    rule Command-Use {
-        use ':' [
-            <Phrases>
-            || <rule-failure('>use: command', 'one or more comma-separated phrases')>
-        ]
-    }
+    rule Command-Tag { tags? ':' <Phrases> }
+    rule Command-Use { use ':' <Phrases> }
 
 
     rule  Phrases { <Phrase>+ % ',' }
@@ -199,26 +251,5 @@ grammar Tabula-Grammar {
     token String   { '"' $<Body> = [ <-["]>* ] '"' }  # TODO: single quotes, quote escaping
     token Variable { '#' <Word> }
     token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }
-
-
-    method rule-failure($rule, $expected = '') {
-        my $parsed-so-far = self.target.substr(0, self.pos);
-        my @lines = $parsed-so-far.lines;
-        my $line-of-failure = @lines.elems();
-        my $line-before-failure = @lines[*-1];
-        my $column-of-failure = $line-before-failure.chars() + 1;
-        my $line-after-failure = self.target.substr(self.pos);
-
-        my $expectation-line = ($expected eq '')
-            ?? ''
-            !! "(expected $expected)\n";
-
-        my $message =
-            "Did not parse as a $rule: line $line-of-failure at column $column-of-failure:\n"
-            ~ $line-before-failure ~ '[here->]' ~ $line-after-failure ~ "\n"
-            ~ $expectation-line;
-
-        die $message;
-    }
 }
 */

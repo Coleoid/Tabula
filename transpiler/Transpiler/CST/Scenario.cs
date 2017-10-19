@@ -39,7 +39,7 @@ namespace Tabula.CST
 
     public class Step : CST_Entity
     {
-        public List<Symbol> Symbols { get; }
+        public List<Symbol> Symbols { get; set; }
     }
 
     public class TokenWrap

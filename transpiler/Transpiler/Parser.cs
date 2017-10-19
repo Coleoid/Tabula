@@ -71,8 +71,8 @@ namespace Tabula
 
             section = ParseParagraph(state);
 
-            if (section == null)
-                section = ParseTable(state);
+           // if (section == null)
+           //     section = ParseTable(state);
 
             if (section == null)
             {
@@ -112,43 +112,43 @@ namespace Tabula
             return paragraph;
         }
 
-        public CST.Table ParseTable(ParserState state)
-        {
-            int rollbackPosition = state.Position;
-            CST.Table table = new CST.Table();
+        //public CST.Table ParseTable(ParserState state)
+        //{
+        //    int rollbackPosition = state.Position;
+        //    CST.Table table = new CST.Table();
 
-            //  Optional Label
-            table.Label = state.Take(TokenType.TableLabel)?.Text;
+        //    //  Optional Label
+        //    table.Label = state.Take(TokenType.TableLabel)?.Text;
 
-            //  If we get no row of column names, we aren't looking at a table.  Rollback.
-            if (!state.NextIs(TokenType.TableRow))
-            {
-                //  ...unless we already found a table label, which can only go on a table.  Abort.
-                if (table.Label != null)
-                    throw new Exception("A table must have a row of column names");
+        //    //  If we get no row of column names, we aren't looking at a table.  Rollback.
+        //    if (!state.NextIs(TokenType.TableRow))
+        //    {
+        //        //  ...unless we already found a table label, which can only go on a table.  Abort.
+        //        if (table.Label != null)
+        //            throw new Exception("A table must have a row of column names");
 
-                state.Position = rollbackPosition;
-                return null;
-            }
-            table.ColumnNames = state.Take(TokenType.TableRow).Parts;
+        //        state.Position = rollbackPosition;
+        //        return null;
+        //    }
+        //    table.ColumnNames = state.Take(TokenType.TableRow).Parts;
 
-            //  Zero or more data rows
-            table.Rows = ParseTableRows(state);
+        //    //  Zero or more data rows
+        //    table.Rows = ParseTableRows(state);
 
-            return table;
-        }
+        //    return table;
+        //}
 
-        public List<List<string>> ParseTableRows(ParserState state)
-        {
-            var rows = new List<List<string>>();
+        //public List<List<string>> ParseTableRows(ParserState state)
+        //{
+        //    var rows = new List<List<string>>();
 
-            while (state.NextIs(TokenType.TableRow))
-            {
-                rows.Add(state.Take().Parts);
-            }
+        //    while (state.NextIs(TokenType.TableRow))
+        //    {
+        //        rows.Add(state.Take().Parts);
+        //    }
 
-            return rows;
-        }
+        //    return rows;
+        //}
 
         public List<string> ParseUseCommands(ParserState state)
         {
@@ -166,9 +166,29 @@ namespace Tabula
         {
             var steps = new List<CST.Step>();
 
-
+            for (var step = ParseStep(state); step != null; step = ParseStep(state))
+                steps.Add(step);
 
             return steps;
+        }
+        
+        public CST.Step ParseStep(ParserState state)
+        {
+            var step = new CST.Step();
+            
+            var symbols = ParseSymbols(state);
+
+            if (symbols.Count > 0)
+            {
+                step.Symbols = symbols;
+                if (state.NextIs(TokenType.NewLine))
+                    state.Take();
+            }
+            else
+            {
+                step = null;
+            }
+            return step;
         }
 
         public List<CST.Symbol> ParseSymbols(ParserState state)
@@ -191,10 +211,10 @@ namespace Tabula
 
         public CST.Symbol ParseWord(ParserState state)
         {
-            CST.Symbol word = null;
-
-
-            return word;
+            if (state.NextIs(TokenType.Word))
+                return new CST.Symbol(state.Take());
+            else
+                return null;
         }
 
         public List<CST.Symbol> ParseTerms(ParserState state)
@@ -211,6 +231,8 @@ namespace Tabula
 
         public CST.Symbol ParseTerm(ParserState state)
         {
+            if (state.AtEnd) return null;
+
             switch (state.Peek().Type)
             {
                 case TokenType.Date:
@@ -267,48 +289,19 @@ grammar Tabula-Grammar {
         # could further constrain so that each set of terms were to be same type of Term, but payoff is dubious...
 
     rule Command {
-        '>'
-            [<Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use>
-            || <rule-failure('Command', "'alias', 'set', 'tag', or 'use'")> ]
+        '>' [ <Command-Alias> || <Command-Set> || <Command-Tag> || <Command-Use> ]
     }
     rule Command-Alias {
-        alias ':' [
-            [   || <String>
-                || <rule-failure('>alias: command', 'a quoted string for the alias name')>
-            ]
-            [   || means || is || to
-                || <rule-failure('>alias: command', "'means', 'is', or 'to' separating the name from its value")>
-            ]
-            [   || <Executable;>
-                || <rule-failure('>alias: command', 'either a single step or a block for the alias value')>
-            ]
-        ]
+        alias ':' <String> [ means || is || to ] <Executable;>
     }
     rule Command-Set {
-        set ':' [
-            [   || <Word> || <Variable>
-                || <rule-failure('>set: command', 'an unquoted word or a variable')>
-            ]
-            [   || means || is || to
-                || <rule-failure('>set: command', "'means', 'is', or 'to'")>
-            ]
-            [   || <Term>
-                || <rule-failure('>set: command', 'a string, number, date, or variable to store')>
-            ]
-        ]
+        set ':' 
+            [ <Word> || <Variable> ]
+            [ means || is || to ]
+            <Term>
     }
-    rule Command-Tag {
-        tags? ':' [
-            <Phrases>
-            || <rule-failure('>tag: command', 'one or more comma-separated phrases')>
-        ]
-    }
-    rule Command-Use {
-        use ':' [
-            <Phrases>
-            || <rule-failure('>use: command', 'one or more comma-separated phrases')>
-        ]
-    }
+    rule Command-Tag { tags? ':' <Phrases> }
+    rule Command-Use { use ':' <Phrases> }
 
 
     rule  Phrases { <Phrase>+ % ',' }
@@ -321,26 +314,5 @@ grammar Tabula-Grammar {
     token String   { '"' $<Body> = [ <-["]>* ] '"' }  # TODO: single quotes, quote escaping
     token Variable { '#' <Word> }
     token Date     { \d\d? '/' \d\d? '/' \d\d\d\d }
-
-
-    method rule-failure($rule, $expected = '') {
-        my $parsed-so-far = self.target.substr(0, self.pos);
-        my @lines = $parsed-so-far.lines;
-        my $line-of-failure = @lines.elems();
-        my $line-before-failure = @lines[*-1];
-        my $column-of-failure = $line-before-failure.chars() + 1;
-        my $line-after-failure = self.target.substr(self.pos);
-
-        my $expectation-line = ($expected eq '')
-            ?? ''
-            !! "(expected $expected)\n";
-
-        my $message =
-            "Did not parse as a $rule: line $line-of-failure at column $column-of-failure:\n"
-            ~ $line-before-failure ~ '[here->]' ~ $line-after-failure ~ "\n"
-            ~ $expectation-line;
-
-        die $message;
-    }
 }
 */

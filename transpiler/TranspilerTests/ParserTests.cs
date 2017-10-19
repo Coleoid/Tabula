@@ -54,7 +54,6 @@ namespace Tabula
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Tags, Has.Count.EqualTo(2));
-            Assert.That(cst.Sections, Is.Empty);
         }
 
         [Test]
@@ -70,7 +69,6 @@ namespace Tabula
             var cst = parser.ParseSection(state);
             Assert.That(cst, Is.Not.Null);
 
-            var paragraph = cst as CST.Paragraph;
             Assert.That(cst.Tags, Has.Count.EqualTo(2));
         }
 
@@ -86,8 +84,96 @@ namespace Tabula
             var cst = parser.ParseSection(state);
             Assert.That(cst, Is.Not.Null);
 
-            var paragraph = cst as CST.Paragraph;
             Assert.That(cst.Label, Is.EqualTo(label));
+        }
+
+        [Test]
+        public void Step_two_words()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Word, "Say"),
+                new Token(TokenType.Word, "Hello"),
+            };
+            var state = new ParserState(tokens);
+            var cst = parser.ParseStep(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst.Symbols, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void Step_with_number_and_date()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Word, "this"),
+                new Token(TokenType.Word, "number"),
+                new Token(TokenType.Number, "22"),
+                new Token(TokenType.Word, "this"),
+                new Token(TokenType.Word, "date"),
+                new Token(TokenType.Date, "11/22/2044"),
+            };
+            var state = new ParserState(tokens);
+            var cst = parser.ParseStep(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst.Symbols, Has.Count.EqualTo(6));
+        }
+
+        [Test]
+        public void Section_header()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.SectionHeader , "Search people with many different duty assignment criteria"),
+                new Token(TokenType.SectionHeader, "Search people with 5 duty assignment criteria"),
+            };
+            var state = new ParserState(tokens);
+            var cst = parser.ParseSectionHeader(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst.Text, Is.EqualTo("Search people with many different duty assignment criteria"));
+
+            cst = parser.ParseSectionHeader(state);
+            Assert.That(cst.Text, Is.EqualTo("Search people with 5 duty assignment criteria"));
+        }
+
+        [Test]
+        public void Steps()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "here"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "there"),
+                new Token(TokenType.NewLine, "\n"),
+            };
+            var state = new ParserState(tokens);
+            var cst = parser.ParseSteps(state);
+
+            Assert.That(cst, Is.Not.Null);
+
+            Assert.That(cst, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void Paragraph()
+        {
+            var tokens = new List<Token> {
+                 new Token(TokenType.UseCommand, "Student Enrollment"),
+                 new Token(TokenType.UseCommand, "Person Search Criteria Workflow"),
+                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "here"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "there"),
+                new Token(TokenType.NewLine, "\n"),
+            };
+            var state = new ParserState(tokens);
+            var cst = parser.ParseParagraph(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst.Workflows, Has.Count.EqualTo(2));
+            Assert.That(cst.Steps, Has.Count.EqualTo(2));
         }
     }
 }

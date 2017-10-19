@@ -86,7 +86,7 @@ namespace Tabula
         [Test]
         public void Tags_in_single_set_of_brackets()
         {
-            var tokens = tokenizer.Tokenize("[serious, monkey, risky]");
+            var tokens = tokenizer.Tokenize("[serious,monkey,   risky]");
             Assert.That(tokens, Has.Count.EqualTo(3));
 
             Token token = tokens[0];
@@ -101,6 +101,109 @@ namespace Tabula
             Assert.That(token.Type, Is.EqualTo(TokenType.Tag));
             Assert.That(token.Text, Is.EqualTo("risky"));
         }
+
+        [TestCase("123")]
+        [TestCase("-123")]
+        [TestCase("12.34")]
+        [TestCase("-12.34")]
+        [TestCase("0.")]
+        [TestCase(".2")]
+        [TestCase("-.2")]
+        public void Term_number(string input)
+        {
+            var tokens = tokenizer.Tokenize(input);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Number));
+            Assert.That(token.Text, Is.EqualTo(input));
+        }
+
+
+        [TestCase("12/25/2023")]
+        [TestCase("1/2/99")]
+        [TestCase("1/2/1999")]
+        public void Term_date(string input)
+        {
+            var tokens = tokenizer.Tokenize(input);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Date));
+            Assert.That(token.Text, Is.EqualTo(input));
+        }
+
+        [TestCase("CamelCase")]
+        [TestCase("Underscore_Case")]
+        [TestCase("digitty_239")]
+        public void Word(string input)
+        {
+            var tokens = tokenizer.Tokenize(input);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Word));
+            Assert.That(token.Text, Is.EqualTo(input));
+        }
+
+        //>use: Global Setting Management
+        [TestCase(">use: Global Setting Management\n", "Global Setting Management")]
+        [TestCase(">use:Organization FNH Management\n", "Organization FNH Management")]
+        [TestCase(">use: Employment  Action Edit \n", "Employment  Action Edit ")]
+        public void Use_command(string input, string expected)
+        {
+            var tokens = tokenizer.Tokenize(input);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.UseCommand));
+            Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase("|")]
+        public void Table_cell_separator(string input)
+        {
+            var tokens = tokenizer.Tokenize(input);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.TableCellSeparator));
+            Assert.That(token.Text, Is.EqualTo(input));
+        }
+
+        [Test]
+        public void Words_and_NewLines()
+        {
+            var tokens = tokenizer.Tokenize("one \n two");
+            Assert.That(tokens, Has.Count.EqualTo(3));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Word));
+            Assert.That(token.Text, Is.EqualTo("one"));
+
+            token = tokens[1];
+            Assert.That(token.Type, Is.EqualTo(TokenType.NewLine));
+
+            token = tokens[2];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Word));
+            Assert.That(token.Text, Is.EqualTo("two"));
+        }
+
+
+
+        //TODO: require a boundary after some tokens, and not after others.
+        //  specifically, this case currently finds two tokens, and it should complain instead.
+        //[TestCase("3part")]
+        //public void not_words(string input)
+        //{
+        //    var tokens = tokenizer.Tokenize(input);
+        //    Assert.That(tokens, Has.Count.EqualTo(1));
+
+        //    Token token = tokens[0];
+        //    Assert.That(token.Type, Is.Not.EqualTo(TokenType.Word));
+        //}
+
+
 
         //[Test]
         //public void TableRow()

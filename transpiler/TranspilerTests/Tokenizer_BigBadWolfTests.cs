@@ -6,7 +6,7 @@ namespace Tabula
     public class Tokenizer_BigBadWolfTests : TokenizerTestBase
     {
         [Test]
-        public void The_big_one()
+        public void Leading_tags()
         {
             var tokens = tokenizer.Tokenize(my_long_example);
 
