@@ -7,7 +7,7 @@ namespace Tabula
     public class Parser
     {
 
-        public CST.Scenario ParseScenarioFile(string scenarioText)
+        public CST.Scenario FileParse(string scenarioText)
         {
             var tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize(scenarioText);
@@ -17,8 +17,31 @@ namespace Tabula
             return scenario;
         }
 
+        public List<string> ParseCommand_Use(ParserState state)
+        {
+            var workflows = new List<string>();
+            while(state.NextIs(TokenType.UseCommand))
+                workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
 
-        // Scenario:  Make stuff from things in place
+            return workflows;
+        }
+
+        public CST.Paragraph ParseParagraph(ParserState state)
+        {
+            int rollbackPosition = state.Position;
+            CST.Paragraph paragraph = new CST.Paragraph();
+
+            paragraph.Workflows = ParseCommand_Use(state);
+            paragraph.Steps = ParseSteps(state);
+
+            if (paragraph.Workflows.Count + paragraph.Steps.Count == 0)
+            {
+                state.Position = rollbackPosition;
+                return null;
+            }
+
+            return paragraph;
+        }
 
         public CST.Scenario ParseScenario(ParserState state)
         {
@@ -31,18 +54,6 @@ namespace Tabula
             scenario.Sections = ParseSections(state);
 
             return scenario;
-        }
-
-        public List<string> ParseTags(ParserState state)
-        {
-            var tags = new List<string>();
-
-            while(state.NextIs(TokenType.Tag))
-            {
-                tags.Add( state.Take().Text );
-            }
-
-            return tags;
         }
 
         public List<CST.Section> ParseSections(ParserState state)
@@ -62,8 +73,8 @@ namespace Tabula
 
             var tags = ParseTags(state);
 
-            var header = ParseSectionHeader(state);
-            if (header == null)
+            var label = ParseSectionLabel(state);
+            if (label == null)
             {
                 state.Position = rollback;
                 return null;
@@ -71,8 +82,8 @@ namespace Tabula
 
             section = ParseParagraph(state);
 
-           // if (section == null)
-           //     section = ParseTable(state);
+            // if (section == null)
+            //     section = ParseTable(state);
 
             if (section == null)
             {
@@ -80,125 +91,35 @@ namespace Tabula
                 return null;
             }
 
-            section.Label = header.Text;
+            section.Label = label.Text;
             section.Tags = tags;
 
             return section;
         }
 
-        public CST.Header ParseSectionHeader(ParserState state)
+        public CST.Label ParseSectionLabel(ParserState state)
         {
-            if (state.NextIs(TokenType.SectionHeader))
-                return new CST.Header(state.Take());
-            else
-                return null;
+            return CST.Label.Wrap(state.Take(TokenType.SectionLabel));
         }
 
-
-        public CST.Paragraph ParseParagraph(ParserState state)
+        public CST.Step ParseStep(ParserState state)
         {
-            int rollbackPosition = state.Position;
-            CST.Paragraph paragraph = new CST.Paragraph();
-
-            paragraph.Workflows = ParseUseCommands(state);
-            paragraph.Steps = ParseSteps(state);
-
-            if (paragraph.Workflows.Count + paragraph.Steps.Count == 0)
-            {
-                state.Position = rollbackPosition;
+            var symbols = ParseSymbols(state);
+            if (symbols.Count == 0)
                 return null;
-            }
 
-            return paragraph;
-        }
+            state.Take(TokenType.NewLine);
 
-        //public CST.Table ParseTable(ParserState state)
-        //{
-        //    int rollbackPosition = state.Position;
-        //    CST.Table table = new CST.Table();
-
-        //    //  Optional Label
-        //    table.Label = state.Take(TokenType.TableLabel)?.Text;
-
-        //    //  If we get no row of column names, we aren't looking at a table.  Rollback.
-        //    if (!state.NextIs(TokenType.TableRow))
-        //    {
-        //        //  ...unless we already found a table label, which can only go on a table.  Abort.
-        //        if (table.Label != null)
-        //            throw new Exception("A table must have a row of column names");
-
-        //        state.Position = rollbackPosition;
-        //        return null;
-        //    }
-        //    table.ColumnNames = state.Take(TokenType.TableRow).Parts;
-
-        //    //  Zero or more data rows
-        //    table.Rows = ParseTableRows(state);
-
-        //    return table;
-        //}
-
-        //public List<List<string>> ParseTableRows(ParserState state)
-        //{
-        //    var rows = new List<List<string>>();
-
-        //    while (state.NextIs(TokenType.TableRow))
-        //    {
-        //        rows.Add(state.Take().Parts);
-        //    }
-
-        //    return rows;
-        //}
-
-        public List<string> ParseUseCommands(ParserState state)
-        {
-            var workflows = new List<string>();
-
-            while(state.NextIs(TokenType.UseCommand))
-            {
-                workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
-            }
-
-            return workflows;
+            return new CST.Step(symbols);
         }
 
         public List<CST.Step> ParseSteps(ParserState state)
         {
             var steps = new List<CST.Step>();
-
             for (var step = ParseStep(state); step != null; step = ParseStep(state))
                 steps.Add(step);
 
             return steps;
-        }
-        
-        public CST.Step ParseStep(ParserState state)
-        {
-            var step = new CST.Step();
-            
-            var symbols = ParseSymbols(state);
-
-            if (symbols.Count > 0)
-            {
-                step.Symbols = symbols;
-                if (state.NextIs(TokenType.NewLine))
-                    state.Take();
-            }
-            else
-            {
-                step = null;
-            }
-            return step;
-        }
-
-        public List<CST.Symbol> ParseSymbols(ParserState state)
-        {
-            var symbols = new List<CST.Symbol>();
-
-            for (var symbol = ParseSymbol(state); symbol != null; symbol = ParseSymbol(state))
-                symbols.Add(symbol);
-
-            return symbols;
         }
 
         public CST.Symbol ParseSymbol(ParserState state)
@@ -209,41 +130,99 @@ namespace Tabula
             return symbol;
         }
 
-        public CST.Symbol ParseWord(ParserState state)
+        public List<CST.Symbol> ParseSymbols(ParserState state)
         {
-            if (state.NextIs(TokenType.Word))
-                return new CST.Symbol(state.Take());
-            else
-                return null;
+            var symbols = new List<CST.Symbol>();
+            for (var symbol = ParseSymbol(state); symbol != null; symbol = ParseSymbol(state))
+                symbols.Add(symbol);
+
+            return symbols;
         }
 
-        public List<CST.Symbol> ParseTerms(ParserState state)
+        public CST.Table ParseTable(ParserState state)
         {
-            List<CST.Symbol> terms = new List<CST.Symbol>();
+            int rollbackPosition = state.Position;
+            CST.Table table = new CST.Table();
 
-            for (var term = ParseTerm(state); term != null; term = ParseTerm(state))
+            // covered by Section at this time, I believe.
+            ////  Optional Label
+            //table.Label = state.Take(TokenType.SectionLabel)?.Text;
+
+            //  After the 
+            if (!state.NextIs(TokenType.TableCellSeparator))
             {
-                terms.Add(term);
+                state.Position = rollbackPosition;
+                return null;
+            }
+            table.ColumnNames = ParseTableRow(state);
+
+            //  Zero or more data rows
+            table.Rows = ParseTableRows(state);
+
+            return table;
+        }
+
+        public List<string> ParseTableRow(ParserState state)
+        {
+            var row = new List<string>();
+
+            while (state.NextIs(TokenType.TableCellSeparator))
+            {
+                state.Take(TokenType.TableCellSeparator);
+                row.Add(state.Take().Text);
             }
 
-            return terms;
+            return row;
+        }
+
+        public List<List<string>> ParseTableRows(ParserState state)
+        {
+            var rows = new List<List<string>>();
+
+            //while (state.NextIs(TokenType.TableRow))
+            //{
+            //    rows.Add(state.Take().Parts);
+            //}
+
+            return rows;
+        }
+
+        public List<string> ParseTags(ParserState state)
+        {
+            var tags = new List<string>();
+
+            while (state.NextIs(TokenType.Tag))
+            {
+                tags.Add(state.Take().Text);
+            }
+
+            return tags;
         }
 
         public CST.Symbol ParseTerm(ParserState state)
         {
-            if (state.AtEnd) return null;
+            var token = state.Take(
+                TokenType.Date,
+                TokenType.Number,
+                TokenType.String,
+                TokenType.Variable
+            );
 
-            switch (state.Peek().Type)
-            {
-                case TokenType.Date:
-                case TokenType.Number:
-                case TokenType.String:
-                case TokenType.Variable:
-                    return new CST.Symbol(state.Take());
+            return CST.Symbol.Wrap(token);
+        }
 
-                default:
-                    return null;
-            }
+        public List<CST.Symbol> ParseTerms(ParserState state)
+        {
+            var terms = new List<CST.Symbol>();
+            for (var term = ParseTerm(state); term != null; term = ParseTerm(state))
+                terms.Add(term);
+
+            return terms;
+        }
+
+        public CST.Symbol ParseWord(ParserState state)
+        {
+            return CST.Symbol.Wrap(state.Take(TokenType.Word));
         }
 
     }

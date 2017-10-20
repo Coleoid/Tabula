@@ -9,13 +9,11 @@ namespace Tabula
         Tag,
         ScenarioLabel,
         UseCommand,
-        TableRow,
-        TableLabel,
         Date,
         Number,
         String,
         Variable,
-        SectionHeader,
+        SectionLabel,
         Word,
         TableCellSeparator,
         NewLine
@@ -93,7 +91,7 @@ namespace Tabula
                 match = rxSectionHeader.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.SectionHeader, match.Groups[1].Value));
+                    Tokens.Add(new Token(TokenType.SectionLabel, match.Groups[1].Value));
                     position += match.Length;
                     continue;
                 }

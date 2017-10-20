@@ -15,7 +15,7 @@ namespace Tabula
         public void Transpile(string fileName, string scenarioText, StringBuilder builder)
         {
             var parser = new Parser();
-            var scenario = parser.ParseScenarioFile(scenarioText);
+            var scenario = parser.FileParse(scenarioText);
             BuildHeader(builder);
             OpenNamespace(builder);
             OpenClass(builder, "foo_generated");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tabula
 {
@@ -29,6 +30,12 @@ namespace Tabula
             return Peek()?.Type == tokenType;
         }
 
+        public bool NextIsIn(TokenType[] tokenTypes)
+        {
+            var nextType = Peek()?.Type;
+            return tokenTypes.Any(t => t == nextType);
+        }
+
         public Token Take()
         {
             return AtEnd ? null : Tokens[Position++];
@@ -36,15 +43,18 @@ namespace Tabula
 
         internal Token Take(TokenType tokenType)
         {
-            return NextIs(tokenType)
-                ? Take()
-                : null;
+            return NextIs(tokenType) ? Take() : null;
         }
 
         internal Token Take(TokenType tokenType, string exceptionMessage)
         {
             if (NextIs(tokenType)) return Take();
             throw new Exception(exceptionMessage);
+        }
+
+        internal Token Take(params TokenType [] types)
+        {
+            return NextIsIn(types) ? Take() : null;
         }
     }
 }

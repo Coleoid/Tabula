@@ -204,6 +204,30 @@ namespace Tabula
         //}
 
 
+        [Test]
+        public void TableRow()
+        {
+            var tokens = tokenizer.Tokenize("| Name | Age |");
+            Assert.That(tokens, Has.Count.EqualTo(5));
+
+            Assert.That(tokens[0].Type, Is.EqualTo(TokenType.TableCellSeparator));
+            Assert.That(tokens[2].Type, Is.EqualTo(TokenType.TableCellSeparator));
+            Assert.That(tokens[4].Type, Is.EqualTo(TokenType.TableCellSeparator));
+
+            Assert.That(tokens[1].Type, Is.EqualTo(TokenType.Word));  //TODO: becomes phrase later
+            Assert.That(tokens[1].Text, Is.EqualTo("Name"));
+
+            Assert.That(tokens[3].Type, Is.EqualTo(TokenType.Word));  //TODO: becomes phrase later
+            Assert.That(tokens[3].Text, Is.EqualTo("Age"));
+        }
+
+        [Test]
+        public void TableRows()
+        {
+            var tokens = tokenizer.Tokenize("| Name | \n | Bob | \n | Ann | \n");
+            Assert.That(tokens, Has.Count.EqualTo(12));
+        }
+
 
         //[Test]
         //public void TableRow()

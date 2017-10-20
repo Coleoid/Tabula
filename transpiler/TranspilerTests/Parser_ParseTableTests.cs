@@ -27,11 +27,30 @@ namespace Tabula
         //    Assert.That(table.Rows.Count, Is.Zero);
         //}
 
-        [Test]
-        public void Table_reads_several_rows()
+        public ParserState StateFromString(string inputText)
         {
-            Assert.Fail();
+            var tokenizer = new Tokenizer();
+            var tokens = tokenizer.Tokenize(inputText);
+            return new ParserState(tokens);
         }
+
+        [Test]
+        public void ParseTable()
+        {
+            var state = StateFromString("\"stuff\":\n| Name | \n | Bob | \n | Ann | \n");
+            CST.Table table = parser.ParseTable(state);
+
+            Assert.That(table, Is.Not.Null);
+        }
+
+        [Test]
+        public void ParseTableRow()
+        {
+            var state = StateFromString("| Fun | Games | Misc |");
+            List<string> row = parser.ParseTableRow(state);
+            Assert.That(row, Is.Not.Null);
+        }
+
 
         //  In general, a table is not required at any particular point,
         //  so if it's not found, we get a null, not an abort.
