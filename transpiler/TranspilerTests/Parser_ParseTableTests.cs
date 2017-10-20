@@ -37,18 +37,39 @@ namespace Tabula
         [Test]
         public void ParseTable()
         {
-            var state = StateFromString("\"stuff\":\n| Name | \n | Bob | \n | Ann | \n");
+            var state = StateFromString("'stuff':\n| Name | \n | Bob | \n | Ann | \n");
             CST.Table table = parser.ParseTable(state);
 
             Assert.That(table, Is.Not.Null);
         }
 
         [Test]
-        public void ParseTableRow()
+        public void Row_no_newline()
         {
             var state = StateFromString("| Fun | Games | Misc |");
             List<string> row = parser.ParseTableRow(state);
             Assert.That(row, Is.Not.Null);
+            Assert.That(row, Has.Count.EqualTo(3));
+            Assert.That(row, Is.EquivalentTo(new [] { "Fun", "Games", "Misc" }));
+        }
+
+        [Test]
+        public void Row_with_newline()
+        {
+            var state = StateFromString("| Fun | \n foo");
+            List<string> row = parser.ParseTableRow(state);
+            Assert.That(row, Is.Not.Null);
+            Assert.That(row, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void Row_with_multiple_symbols()
+        {
+            var state = StateFromString("| Fun and games | \n foo");
+            List<string> row = parser.ParseTableRow(state);
+            Assert.That(row, Is.Not.Null);
+            Assert.That(row, Has.Count.EqualTo(1));
+            Assert.That(row[0], Is.EqualTo("Fun and games"));
         }
 
 

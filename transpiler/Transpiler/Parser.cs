@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Tabula
@@ -164,13 +165,21 @@ namespace Tabula
 
         public List<string> ParseTableRow(ParserState state)
         {
+            if (!state.NextIs(TokenType.TableCellSeparator)) return null;
+
             var row = new List<string>();
 
-            while (state.NextIs(TokenType.TableCellSeparator))
+            state.Take(TokenType.TableCellSeparator);
+
+            while (!state.AtEnd && !state.NextIs(TokenType.NewLine))
             {
-                state.Take(TokenType.TableCellSeparator);
-                row.Add(state.Take().Text);
+                var syms = ParseSymbols(state);
+                var text = string.Join(" ", syms.Select(s => s.Text).ToArray());
+                row.Add(text);
+
+                state.Take(TokenType.TableCellSeparator, "Gotta be | next but isn't.");
             }
+            state.Take(TokenType.NewLine);
 
             return row;
         }
