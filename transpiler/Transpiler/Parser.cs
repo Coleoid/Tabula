@@ -75,16 +75,11 @@ namespace Tabula
             var tags = ParseTags(state);
 
             var label = ParseSectionLabel(state);
-            if (label == null)
-            {
-                state.Position = rollback;
-                return null;
-            }
 
             section = ParseParagraph(state);
 
-            // if (section == null)
-            //     section = ParseTable(state);
+            if (section == null)
+                section = ParseTable(state);
 
             if (section == null)
             {
@@ -109,7 +104,7 @@ namespace Tabula
             if (symbols.Count == 0)
                 return null;
 
-            state.Take(TokenType.NewLine);
+            state.AdvanceLines();
 
             return new CST.Step(symbols);
         }
@@ -142,25 +137,13 @@ namespace Tabula
 
         public CST.Table ParseTable(ParserState state)
         {
-            int rollbackPosition = state.Position;
-            CST.Table table = new CST.Table();
+            var columnNames = ParseTableRow(state);
+            if (columnNames == null) return null;
 
-            // covered by Section at this time, I believe.
-            ////  Optional Label
-            //table.Label = state.Take(TokenType.SectionLabel)?.Text;
-
-            //  After the 
-            if (!state.NextIs(TokenType.TableCellSeparator))
-            {
-                state.Position = rollbackPosition;
-                return null;
-            }
-            table.ColumnNames = ParseTableRow(state);
-
-            //  Zero or more data rows
-            table.Rows = ParseTableRows(state);
-
-            return table;
+            return new CST.Table {
+                ColumnNames = columnNames,
+                Rows = ParseTableRows(state)
+            };
         }
 
         public List<string> ParseTableRow(ParserState state)
@@ -171,7 +154,7 @@ namespace Tabula
 
             state.Take(TokenType.TableCellSeparator);
 
-            while (!state.AtEnd && !state.NextIs(TokenType.NewLine))
+            while (!state.LineComplete)
             {
                 var syms = ParseSymbols(state);
                 var text = string.Join(" ", syms.Select(s => s.Text).ToArray());
@@ -179,7 +162,7 @@ namespace Tabula
 
                 state.Take(TokenType.TableCellSeparator, "Gotta be | next but isn't.");
             }
-            state.Take(TokenType.NewLine);
+            state.AdvanceLines();
 
             return row;
         }
@@ -187,11 +170,11 @@ namespace Tabula
         public List<List<string>> ParseTableRows(ParserState state)
         {
             var rows = new List<List<string>>();
-
-            //while (state.NextIs(TokenType.TableRow))
-            //{
-            //    rows.Add(state.Take().Parts);
-            //}
+            while (state.NextIs(TokenType.TableCellSeparator))
+            {
+                var row = ParseTableRow(state);
+                rows.Add(row);
+            }
 
             return rows;
         }
@@ -203,6 +186,7 @@ namespace Tabula
             while (state.NextIs(TokenType.Tag))
             {
                 tags.Add(state.Take().Text);
+                state.AdvanceLines();
             }
 
             return tags;

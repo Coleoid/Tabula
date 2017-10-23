@@ -19,6 +19,10 @@ namespace Tabula
         {
             get => Position == Tokens.Count;
         }
+        public bool LineComplete
+        {
+            get => AtEnd || NextIs(TokenType.NewLine);
+        }
 
         public Token Peek()
         {
@@ -55,6 +59,11 @@ namespace Tabula
         internal Token Take(params TokenType [] types)
         {
             return NextIsIn(types) ? Take() : null;
+        }
+
+        internal void AdvanceLines()
+        {
+            while (Take(TokenType.NewLine) != null) { }
         }
     }
 }
