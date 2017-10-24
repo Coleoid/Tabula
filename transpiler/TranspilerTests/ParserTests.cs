@@ -12,6 +12,14 @@ namespace Tabula
         {
             parser = new Parser();
         }
+
+        public ParserState StateFromString(string inputText)
+        {
+            var tokenizer = new Tokenizer();
+            var tokens = tokenizer.Tokenize(inputText);
+            return new ParserState(tokens);
+        }
+
     }
 
     [TestFixture]
@@ -39,7 +47,7 @@ namespace Tabula
                 new Token(TokenType.Tag, "Enrollment"),
                 new Token(TokenType.Tag, "AC-98989"),
                 new Token(TokenType.SectionLabel, ""),
-                new Token(TokenType.UseCommand, "Student Enrollment"),
+                new Token(TokenType.CommandUse, "Student Enrollment"),
             };
             var state = new ParserState(tokens);
             var cst = parser.ParseSection(state);
@@ -54,7 +62,7 @@ namespace Tabula
             string label = "Enroll Bob in Early Structure Fire Detection";
             var tokens = new List<Token> {
                 new Token(TokenType.SectionLabel, label),
-                new Token(TokenType.UseCommand, "Student Enrollment"),
+                new Token(TokenType.CommandUse, "Student Enrollment"),
             };
             var state = new ParserState(tokens);
             var cst = parser.ParseSection(state);
@@ -68,8 +76,8 @@ namespace Tabula
         public void Paragraph()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.UseCommand, "Student Enrollment"),
-                new Token(TokenType.UseCommand, "Person Search Criteria Workflow"),
+                new Token(TokenType.CommandUse, "Student Enrollment"),
+                new Token(TokenType.CommandUse, "Person Search Criteria Workflow"),
                 new Token(TokenType.Word, "Search"),
                 new Token(TokenType.Word, "here"),
                 new Token(TokenType.NewLine, "\n"),
@@ -138,7 +146,8 @@ namespace Tabula
         public void Section_header()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.SectionLabel , "Search people with many different duty assignment criteria"),
+                new Token(TokenType.SectionLabel, "Search people with many different duty assignment criteria"),
+                new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.SectionLabel, "Search people with 5 duty assignment criteria"),
             };
             var state = new ParserState(tokens);

@@ -21,7 +21,7 @@ namespace Tabula
         public List<string> ParseCommand_Use(ParserState state)
         {
             var workflows = new List<string>();
-            while(state.NextIs(TokenType.UseCommand))
+            while(state.NextIs(TokenType.CommandUse))
                 workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
 
             return workflows;
@@ -95,7 +95,9 @@ namespace Tabula
 
         public CST.Label ParseSectionLabel(ParserState state)
         {
-            return CST.Label.Wrap(state.Take(TokenType.SectionLabel));
+            CST.Label label = CST.Label.Wrap(state.Take(TokenType.SectionLabel));
+            state.AdvanceLines();
+            return label;
         }
 
         public CST.Step ParseStep(ParserState state)

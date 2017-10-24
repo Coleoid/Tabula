@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Tabula
@@ -8,15 +9,16 @@ namespace Tabula
         Unknown,
         Tag,
         ScenarioLabel,
-        UseCommand,
+        SectionLabel,
+        CommandUse,
+        CommandAlias,
         Date,
         Number,
         String,
         Variable,
-        SectionLabel,
         Word,
         TableCellSeparator,
-        NewLine
+        NewLine,
     }
 
     public class Token
@@ -29,6 +31,12 @@ namespace Tabula
         {
             this.Type = type;
             this.Text = text;
+        }
+
+        public Token(TokenType type, params string [] parts)
+        {
+            this.Type = type;
+            this.Parts = parts.ToList();
         }
 
         public Token(TokenType type, List<string> parts)
@@ -44,16 +52,17 @@ namespace Tabula
 
         //  Token regexes need to be start-anchored
         Regex rxWS = new Regex(@"^([\t ]*)");
-        Regex rxScenarioLabel = new Regex(@"^Scenario: *(.*)", RegexOptions.IgnoreCase);
+        Regex rxScenarioLabel = new Regex(@"^Scenario: *([""']?)(.*)\1", RegexOptions.IgnoreCase);
         Regex rxWord = new Regex(@"^([a-zA-Z_]\w*)"); //    token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }
-        Regex rxString = new Regex(@"^'([^']*)'");
-        Regex rxUseCommand = new Regex(@"^>use: ?([^\n]*)\n");  //>use: Global Setting Management
+        Regex rxString = new Regex(@"^([""'])(.*)\1");
+        Regex rxCommandUse = new Regex(@"^>use: *([^\n]*)");  //>use: Global Setting Management
+        Regex rxCommandAlias = new Regex(@"^>alias: (.+) => (.+)");  //>alias: bob => "Nordberg, Robert"
         Regex rxTag = new Regex(@"^\[([^]]+)\]");
         Regex rxNumber = new Regex(@"^(-?(?:\d+(?:\.\d*)?)|-?\.\d+)");
         Regex rxDate = new Regex(@"^(\d\d?/\d\d?/\d\d\d?\d?)");
         Regex rxTableCellSeparator = new Regex(@"^\|");
-        Regex rxNewLine = new Regex(@"^\n");
-        Regex rxSectionHeader = new Regex(@"^'([^']*)':[\t ]*\n");
+        Regex rxNewLine = new Regex(@"^\r?\n");
+        Regex rxSectionLabel = new Regex(@"^([""'])(.*)\1:");
 
         public Tokenizer()
         {
@@ -80,21 +89,47 @@ namespace Tabula
                 //  Then, a series of patterns try to match at the cursor position.
                 //  On a match, we create the token, advance the cursor, and start again.
 
-                match = rxScenarioLabel.Match(remainingText);
+                match = rxNewLine.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.ScenarioLabel, match.Groups[1].Value));
+                    Tokens.Add(new Token(TokenType.NewLine, "\n"));
                     position += match.Length;
                     continue;
                 }
 
-                match = rxSectionHeader.Match(remainingText);
+                match = rxScenarioLabel.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.SectionLabel, match.Groups[1].Value));
+                    Tokens.Add(new Token(TokenType.ScenarioLabel, match.Groups[2].Value));
                     position += match.Length;
                     continue;
                 }
+
+                match = rxSectionLabel.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.SectionLabel, match.Groups[2].Value));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxCommandAlias.Match(remainingText);
+                if (match.Success)
+                {
+                    var alias = new Token(TokenType.CommandAlias, match.Groups[1].Value, match.Groups[2].Value);
+                    Tokens.Add(alias);
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxCommandUse.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.CommandUse, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
 
                 match = rxWord.Match(remainingText);
                 if (match.Success)
@@ -107,7 +142,7 @@ namespace Tabula
                 match = rxString.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.String, match.Groups[1].Value));
+                    Tokens.Add(new Token(TokenType.String, match.Groups[2].Value));
                     position += match.Length;
                     continue;
                 }
@@ -141,10 +176,10 @@ namespace Tabula
                     continue;
                 }
 
-                match = rxUseCommand.Match(remainingText);
+                match = rxCommandAlias.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.UseCommand, match.Groups[1].Value));
+                    Tokens.Add(new Token(TokenType.CommandUse, match.Groups[1].Value));
                     position += match.Length;
                     continue;
                 }
@@ -153,14 +188,6 @@ namespace Tabula
                 if (match.Success)
                 {
                     Tokens.Add(new Token(TokenType.TableCellSeparator, "|"));
-                    position += match.Length;
-                    continue;
-                }
-
-                match = rxNewLine.Match(remainingText);
-                if (match.Success)
-                {
-                    Tokens.Add(new Token(TokenType.NewLine, "\n"));
                     position += match.Length;
                     continue;
                 }

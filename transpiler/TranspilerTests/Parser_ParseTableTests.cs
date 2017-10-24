@@ -27,13 +27,6 @@ namespace Tabula
         //    Assert.That(table.Rows.Count, Is.Zero);
         //}
 
-        public ParserState StateFromString(string inputText)
-        {
-            var tokenizer = new Tokenizer();
-            var tokens = tokenizer.Tokenize(inputText);
-            return new ParserState(tokens);
-        }
-
         [Test]
         public void ParseSection_Table()
         {

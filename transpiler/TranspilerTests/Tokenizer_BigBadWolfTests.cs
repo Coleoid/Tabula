@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Collections.Generic;
+using NUnit.Framework;
 
 namespace Tabula
 {
@@ -6,18 +8,85 @@ namespace Tabula
     public class Tokenizer_BigBadWolfTests : TokenizerTestBase
     {
         [Test]
-        public void Leading_tags()
+        public void Scenario_header()
         {
-            var tokens = tokenizer.Tokenize(my_long_example);
+            var tokens = tokenizer.Tokenize(bigby);
 
-            Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Tag));
-            Assert.That(tokens[1].Type, Is.EqualTo(TokenType.Tag));
-            Assert.That(tokens[2].Type, Is.EqualTo(TokenType.Tag));
+            Assert_TokenSequenceMatches(tokens, 0,
+                TokenType.NewLine,
+                TokenType.Tag,
+                TokenType.Tag,
+                TokenType.Tag,
+                TokenType.NewLine,
+                TokenType.ScenarioLabel
+            );
+
+            Assert.That(tokens[5].Text, Does.StartWith("Advanced person"));
         }
 
-        private string my_long_example =
-        @"
+        [Test]
+        public void para_1()
+        {
+            var tokens = tokenizer.Tokenize(bigby);
 
+            Assert_TokenSequenceMatches(tokens, 8,
+                TokenType.SectionLabel,
+                TokenType.NewLine,
+                TokenType.CommandUse,
+                TokenType.NewLine,
+                TokenType.Word,
+                TokenType.Word,
+                TokenType.Word,
+                TokenType.NewLine
+            );
+
+            Assert.That(tokens[8].Text, Does.StartWith("Enable duty locations"));
+            Assert.That(tokens[10].Text, Does.Match("Global Setting Management"));
+            Assert.That(tokens[12].Text, Does.Match("Enable"));
+            Assert.That(tokens[13].Text, Does.Match("Duty"));
+            Assert.That(tokens[14].Text, Does.Match("Locations"));
+        }
+
+        [Test]
+        public void para_2()
+        {
+            var tokens = tokenizer.Tokenize(bigby);
+
+            Assert_TokenSequenceMatches(tokens, 17,
+                TokenType.SectionLabel,
+                TokenType.NewLine,
+                TokenType.CommandAlias,
+                TokenType.NewLine
+            );
+
+            Assert.That(tokens[17].Text, Does.Match("What we'll call our people in this scenario"));
+            Assert.That(tokens[19].Parts[0], Does.Match("#handle"));
+            Assert.That(tokens[19].Parts[1], Does.Match("#FullNameLF"));
+        }
+
+        [Test]
+        public void table_1()
+        {
+            var tokens = tokenizer.Tokenize(bigby);
+
+            Assert_TokenSequenceMatches(tokens, 21,
+                TokenType.TableCellSeparator,
+                TokenType.Word,
+                TokenType.TableCellSeparator,
+                TokenType.Word,
+                TokenType.TableCellSeparator,
+                TokenType.NewLine,
+                TokenType.TableCellSeparator,
+                TokenType.Word,
+                TokenType.TableCellSeparator,
+                TokenType.String,
+                TokenType.TableCellSeparator,
+                TokenType.NewLine
+            );
+        }
+
+        private string bigby =
+        @"
 [Person Search, Duty Assignments, AC-16629]
 Scenario: ""Advanced person search with duty assignments""
 

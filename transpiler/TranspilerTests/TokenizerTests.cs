@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Tabula
@@ -12,6 +13,21 @@ namespace Tabula
         {
             tokenizer = new Tokenizer();
         }
+
+
+        protected void Assert_TokenSequenceMatches(List<Token> tokens, int fromPosition, params TokenType[] types)
+        {
+            for (int i = 0; i < types.Length; i++)
+            {
+                var tokenIndex = i + fromPosition;
+                Assert.That(tokens.Count, Is.GreaterThan(tokenIndex),
+                    $"There are only {tokens.Count} tokens, when we expect to test types from indexes {fromPosition} to {fromPosition + types.Length - 1}.");
+
+                Assert.That(tokens[tokenIndex].Type, Is.EqualTo(types[i]),
+                    $"The token at position {i + fromPosition} did not match expectations.");
+            }
+        }
+
     }
 
     [TestFixture]
@@ -29,7 +45,7 @@ namespace Tabula
         public void Unrecognized_token_skips_remaining_input_and_warns()
         {
             var tokens = tokenizer.Tokenize(" \n  %%% 'Hello, World!'");
-            Assert.That(tokens, Has.Count.EqualTo(0));
+            Assert.That(tokens, Has.Count.EqualTo(1));
             Assert.That(tokenizer.Warnings, Has.Count.EqualTo(1));
 
             var warning = tokenizer.Warnings[0];
@@ -49,6 +65,7 @@ namespace Tabula
 
         [TestCase("scenario: What am I doing?", "What am I doing?")]
         [TestCase("Scenario:", "")]
+        [TestCase("Scenario: \"duuude.\"", "duuude.")]
         public void Scenario_label(string line, string expectedText)
         {
             var tokens = tokenizer.Tokenize(line);
@@ -59,15 +76,28 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo(expectedText));
         }
 
-        [Test]
-        public void String()
+        [TestCase("'What am I doing?':  ", "What am I doing?")]
+        [TestCase(@"""This thing here"":", "This thing here")]
+        public void Section_label(string line, string expectedText)
         {
-            var tokens = tokenizer.Tokenize("'Hello, World!'");
+            var tokens = tokenizer.Tokenize(line);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.SectionLabel));
+            Assert.That(token.Text, Is.EqualTo(expectedText));
+        }
+
+        [TestCase("'Hello, World!'", "Hello, World!")]
+        [TestCase("\"Hello, World!\"", "Hello, World!")]
+        public void String(string text, string expected)
+        {
+            var tokens = tokenizer.Tokenize(text);
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
             Assert.That(token.Type, Is.EqualTo(TokenType.String));
-            Assert.That(token.Text, Is.EqualTo("Hello, World!"));
+            Assert.That(token.Text, Is.EqualTo(expected));
         }
         //TODO: Double-quoted strings
         //TODO: Strings containing escaped quotes
@@ -119,7 +149,6 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo(input));
         }
 
-
         [TestCase("12/25/2023")]
         [TestCase("1/2/99")]
         [TestCase("1/2/1999")]
@@ -146,18 +175,29 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo(input));
         }
 
-        //>use: Global Setting Management
-        [TestCase(">use: Global Setting Management\n", "Global Setting Management")]
-        [TestCase(">use:Organization FNH Management\n", "Organization FNH Management")]
-        [TestCase(">use: Employment  Action Edit \n", "Employment  Action Edit ")]
-        public void Use_command(string input, string expected)
+        [TestCase(">use:Organization FNH Management", "Organization FNH Management")]
+        [TestCase(">use: Global Setting Management", "Global Setting Management")]
+        [TestCase(">use:  Employment  Action Edit ", "Employment  Action Edit ")]
+        public void Command_use(string input, string expected)
         {
             var tokens = tokenizer.Tokenize(input);
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
-            Assert.That(token.Type, Is.EqualTo(TokenType.UseCommand));
+            Assert.That(token.Type, Is.EqualTo(TokenType.CommandUse));
             Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase(">alias: this => #that", "this", "#that")]
+        public void Command_Alias(string input, string from, string to)
+        {
+            var tokens = tokenizer.Tokenize(input);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.CommandAlias));
+            Assert.That(token.Parts[0], Is.EqualTo(from));
+            Assert.That(token.Parts[1], Is.EqualTo(to));
         }
 
         [TestCase("|")]
