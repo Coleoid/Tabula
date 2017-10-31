@@ -3,27 +3,8 @@ using System.Collections.Generic;
 
 namespace Tabula
 {
-    public class ParserTestBase
-    {
-        protected Parser parser;
-
-        [SetUp]
-        public void SetUp()
-        {
-            parser = new Parser();
-        }
-
-        public ParserState StateFromString(string inputText)
-        {
-            var tokenizer = new Tokenizer();
-            var tokens = tokenizer.Tokenize(inputText);
-            return new ParserState(tokens);
-        }
-
-    }
-
     [TestFixture]
-    public class ParserTests : ParserTestBase
+    public class ParserTests : TranspilerTestBase
     {
         [Test]
         public void Scenario_gets_tags()
@@ -34,7 +15,7 @@ namespace Tabula
                 new Token(TokenType.ScenarioLabel, "Get active and make noise"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseScenario(state);
+            var cst = _parser.ParseScenario(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Tags, Has.Count.EqualTo(2));
@@ -47,10 +28,10 @@ namespace Tabula
                 new Token(TokenType.Tag, "Enrollment"),
                 new Token(TokenType.Tag, "AC-98989"),
                 new Token(TokenType.SectionLabel, ""),
-                new Token(TokenType.CommandUse, "Student Enrollment"),
+                new Token(TokenType.cmd_Use, "Student Enrollment"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseSection(state);
+            var cst = _parser.ParseSection(state);
             Assert.That(cst, Is.Not.Null);
 
             Assert.That(cst.Tags, Has.Count.EqualTo(2));
@@ -62,10 +43,10 @@ namespace Tabula
             string label = "Enroll Bob in Early Structure Fire Detection";
             var tokens = new List<Token> {
                 new Token(TokenType.SectionLabel, label),
-                new Token(TokenType.CommandUse, "Student Enrollment"),
+                new Token(TokenType.cmd_Use, "Student Enrollment"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseSection(state);
+            var cst = _parser.ParseSection(state);
             Assert.That(cst, Is.Not.Null);
 
             Assert.That(cst.Label, Is.EqualTo(label));
@@ -76,8 +57,8 @@ namespace Tabula
         public void Paragraph()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.CommandUse, "Student Enrollment"),
-                new Token(TokenType.CommandUse, "Person Search Criteria Workflow"),
+                new Token(TokenType.cmd_Use, "Student Enrollment"),
+                new Token(TokenType.cmd_Use, "Person Search Criteria Workflow"),
                 new Token(TokenType.Word, "Search"),
                 new Token(TokenType.Word, "here"),
                 new Token(TokenType.NewLine, "\n"),
@@ -86,7 +67,7 @@ namespace Tabula
                 new Token(TokenType.NewLine, "\n"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseParagraph(state);
+            var cst = _parser.ParseParagraph(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Workflows, Has.Count.EqualTo(2));
@@ -102,7 +83,7 @@ namespace Tabula
                 new Token(TokenType.Word, "Hello"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseStep(state);
+            var cst = _parser.ParseStep(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Symbols, Has.Count.EqualTo(2));
@@ -120,7 +101,7 @@ namespace Tabula
                 new Token(TokenType.Date, "11/22/2044"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseStep(state);
+            var cst = _parser.ParseStep(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Symbols, Has.Count.EqualTo(6));
@@ -135,7 +116,7 @@ namespace Tabula
                 new Token(TokenType.Variable, "#nextPerson"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseStep(state);
+            var cst = _parser.ParseStep(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Symbols, Has.Count.EqualTo(3));
@@ -151,12 +132,12 @@ namespace Tabula
                 new Token(TokenType.SectionLabel, "Search people with 5 duty assignment criteria"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseSectionLabel(state);
+            var cst = _parser.ParseSectionLabel(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Text, Is.EqualTo("Search people with many different duty assignment criteria"));
 
-            cst = parser.ParseSectionLabel(state);
+            cst = _parser.ParseSectionLabel(state);
             Assert.That(cst.Text, Is.EqualTo("Search people with 5 duty assignment criteria"));
         }
 
@@ -172,7 +153,7 @@ namespace Tabula
                 new Token(TokenType.NewLine, "\n"),
             };
             var state = new ParserState(tokens);
-            var cst = parser.ParseSteps(state);
+            var cst = _parser.ParseSteps(state);
 
             Assert.That(cst, Is.Not.Null);
 
@@ -184,7 +165,7 @@ namespace Tabula
         {
             var tokens = new List<Token> { new Token(TokenType.Date, "09/30/2016") };
             var state = new ParserState(tokens);
-            var cst = parser.ParseTerm(state);
+            var cst = _parser.ParseTerm(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Type, Is.EqualTo(TokenType.Date));
@@ -196,7 +177,7 @@ namespace Tabula
         {
             var tokens = new List<Token> { new Token(TokenType.Number, "23") };
             var state = new ParserState(tokens);
-            var cst = parser.ParseTerm(state);
+            var cst = _parser.ParseTerm(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Type, Is.EqualTo(TokenType.Number));

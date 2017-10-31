@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -7,18 +8,22 @@ namespace Tabula
     public enum TokenType
     {
         Unknown,
+        NewLine,
         Tag,
+        cmd_Use,
+        cmd_Set,
+        cmd_Alias,
         ScenarioLabel,
         SectionLabel,
-        CommandUse,
-        CommandAlias,
         Date,
         Number,
         String,
         Variable,
         Word,
+        Comma,
         TableCellSeparator,
-        NewLine,
+        BlockStart,
+        BlockEnd,
     }
 
     public class Token
@@ -50,19 +55,24 @@ namespace Tabula
     {
         public List<string> Warnings { get; set; }
 
-        //  Token regexes need to be start-anchored
-        Regex rxWS = new Regex(@"^([\t ]*)");
-        Regex rxScenarioLabel = new Regex(@"^Scenario: *([""']?)(.*)\1", RegexOptions.IgnoreCase);
-        Regex rxWord = new Regex(@"^([a-zA-Z_]\w*)"); //    token Word    { [<:Letter> || <[ _ \' \- ]> ] [\w || <[ _ \' \- ]>] * }
-        Regex rxString = new Regex(@"^([""'])(.*)\1");
-        Regex rxCommandUse = new Regex(@"^>use: *([^\n]*)");  //>use: Global Setting Management
-        Regex rxCommandAlias = new Regex(@"^>alias: (.+) => (.+)");  //>alias: bob => "Nordberg, Robert"
-        Regex rxTag = new Regex(@"^\[([^]]+)\]");
-        Regex rxNumber = new Regex(@"^(-?(?:\d+(?:\.\d*)?)|-?\.\d+)");
-        Regex rxDate = new Regex(@"^(\d\d?/\d\d?/\d\d\d?\d?)");
-        Regex rxTableCellSeparator = new Regex(@"^\|");
-        Regex rxNewLine = new Regex(@"^\r?\n");
-        Regex rxSectionLabel = new Regex(@"^([""'])(.*)\1:");
+        //  Token regexes need to be start-anchored, or they will skip input.
+        Regex rxHWS             = new Regex(@"^([\t ]*)");
+        Regex rxNewLine         = new Regex(@"^\r?\n");
+        Regex rxScenarioLabel   = new Regex(@"^Scenario: *([""']?)(.*)\1", RegexOptions.IgnoreCase);
+        Regex rxWord            = new Regex(@"^([a-zA-Z_]\w*)");  //  first character = letter or underscore, then any word characters
+        Regex rxString          = new Regex(@"^([""'])(.*)\1");   //  single or double quotes  (full implementation may take a while)
+        Regex rxCommandUse      = new Regex(@"^use: *([^\n]*)");  //  use: Global Setting Management
+        Regex rxCommandSet      = new Regex(@"^set: (.+) =>");    //  set: bob => "Nordberg, Robert" (run time)
+        Regex rxCommandAlias    = new Regex(@"^alias: (.+) =>");  //  alias: "prep #name" => prepare user #name for class (build time)
+        Regex rxTag             = new Regex(@"^\[([^]]+)\]");
+        Regex rxNumber          = new Regex(@"^(-?(?:\d+(?:\.\d*)?)|-?\.\d+)");
+        Regex rxDate            = new Regex(@"^(\d\d?/\d\d?/\d\d\d?\d?)");
+        Regex rxTableMarker     = new Regex(@"^\|");
+        Regex rxSectionLabel    = new Regex(@"^([""'])(.*)\1:");
+        Regex rxVariable        = new Regex(@"^#([a-zA-Z_]\w*)");
+        Regex rxBlockStart      = new Regex(@"^\.\.\.");
+        Regex rxBlockEnd        = new Regex(@"^\.");
+        Regex rxComma           = new Regex(@"^,");
 
         public Tokenizer()
         {
@@ -73,6 +83,7 @@ namespace Tabula
         {
             var Tokens = new List<Token>();
             int position = 0;
+            int line = 1;
 
             string remainingText = inputText.Substring(position);
 
@@ -80,23 +91,28 @@ namespace Tabula
             {
                 remainingText = inputText.Substring(position);
 
-                //  First, nibble off leading whitespace
-                var match = rxWS.Match(remainingText);
+                //  Leading (horizontal) whitespace is skipped past
+                var match = rxHWS.Match(remainingText);
                 position += match.Length;
                 remainingText = inputText.Substring(position);
 
-
-                //  Then, a series of patterns try to match at the cursor position.
-                //  On a match, we create the token, advance the cursor, and start again.
-
+                //  Newlines complete commands, so they are recorded as tokens.
                 match = rxNewLine.Match(remainingText);
                 if (match.Success)
                 {
                     Tokens.Add(new Token(TokenType.NewLine, "\n"));
                     position += match.Length;
+                    line++;
                     continue;
                 }
 
+
+                //  Then, a series of patterns try to match at the cursor position.
+                //  On a match, we create the token, advance the cursor, and start again.
+                //  Some parse ambiguities are resolved by the order of the matches,
+                //  providing a kind of poor man's LTM (Longest Token Matching).
+
+                //  ScenarioLabel before Word to allow 'Scenario: mumph blumb foo'
                 match = rxScenarioLabel.Match(remainingText);
                 if (match.Success)
                 {
@@ -105,6 +121,7 @@ namespace Tabula
                     continue;
                 }
 
+                //  SectionLabel before String to allow '"set up people":'
                 match = rxSectionLabel.Match(remainingText);
                 if (match.Success)
                 {
@@ -113,11 +130,19 @@ namespace Tabula
                     continue;
                 }
 
+                //  Commands before Word to catch keywords: 'set: bob => "Nordberg, Robert"'
+                match = rxCommandSet.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.cmd_Set, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
+
                 match = rxCommandAlias.Match(remainingText);
                 if (match.Success)
                 {
-                    var alias = new Token(TokenType.CommandAlias, match.Groups[1].Value, match.Groups[2].Value);
-                    Tokens.Add(alias);
+                    Tokens.Add(new Token(TokenType.cmd_Alias, match.Groups[1].Value));
                     position += match.Length;
                     continue;
                 }
@@ -125,11 +150,18 @@ namespace Tabula
                 match = rxCommandUse.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.CommandUse, match.Groups[1].Value));
+                    Tokens.Add(new Token(TokenType.cmd_Use, match.Groups[1].Value));
                     position += match.Length;
                     continue;
                 }
 
+                match = rxVariable.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.Variable, match.Groups[1].Value));
+                    position += match.Length;
+                    continue;
+                }
 
                 match = rxWord.Match(remainingText);
                 if (match.Success)
@@ -160,6 +192,7 @@ namespace Tabula
                     continue;
                 }
 
+                //  Date before Number to allow '11/22/1984'
                 match = rxDate.Match(remainingText);
                 if (match.Success)
                 {
@@ -168,6 +201,7 @@ namespace Tabula
                     continue;
                 }
 
+                //  Number before BlockEnd to allow '.25'
                 match = rxNumber.Match(remainingText);
                 if (match.Success)
                 {
@@ -176,15 +210,24 @@ namespace Tabula
                     continue;
                 }
 
-                match = rxCommandAlias.Match(remainingText);
+                //  BlockStart before BlockEnd to allow '...'
+                match = rxBlockStart.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.CommandUse, match.Groups[1].Value));
+                    Tokens.Add(new Token(TokenType.BlockStart, "..."));
                     position += match.Length;
                     continue;
                 }
 
-                match = rxTableCellSeparator.Match(remainingText);
+                match = rxBlockEnd.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.BlockEnd, "."));
+                    position += match.Length;
+                    continue;
+                }
+
+                match = rxTableMarker.Match(remainingText);
                 if (match.Success)
                 {
                     Tokens.Add(new Token(TokenType.TableCellSeparator, "|"));
@@ -192,17 +235,25 @@ namespace Tabula
                     continue;
                 }
 
+                match = rxComma.Match(remainingText);
+                if (match.Success)
+                {
+                    Tokens.Add(new Token(TokenType.Comma, ","));
+                    position += match.Length;
+                    continue;
+                }
+
                 //  Finally, if none of the token patterns matched at the cursor position, fail.
                 //  Right now, that's simply 'advance to end of input', to ignore everything
-                //  at and after the unrecognized input.
-                Warnings.Add($"Unrecognized token at position {position}.");
+                //  at, and after, the unrecognized input.
+                int snippetLength = Math.Min(20, remainingText.Length);
+                Warnings.Add($"Text not tokenizable on line {line}, at:\n{remainingText.Substring(0,snippetLength)}\n");
                 position = inputText.Length;
-                //TODO: Warn better.  Line and column.
 
                 //TODO: Fail softer.
                 //  Make it consume one 'word' instead, and insert an "Unrecognized" token,
                 //  as an attempt to recover from the problem.  Needs some mature problem reporting,
-                //  first, or it will cause "hilarious" scenario-writer agony.
+                //  first, since it may ignore quite a bit of input before resyncing.
             }
 
             return Tokens;

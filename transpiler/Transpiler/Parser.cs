@@ -21,7 +21,7 @@ namespace Tabula
         public List<string> ParseCommand_Use(ParserState state)
         {
             var workflows = new List<string>();
-            while(state.NextIs(TokenType.CommandUse))
+            while(state.NextIs(TokenType.cmd_Use))
                 workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
 
             return workflows;
@@ -46,6 +46,7 @@ namespace Tabula
 
         public CST.Scenario ParseScenario(ParserState state)
         {
+            state.AdvanceLines();
             var scenario = new CST.Scenario();
             scenario.Tags = ParseTags(state);
             var token = state.Take(TokenType.ScenarioLabel,
