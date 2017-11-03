@@ -92,11 +92,19 @@ namespace Tabula.CST
     public class Paragraph : Section
     {
         public List<Action> Actions { get; internal set; }
+        public Paragraph()
+        {
+            Actions = new List<Action>();
+        }
     }
 
     public class Scenario: CST_Entity
     {
         public List<Section> Sections { get; set; }
+        public Scenario()
+        {
+            Sections = new List<Section>();
+        }
     }
 
     public class Section: CST_Entity

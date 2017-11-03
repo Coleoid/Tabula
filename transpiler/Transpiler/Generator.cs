@@ -64,15 +64,24 @@ namespace Tabula
         {
         }
 
-        public List<string> NeededWorkflows = new List<string>();
-        public void AddWorkflow(string workflowName)
+        public List<string> GetNeededWorkflows()
         {
-            NeededWorkflows.Add(workflowName);
+            var nws = new List<string>();
+
+            //??? the moving hand writes...
+            //Scenario.
+
+            return nws;
         }
+
+        //public void AddWorkflow(string workflowName)
+        //{
+        //    NeededWorkflows.Add(workflowName);
+        //}
 
         public void BuildDeclarations()
         {
-            foreach (var workflow in NeededWorkflows)
+            foreach (var workflow in GetNeededWorkflows())
             {
                 var varName = nameOfWorkflowInstance(workflow);
                 Builder.AppendFormat("public {0} {1};{2}", workflow, varName, Environment.NewLine);

@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -39,7 +40,6 @@ namespace Tabula
         }
 
         [TestCase("my_scenario.tab", "my_scenario_generated")]
-        [TestCase("another_scenario", "another_scenario_generated")]
         [TestCase("c:\\proj\\scenarios\\my.tab", "my_generated")]
         [TestCase("scenarios\\my_tests.v4.tab", "my_tests_v4_generated")]
         public void scenario_class_name_matches_file_name(string fileName, string expectedClassName)
@@ -72,39 +72,44 @@ namespace Tabula
             Assert.That(classText, Does.Contain($"  //  {label}"));
         }
 
-        //[Test]
-        //public void declarations_empty_to_start()
-        //{
-        //    transpiler.BuildDeclarations(builder);
-        //    var declarations = builder.ToString();
+        [Test]
+        public void declarations_empty_to_start()
+        {
+            generator.BuildDeclarations();
+            var declarations = builder.ToString();
 
-        //    Assert.That(declarations, Is.EqualTo(string.Empty));
-        //}
+            Assert.That(declarations, Is.EqualTo(string.Empty));
+        }
 
-        //[Test]
-        //public void one_declaration_per_needed_workflow()
-        //{
-        //    transpiler.AddWorkflow("ScenarioContext.Implementations.Administration.TaskRunnerWorkflow");
-        //    transpiler.AddWorkflow("ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow");
+        [Test]
+        public void one_declaration_per_needed_workflow()
+        {
+            var wfs = new List<string> {
+                "ScenarioContext.Implementations.Administration.TaskRunnerWorkflow",
+                "ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow"
+            };
+            var para = new CST.Paragraph();
+            para.Actions.Add(new CST.CommandUse(wfs));
+            scenario.Sections.Add(para);
 
-        //    transpiler.BuildDeclarations(builder);
+            generator.BuildDeclarations();
 
-        //    var declarations = builder.ToString();
-        //    var lines = Regex.Split(declarations, Environment.NewLine);
+            var declarations = builder.ToString();
+            var lines = Regex.Split(declarations, Environment.NewLine);
 
-        //    Assert.That(lines.Count(), Is.EqualTo(3));
-        //    Assert.That(lines[0], Is.EqualTo("public ScenarioContext.Implementations.Administration.TaskRunnerWorkflow TaskRunner;"));
-        //    Assert.That(lines[1], Is.EqualTo("public ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow AddEnrollment;"));
-        //    Assert.That(lines[2], Is.EqualTo(string.Empty));
-        //}
+            Assert.That(lines.Count(), Is.EqualTo(3));
+            Assert.That(lines[0], Is.EqualTo("public ScenarioContext.Implementations.Administration.TaskRunnerWorkflow TaskRunner;"));
+            Assert.That(lines[1], Is.EqualTo("public ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow AddEnrollment;"));
+            Assert.That(lines[2], Is.EqualTo(string.Empty));
+        }
 
-        //[TestCase("ScenarioContext.Implementations.Administration.TaskRunnerWorkflow", "TaskRunner")]
-        //[TestCase("ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow", "AddEnrollment")]
-        //public void instance_name_known_from_workflow(string workflowName, string expectedInstanceName)
-        //{
-        //    string instanceName = transpiler.nameOfWorkflowInstance(workflowName);
+        [TestCase("ScenarioContext.Implementations.Administration.TaskRunnerWorkflow", "TaskRunner")]
+        [TestCase("ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow", "AddEnrollment")]
+        public void instance_name_known_from_workflow(string workflowName, string expectedInstanceName)
+        {
+            string instanceName = generator.nameOfWorkflowInstance(workflowName);
 
-        //    Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
-        //}
+            Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
+        }
     }
 }
