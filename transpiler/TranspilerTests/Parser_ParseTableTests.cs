@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tabula
 {
@@ -46,29 +47,75 @@ namespace Tabula
         public void Row_then_EOF()
         {
             var state = StateFromString("| Fun | Games | Misc |");
-            List<string> row = _parser.ParseTableRow(state);
+            var row = _parser.ParseTableRow(state);
             Assert.That(row, Is.Not.Null);
-            Assert.That(row, Has.Count.EqualTo(3));
-            Assert.That(row, Is.EquivalentTo(new [] { "Fun", "Games", "Misc" }));
+            Assert.That(row.Cells, Has.Count.EqualTo(3));
+            Assert.That(row.Cells.Select(c => c[0]), Is.EquivalentTo(new [] { "Fun", "Games", "Misc" }));
         }
 
         [Test]
         public void Row_then_newline()
         {
             var state = StateFromString("| Fun | \n foo");
-            List<string> row = _parser.ParseTableRow(state);
+            var row = _parser.ParseTableRow(state);
             Assert.That(row, Is.Not.Null);
-            Assert.That(row, Has.Count.EqualTo(1));
+            Assert.That(row.Cells, Has.Count.EqualTo(1));
         }
 
         [Test]
         public void Row_with_multiple_symbols()
         {
             var state = StateFromString("| Fun and games | \n foo");
-            List<string> row = _parser.ParseTableRow(state);
+            var row = _parser.ParseTableRow(state);
             Assert.That(row, Is.Not.Null);
-            Assert.That(row, Has.Count.EqualTo(1));
-            Assert.That(row[0], Is.EqualTo("Fun and games"));
+            Assert.That(row.Cells, Has.Count.EqualTo(1));
+            Assert.That(row.Cells[0][0], Is.EqualTo("Fun and games"));
+        }
+
+        [Test]
+        public void TableCell()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Word, "Say"),
+                new Token(TokenType.Word, "Hello"),
+                new Token(TokenType.TableCellSeparator, "|"),
+            };
+            var state = new ParserState(tokens);
+            var cst = _parser.ParseTableCell(state);
+
+            Assert.That(cst, Has.Count.EqualTo(1));
+            Assert.That(cst[0], Is.EqualTo("Say Hello"));
+        }
+
+        [Test]
+        public void TableCell_empty()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.TableCellSeparator, "|"),
+            };
+            var state = new ParserState(tokens);
+            var cst = _parser.ParseTableCell(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst, Is.Empty);
+        }
+
+        [Test]
+        public void TableCell_two_values_with_comma()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Word, "Say"),
+                new Token(TokenType.Word, "Say"),
+                new Token(TokenType.Comma, ","),
+                new Token(TokenType.Word, "Say"),
+                new Token(TokenType.TableCellSeparator, "|"),
+            };
+            var state = new ParserState(tokens);
+            var cst = _parser.ParseTableCell(state);
+
+            Assert.That(cst, Has.Count.EqualTo(2));
+            Assert.That(cst[0], Is.EqualTo("Say Say"));
+            Assert.That(cst[1], Is.EqualTo("Say"));
         }
 
 

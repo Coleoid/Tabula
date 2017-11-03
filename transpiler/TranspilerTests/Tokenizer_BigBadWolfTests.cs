@@ -65,7 +65,7 @@ namespace Tabula
             Assert_TokenSequenceMatches(tokens, 17,
                 TokenType.SectionLabel,
                 TokenType.NewLine,
-                TokenType.cmd_Alias,
+                TokenType.cmd_Set,
                 TokenType.Variable,
                 TokenType.NewLine
             );

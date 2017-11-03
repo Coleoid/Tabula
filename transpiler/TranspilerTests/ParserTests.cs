@@ -58,7 +58,9 @@ namespace Tabula
         {
             var tokens = new List<Token> {
                 new Token(TokenType.cmd_Use, "Student Enrollment"),
+                new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.cmd_Use, "Person Search Criteria Workflow"),
+                new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.Word, "Search"),
                 new Token(TokenType.Word, "here"),
                 new Token(TokenType.NewLine, "\n"),
@@ -70,8 +72,32 @@ namespace Tabula
             var cst = _parser.ParseParagraph(state);
 
             Assert.That(cst, Is.Not.Null);
-            Assert.That(cst.Workflows, Has.Count.EqualTo(2));
-            Assert.That(cst.Steps, Has.Count.EqualTo(2));
+            Assert.That(cst.Actions, Has.Count.EqualTo(3));
+            Assert.That(cst.Actions[0], Is.TypeOf<CST.CommandUse>());
+        }
+
+        [Test]
+        public void Paragraph_with_set_and_alias()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.cmd_Use, "Student Enrollment"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.cmd_Set, "#Fred"),
+                new Token(TokenType.String, "Boxley, Frederick"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.cmd_Alias, "Search"),
+                new Token(TokenType.BlockStart, "..."),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "there"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.BlockEnd, "."),
+            };
+            var state = new ParserState(tokens);
+            var cst = _parser.ParseParagraph(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst.Actions, Has.Count.EqualTo(3));
         }
 
 
@@ -134,7 +160,6 @@ namespace Tabula
             var state = new ParserState(tokens);
             var cst = _parser.ParseSectionLabel(state);
 
-            Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Text, Is.EqualTo("Search people with many different duty assignment criteria"));
 
             cst = _parser.ParseSectionLabel(state);

@@ -34,7 +34,7 @@ namespace Tabula
             return Peek()?.Type == tokenType;
         }
 
-        public bool NextIsIn(TokenType[] tokenTypes)
+        public bool NextIsIn(params TokenType[] tokenTypes)
         {
             var nextType = Peek()?.Type;
             return tokenTypes.Any(t => t == nextType);

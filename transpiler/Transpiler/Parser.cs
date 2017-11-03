@@ -18,13 +18,99 @@ namespace Tabula
             return scenario;
         }
 
-        public List<string> ParseCommand_Use(ParserState state)
+        public CST.Action ParseAction(ParserState state)
         {
-            var workflows = new List<string>();
-            while(state.NextIs(TokenType.cmd_Use))
-                workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
+            state.AdvanceLines();
+            if (state.AtEnd) return null;
 
-            return workflows;
+            switch (state.Peek().Type)
+            {
+                case TokenType.cmd_Alias:
+                    return ParseCommand_Alias(state);
+
+                case TokenType.cmd_Set:
+                    return ParseCommand_Set(state);
+
+                case TokenType.cmd_Use:
+                    return ParseCommand_Use(state);
+
+                case TokenType.BlockStart:
+                    return ParseBlock(state);
+
+                default:
+                    break;
+            }
+
+            return ParseStep(state);
+        }
+
+        public List<CST.Action> ParseActions(ParserState state)
+        {
+            var actions = new List<CST.Action>();
+            while (true)
+            {
+                var action = ParseAction(state);
+                if (action == null) break;
+                actions.Add(action);
+            }
+
+            return actions;
+        }
+
+        public CST.Block ParseBlock(ParserState state)
+        {
+            if (!state.NextIs(TokenType.BlockStart))
+                return null;
+            state.Take(TokenType.BlockStart);
+
+            var actions = ParseActions(state);
+
+            if (!state.NextIs(TokenType.BlockEnd))
+                throw new Exception("After the actions in a block, we need a block end, a period.");
+            state.Take(TokenType.BlockEnd);
+
+            return new CST.Block(actions);
+        }
+
+        public CST.CommandAlias ParseCommand_Alias(ParserState state)
+        {
+            state.AdvanceLines();
+            if (!state.NextIs(TokenType.cmd_Alias)) return null;
+
+            var aliasToken = state.Take();
+            var action = ParseAction(state);
+            if (action == null)
+                throw new Exception("The target of an Alias command must be a step or a block of steps.");
+
+            var alias = new CST.CommandAlias(aliasToken.Text, action);
+            return alias;
+        }
+
+        public CST.CommandSet ParseCommand_Set(ParserState state)
+        {
+            state.AdvanceLines();
+            if (!state.NextIs(TokenType.cmd_Set)) return null;
+
+            var setToken = state.Take();
+            var term = ParseTerm(state);
+            if (term == null)
+                throw new Exception("The target of a Set command must be a term--a variable, string, date, or number.");
+
+            var set = new CST.CommandSet(setToken.Text, term);
+            return set;
+        }
+
+        public CST.CommandUse ParseCommand_Use(ParserState state)
+        {
+            state.AdvanceLines();
+            var workflows = new List<string>();
+            while (state.NextIs(TokenType.cmd_Use))
+            {
+                workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
+                state.AdvanceLines();
+            }
+
+            return new CST.CommandUse(workflows);
         }
 
         public CST.Paragraph ParseParagraph(ParserState state)
@@ -32,10 +118,9 @@ namespace Tabula
             int rollbackPosition = state.Position;
             CST.Paragraph paragraph = new CST.Paragraph();
 
-            paragraph.Workflows = ParseCommand_Use(state);
-            paragraph.Steps = ParseSteps(state);
+            paragraph.Actions = ParseActions(state);
 
-            if (paragraph.Workflows.Count + paragraph.Steps.Count == 0)
+            if (paragraph.Actions.Count == 0)
             {
                 state.Position = rollbackPosition;
                 return null;
@@ -62,8 +147,12 @@ namespace Tabula
         {
             var sections = new List<CST.Section>();
 
-            for (var section = ParseSection(state); section != null; section = ParseSection(state))
+            while (true)
+            {
+                var section = ParseSection(state);
+                if (section == null) break;
                 sections.Add(section);
+            }
 
             return sections;
         }
@@ -73,6 +162,7 @@ namespace Tabula
             int rollback = state.Position;
             CST.Section section;
 
+            state.AdvanceLines();
             var tags = ParseTags(state);
 
             var label = ParseSectionLabel(state);
@@ -88,7 +178,7 @@ namespace Tabula
                 return null;
             }
 
-            section.Label = label.Text;
+            section.Label = label?.Text;
             section.Tags = tags;
 
             return section;
@@ -115,8 +205,13 @@ namespace Tabula
         public List<CST.Step> ParseSteps(ParserState state)
         {
             var steps = new List<CST.Step>();
-            for (var step = ParseStep(state); step != null; step = ParseStep(state))
+
+            while (true)
+            {
+                var step = ParseStep(state);
+                if (step == null) break;
                 steps.Add(step);
+            }
 
             return steps;
         }
@@ -132,15 +227,21 @@ namespace Tabula
         public List<CST.Symbol> ParseSymbols(ParserState state)
         {
             var symbols = new List<CST.Symbol>();
-            for (var symbol = ParseSymbol(state); symbol != null; symbol = ParseSymbol(state))
+            while (true)
+            {
+                var symbol = ParseSymbol(state);
+                if (symbol == null) break;
                 symbols.Add(symbol);
+            }
 
             return symbols;
         }
 
         public CST.Table ParseTable(ParserState state)
         {
-            var columnNames = ParseTableRow(state);
+            var topRow = ParseTableRow(state);
+            if (topRow == null) return null;
+            var columnNames = topRow.Cells.Select(c => c[0]).ToList();
             if (columnNames == null) return null;
 
             return new CST.Table {
@@ -149,30 +250,46 @@ namespace Tabula
             };
         }
 
-        public List<string> ParseTableRow(ParserState state)
+        public List<string> ParseTableCell(ParserState state)
         {
-            if (!state.NextIs(TokenType.TableCellSeparator)) return null;
-
-            var row = new List<string>();
-
-            state.Take(TokenType.TableCellSeparator);
-
-            while (!state.LineComplete)
+            var values = new List<string>();
+            while (!state.NextIs(TokenType.TableCellSeparator))
             {
                 var syms = ParseSymbols(state);
                 var text = string.Join(" ", syms.Select(s => s.Text).ToArray());
-                row.Add(text);
 
+                if (!state.NextIsIn(TokenType.TableCellSeparator, TokenType.Comma))
+                    throw new Exception("Can only handle symbols and commas inside a table cell.");
+
+                state.Take(TokenType.Comma);
+                values.Add(text);
+            }
+
+            return values;
+        }
+
+        public CST.TableRow ParseTableRow(ParserState state)
+        {
+            if (!state.NextIs(TokenType.TableCellSeparator)) return null;
+
+            state.Take(TokenType.TableCellSeparator);
+
+            var cells = new List<List<string>>();
+            while (!state.LineComplete)
+            {
+                var cell = ParseTableCell(state);
+                cells.Add(cell);
                 state.Take(TokenType.TableCellSeparator, "Gotta be | next but isn't.");
             }
             state.AdvanceLines();
 
+            var row = new CST.TableRow(cells);
             return row;
         }
 
-        public List<List<string>> ParseTableRows(ParserState state)
+        public List<CST.TableRow> ParseTableRows(ParserState state)
         {
-            var rows = new List<List<string>>();
+            var rows = new List<CST.TableRow>();
             while (state.NextIs(TokenType.TableCellSeparator))
             {
                 var row = ParseTableRow(state);

@@ -44,7 +44,7 @@ use: Global Setting Management
 Enable Duty Locations
 
 ""What we'll call our people in this scenario"":
-alias: #handle => #FullNameLF
+set: #handle => #FullNameLF
 | handle | FullNameLF               |
 | Lina   | ""Frixell, Rorolina""    |
 | Gio    | ""Arland, Giovanni""     |
@@ -52,7 +52,7 @@ alias: #handle => #FullNameLF
 | Mimi   | ""Schwarzlang, Mimi""    |
 
 ""What we'll call the organizations they work for"":
-alias: #TLA => #OrganizationName
+set: #TLA => #OrganizationName
 | TLA | OrganizationName             |
 | HPD | Hometown Police Department   |
 | OPD | Otherville Police Department |

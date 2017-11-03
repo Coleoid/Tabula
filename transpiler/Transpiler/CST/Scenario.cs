@@ -30,6 +30,69 @@ namespace Tabula.CST
 
     //  ===================
 
+    public class Action : Taggable
+    {
+        public List<string> Tags { get; set; }
+    }
+
+    public class Block : Action
+    {
+        public List<Action> Actions { get; set; }
+        public Block(List<Action> actions)
+        {
+            Actions = actions;
+        }
+    }
+
+    public class CommandAlias : Action
+    {
+        public string Name { get; set; }
+        public Action Action { get; set; }
+
+        public CommandAlias(string name, Action action)
+        {
+            Name = name;
+            Action = action;
+        }
+    }
+
+    public class CommandSet : Action
+    {
+        public string Name { get; set; }
+        public Symbol Term { get; set; }
+
+        public CommandSet(string name, Symbol term)
+        {
+            Name = name;
+            Term = term;
+        }
+    }
+
+    public class CommandUse : Action
+    {
+        public List<string> Workflows { get; set; }
+        public CommandUse(List<string> workflows)
+        {
+            Workflows = workflows;
+        }
+    }
+
+    public class Label : Wrapper
+    {
+        public Label(Token token)
+            : base(token)
+        { }
+
+        internal static Label Wrap(Token token)
+        {
+            return token == null ? null : new Label(token);
+        }
+    }
+
+    public class Paragraph : Section
+    {
+        public List<Action> Actions { get; internal set; }
+    }
 
     public class Scenario: CST_Entity
     {
@@ -40,26 +103,13 @@ namespace Tabula.CST
     {
     }
 
-    public class Paragraph : Section
-    {
-        public List<string> Workflows { get; internal set; }
-        public List<Step> Steps { get; internal set; }
-    }
-
-    public class Table : Section
-    {
-        public List<string> ColumnNames { get; set; }
-        public List<List<string>> Rows { get; set; }
-    }
-
-    public class Step : Taggable
+    public class Step : Action, Taggable
     {
         public Step(List<Symbol> symbols)
         {
             Symbols = symbols;
         }
 
-        public List<string> Tags { get; set; }
         public List<Symbol> Symbols { get; set; }
     }
 
@@ -75,15 +125,19 @@ namespace Tabula.CST
         }
     }
 
-    public class Label : Wrapper
+    public class Table : Section
     {
-        public Label(Token token)
-            : base(token)
-        { }
+        public List<string> ColumnNames { get; set; }
+        public List<TableRow> Rows { get; set; }
+    }
 
-        internal static Label Wrap(Token token)
+    public class TableRow
+    {
+        public List<List<string>> Cells { get; set; }
+
+        public TableRow(List<List<string>> cells)
         {
-            return token == null ? null : new Label(token);
+            Cells = cells;
         }
     }
 }
