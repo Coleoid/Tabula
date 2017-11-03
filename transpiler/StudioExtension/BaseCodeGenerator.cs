@@ -63,6 +63,8 @@ namespace Tabula
             codeFileNameSpace = wszDefaultNamespace;
             codeGeneratorProgress = pGenerateProgress;
 
+            //JC
+            //byte[] bytes = GenerateCode(bstrInputFileContents);
             byte[] bytes = GenerateCode(bstrInputFileContents);
 
             if (bytes == null)

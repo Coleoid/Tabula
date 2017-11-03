@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Tabula
 {
     [TestFixture]
-    public class ParserTests : TranspilerTestBase
+    public class ParserTests : TranspilerUnitTestBase
     {
         [Test]
         public void Scenario_gets_tags()
@@ -51,7 +51,6 @@ namespace Tabula
 
             Assert.That(cst.Label, Is.EqualTo(label));
         }
-
 
         [Test]
         public void Paragraph()
@@ -208,6 +207,5 @@ namespace Tabula
             Assert.That(cst.Type, Is.EqualTo(TokenType.Number));
             Assert.That(cst.Text, Is.EqualTo("23"));
         }
-
     }
 }

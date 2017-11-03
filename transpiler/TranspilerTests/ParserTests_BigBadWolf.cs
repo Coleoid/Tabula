@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Tabula
 {
     [TestFixture]
-    public class Parser_BigBadWolfTests : TranspilerTestBase
+    public class ParserTests_BigBadWolf : TranspilerUnitTestBase
     {
         [Test]
         public void Whos_afraid_to_parse_the_big_bad_wolf()
@@ -13,9 +13,8 @@ namespace Tabula
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0),
                 () => "Warnings: " + string.Join("\n", _tokenizer.Warnings)
             );
-
-
             var state = new ParserState(tokens);
+
             var cst = _parser.ParseScenario(state);
 
             //  [Person Search, Duty Assignments, AC-16629]
@@ -27,15 +26,7 @@ namespace Tabula
             //  Scenario: ""Advanced person search with duty assignments""
             Assert.That(cst.Label, Is.EqualTo("Advanced person search with duty assignments"));
 
-            //TODO: current (31 Oct 17) failure point, no sections in scenario after ParseScenario.
             Assert.That(cst.Sections, Has.Count.EqualTo(29));
-
-            //  ""Enable duty locations"":
-            //  use: Global Setting Management
-            //  Enable Duty Locations
-            var para = cst.Sections[0] as CST.Paragraph;
-            Assert.That(para, Is.Not.Null);
-
             Assert.That(cst.Sections[0].Label, Is.EqualTo("Enable duty locations"));
             Assert.That(cst.Sections[1].Label, Is.EqualTo("What we'll call our people in this scenario"));
             Assert.That(cst.Sections[2].Label, Is.Null);
@@ -67,8 +58,30 @@ namespace Tabula
             Assert.That(cst.Sections[28].Label, Is.EqualTo("Assignment date range, location/org, and employment type"));
         }
 
-        //[Test]
-        //public void 
+        [Test]
+        public void Undecorated_alias_to_a_block()
+        {
+            var tokens = _tokenizer.Tokenize(BigBadWolf);
+            Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0),
+                () => "Warnings: " + string.Join("\n", _tokenizer.Warnings)
+            );
+            var state = new ParserState(tokens);
+
+            var cst = _parser.ParseScenario(state);
+
+            //  alias: ""Add employment actions for #employeeName at #orgName"" => ...
+            Assert.That(cst.Sections[13].Label, Is.Null);
+            var para = cst.Sections[13] as CST.Paragraph;
+            Assert.That(para, Is.Not.Null);
+            Assert.That(para.Actions, Has.Count.EqualTo(1));
+
+            var alias = para.Actions[0] as CST.CommandAlias;
+            Assert.That(alias, Is.Not.Null);
+            var block = alias.Action as CST.Block;
+            Assert.That(block, Is.Not.Null);
+
+            Assert.That(block.Actions, Has.Count.EqualTo(10));
+        }
 
     }
 }

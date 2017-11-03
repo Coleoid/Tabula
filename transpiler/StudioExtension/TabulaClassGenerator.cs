@@ -72,7 +72,7 @@ namespace Tabula
         internal void GenerateText(string scenarioText, StringBuilder builder)
         {
             var transpiler = new Transpiler();
-            transpiler.Transpile("foo.tab", scenarioText, builder);
+            transpiler.Transpile(InputFilePath, scenarioText, builder);
         }
     }
 }

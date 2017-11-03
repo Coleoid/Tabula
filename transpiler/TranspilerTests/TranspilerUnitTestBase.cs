@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Tabula
 {
-    public class TranspilerTestBase
+    public class TranspilerUnitTestBase
     {
         protected Parser _parser;
         protected Tokenizer _tokenizer;

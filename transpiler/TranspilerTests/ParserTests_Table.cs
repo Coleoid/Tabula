@@ -6,7 +6,7 @@ using System.Linq;
 namespace Tabula
 {
     [TestFixture]
-    public class Parser_ParseTableTests : TranspilerTestBase
+    public class ParserTests_Table : TranspilerUnitTestBase
     {
         ////  Label is optional, data rows are optional.
         //[Test]

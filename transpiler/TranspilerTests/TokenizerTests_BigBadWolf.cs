@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Tabula
 {
     [TestFixture]
-    public class Tokenizer_BigBadWolfTests : TranspilerTestBase
+    public class TokenizerTests_BigBadWolf : TranspilerUnitTestBase
     {
         [Test]
         public void Whos_afraid_to_tokenize_the_big_bad_wolf()
@@ -95,8 +95,5 @@ namespace Tabula
                 TokenType.NewLine
             );
         }
-
     }
-
-
 }

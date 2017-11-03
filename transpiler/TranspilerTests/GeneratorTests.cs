@@ -7,22 +7,27 @@ using System.Text.RegularExpressions;
 namespace Tabula
 {
     [TestFixture]
-    public class TranspilerTests
+    public class GeneratorTests
     {
         StringBuilder builder;
-        Transpiler transpiler;
+        CST.Scenario scenario;
+        Generator generator;
 
         [SetUp]
         public void SetUp()
         {
             builder = new StringBuilder();
-            transpiler = new Transpiler();
+            scenario = new CST.Scenario();
+            generator = new Generator { Builder = builder, Scenario = scenario };
         }
 
-        [Test]
-        public void Header_contains_generated_file_warning()
+        //TODO:  Report scenario errors in Visual Studio error list
+
+        [TestCase("squangle_widgets_across_timezones.tab")]
+        [TestCase("groplet_quality_within_tolerance.tab")]
+        public void Header_warns_it_is_generated_and_tells_where_source_file_is(string fileName)
         {
-            transpiler.BuildHeader(builder);
+            generator.BuildHeader(fileName);
 
             var result = builder.ToString();
             var lines = Regex.Split(result, Environment.NewLine);
@@ -30,38 +35,16 @@ namespace Tabula
             Assert.That(lines.Count(), Is.GreaterThan(2));
             Assert.That(lines[0], Does.Contain("generated"));
             Assert.That(lines[0], Does.Contain("TabulaClassGenerator"));
+            Assert.That(lines[1], Does.Contain(fileName));
         }
-
-        //TODO:  Think.  Do I want to make truly empty scenarios work?
-        //[Test]
-        //public void Empty_scenario_contains_header()
-        //{
-        //    var headerBuilder = new StringBuilder();
-
-        //    transpiler.BuildHeader(headerBuilder);
-        //    transpiler.Transpile("foo.tab", string.Empty, builder);
-
-        //    var headerText = headerBuilder.ToString();
-        //    var emptyScenarioText = builder.ToString();
-
-        //    Assert.That(emptyScenarioText, Does.Contain(headerText));
-        //}
-
-        //[Test]
-        //public void Empty_scenario_creates_class_in_namespace()
-        //{
-        //    transpiler.Transpile("foo.tab", string.Empty, builder);
-
-        //    var emptyScenarioText = builder.ToString();
-        //    Assert.That(emptyScenarioText, Does.Contain("namespace Tabula"));
-        //    Assert.That(emptyScenarioText, Does.Contain("public class"));
-        //}
 
         [TestCase("my_scenario.tab", "my_scenario_generated")]
         [TestCase("another_scenario", "another_scenario_generated")]
+        [TestCase("c:\\proj\\scenarios\\my.tab", "my_generated")]
+        [TestCase("scenarios\\my_tests.v4.tab", "my_tests_v4_generated")]
         public void scenario_class_name_matches_file_name(string fileName, string expectedClassName)
         {
-            transpiler.OpenClass(builder, fileName);
+            generator.OpenClass(fileName);
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($"public class {expectedClassName}"));
@@ -70,7 +53,7 @@ namespace Tabula
         [Test]
         public void Class_declaration_includes_base_and_interface()
         {
-            transpiler.OpenClass(builder, "TuitionBilling");
+            generator.OpenClass("TuitionBilling");
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($": GeneratedScenarioBase, IGeneratedScenario"));
@@ -80,8 +63,10 @@ namespace Tabula
         public void Class_declaration_includes_scenario_label_as_comment()
         {
             var label = "AC-39393: Snock the cubid foratically";
-            transpiler.ScenarioLabel = label;
-            transpiler.OpenClass(builder, "TuitionBilling");
+            var scenario = new CST.Scenario();
+            scenario.Label = label;
+            generator.Scenario = scenario;
+            generator.OpenClass("TuitionBilling");
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($"  //  {label}"));

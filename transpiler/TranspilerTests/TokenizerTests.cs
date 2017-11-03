@@ -4,7 +4,7 @@ using System.Linq;
 namespace Tabula
 {
     [TestFixture]
-    public class TokenizerTests : TranspilerTestBase
+    public class TokenizerTests : TranspilerUnitTestBase
     {
         [Test]
         public void Empty_input_produces_no_tokens_or_warnings()
