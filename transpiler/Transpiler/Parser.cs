@@ -7,6 +7,12 @@ namespace Tabula
 {
     public class Parser
     {
+        public CST.Scenario Scenario { get; set; }
+
+        public Parser()
+        {
+            Scenario = new CST.Scenario();
+        }
 
         public CST.Scenario FileParse(string scenarioText)
         {
@@ -109,7 +115,7 @@ namespace Tabula
                 workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
                 state.AdvanceLines();
             }
-
+            Scenario.NeededWorkflows.AddRange(workflows);
             return new CST.CommandUse(workflows);
         }
 
@@ -132,15 +138,14 @@ namespace Tabula
         public CST.Scenario ParseScenario(ParserState state)
         {
             state.AdvanceLines();
-            var scenario = new CST.Scenario();
-            scenario.Tags = ParseTags(state);
+            Scenario.Tags.AddRange(ParseTags(state));
             var token = state.Take(TokenType.ScenarioLabel,
                 "Scenario should start with a label like  'Scenario: Student departure sends mail'");
 
-            scenario.Label = token.Text;
-            scenario.Sections = ParseSections(state);
+            Scenario.Label = token.Text;
+            Scenario.Sections.AddRange(ParseSections(state));
 
-            return scenario;
+            return Scenario;
         }
 
         public List<CST.Section> ParseSections(ParserState state)

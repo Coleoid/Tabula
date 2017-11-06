@@ -7,7 +7,7 @@
     <ProjectGuid>{78237C47-A53B-4754-9ECD-098E717AA930}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Transpiler</RootNamespace>
+    <RootNamespace>Tabula</RootNamespace>
     <AssemblyName>Transpiler</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -43,7 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CST\Bases.cs" />
+    <Compile Include="CST\Domain.cs" />
     <Compile Include="CST\Scenario.cs" />
+    <Compile Include="CST\Table.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Tabula
@@ -54,11 +55,12 @@ namespace Tabula
             if (lastDot != -1)
                 inputFilePath = inputFilePath.Remove(lastDot);
 
-            var className = inputFilePath.Replace(' ', '_').Replace('.', '_');
-            Builder.AppendLine($"    public class {className}_generated  //  {Scenario.Label}");
+            ClassName = inputFilePath.Replace(' ', '_').Replace('.', '_') + "_generated";
+            Builder.AppendLine($"    public class {ClassName}  //  {Scenario.Label}");
             Builder.AppendLine("        : GeneratedScenarioBase, IGeneratedScenario");
             Builder.AppendLine("    {");
         }
+        public string ClassName { get; set; }
 
         public void BuildBody()
         {
@@ -66,25 +68,22 @@ namespace Tabula
 
         public List<string> GetNeededWorkflows()
         {
-            var nws = new List<string>();
+            List<string> nws = Scenario.NeededWorkflows;
+            nws.Sort();
+            var unws = nws.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 
-            //TODO: NEXT: the moving hand writes...
-            //  During parse, ach use command adds its workflow(s) to a list in the ParserState
-            //   to eliminate a tree walk when building the declarations.
-            //  Also, we want to check available workflows at build time, so we should have the
-            //   source line available for build time error reporting.
-
-            //  Then the 'peepEnrollment = new PeopleEnrollmentWorkflow();' lines are placed in
+            //TODO:
+            //  The 'peepEnrollment = new PeopleEnrollmentWorkflow();' lines are placed in
             //   each paragraph (or block) method, as the use command is encountered.
-            //  (And I need to think out not messing up the state of any workflows which rely
+            //  And I need to think out not messing up the state of any workflows which rely
             //   on their state.  Perhaps we manually stash and replace workflow instances?
-            //  Or, since I'm doing
-            //   local initialization, I could switch to local declaration, also.  Then we need
-            //   to find a way to know which workflows to pass as arguments, and do so with all
-            //   consumers of the block.  More complex, and I don't know where the real use
-            //   cases will be pushing me.)
+            //  Or, since I'm doing local initialization, I could switch to local declaration,
+            //   also.  Then we need to find a way to know which workflows to pass as arguments,
+            //   and do so with all consumers of the block.  More complex.
+            //  I don't know where the real use cases will push us, so starting simple (and
+            //   working to uncover the forces involved) seems like the plan.
 
-            return nws;
+            return unws;
         }
 
         //public void AddWorkflow(string workflowName)
@@ -101,9 +100,15 @@ namespace Tabula
             }
         }
 
+        //  Since workflow instantiation happens in each paragraph, this is (for now) a stub.
         public void BuildConstructor(List<string> neededImplementors)
         {
-
+            Builder.Append("        public ");
+            Builder.Append(ClassName);
+            Builder.AppendLine("()");
+            Builder.AppendLine("            : base()");
+            Builder.AppendLine("        {");
+            Builder.AppendLine("        }");
         }
 
         public void CloseClass()
