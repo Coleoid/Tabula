@@ -28,7 +28,7 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
     <VsixType>v3</VsixType>
     <RootNamespace>Tabula</RootNamespace>
     <AssemblyName>TabulaClassGenerator</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>12.0</OldToolsVersion>

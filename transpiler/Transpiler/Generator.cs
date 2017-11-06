@@ -68,8 +68,21 @@ namespace Tabula
         {
             var nws = new List<string>();
 
-            //??? the moving hand writes...
-            //Scenario.
+            //TODO: NEXT: the moving hand writes...
+            //  During parse, ach use command adds its workflow(s) to a list in the ParserState
+            //   to eliminate a tree walk when building the declarations.
+            //  Also, we want to check available workflows at build time, so we should have the
+            //   source line available for build time error reporting.
+
+            //  Then the 'peepEnrollment = new PeopleEnrollmentWorkflow();' lines are placed in
+            //   each paragraph (or block) method, as the use command is encountered.
+            //  (And I need to think out not messing up the state of any workflows which rely
+            //   on their state.  Perhaps we manually stash and replace workflow instances?
+            //  Or, since I'm doing
+            //   local initialization, I could switch to local declaration, also.  Then we need
+            //   to find a way to know which workflows to pass as arguments, and do so with all
+            //   consumers of the block.  More complex, and I don't know where the real use
+            //   cases will be pushing me.)
 
             return nws;
         }
