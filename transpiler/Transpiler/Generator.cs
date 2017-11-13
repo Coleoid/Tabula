@@ -154,7 +154,7 @@ namespace Tabula
                     sectionsBody.Dedent();
                     sectionsBody.AppendLine("}");
 
-                    //TODO:  Handle cases with paragraphs properly
+                    //TODO:  Handle called, uncalled, and final paragraph cases
                     executeMethodBody.AppendLine(para.MethodName + "();");
                 }
 

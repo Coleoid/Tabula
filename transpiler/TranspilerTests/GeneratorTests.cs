@@ -88,9 +88,10 @@ namespace Tabula
                 "ScenarioContext.Implementations.Administration.TaskRunnerWorkflow",
                 "ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow"
             };
-            var para = new CST.Paragraph();
-            para.Actions.Add(new CST.CommandUse(wfs));
-            scenario.Sections.Add(para);
+            //var para = new CST.Paragraph();
+            //para.Actions.Add(new CST.CommandUse(wfs));
+            scenario.NeededWorkflows = wfs;
+            //scenario.Sections.Add(para);
 
             generator.BuildDeclarations();
 

@@ -50,7 +50,7 @@ namespace Tabula
             return NextIs(tokenType) ? Take() : null;
         }
 
-        internal Token Take(TokenType tokenType, string exceptionMessage)
+        public Token Take(TokenType tokenType, string exceptionMessage)
         {
             if (NextIs(tokenType)) return Take();
             throw new Exception(exceptionMessage);
