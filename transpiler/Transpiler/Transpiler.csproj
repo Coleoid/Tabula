@@ -48,6 +48,7 @@
     <Compile Include="CST\Scenario.cs" />
     <Compile Include="CST\Table.cs" />
     <Compile Include="Generator.cs" />
+    <Compile Include="IndentingStringBuilder.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parser.cs" />

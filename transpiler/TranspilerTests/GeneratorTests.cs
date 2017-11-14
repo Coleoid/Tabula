@@ -88,10 +88,7 @@ namespace Tabula
                 "ScenarioContext.Implementations.Administration.TaskRunnerWorkflow",
                 "ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow"
             };
-            //var para = new CST.Paragraph();
-            //para.Actions.Add(new CST.CommandUse(wfs));
             scenario.NeededWorkflows = wfs;
-            //scenario.Sections.Add(para);
 
             generator.BuildDeclarations();
 
@@ -111,6 +108,42 @@ namespace Tabula
             string instanceName = generator.nameOfWorkflowInstance(workflowName);
 
             Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
+        }
+
+        [Test]
+        public void BuildAction_without_arguments()
+        {
+            //TODO: prepare a fixture class DoerWorkflow with instance name Doer and the method .Do_this()
+
+            //  Step:  do this
+            var symbols = new List<CST.Symbol> {
+                new CST.Symbol(new Token(TokenType.Word, "do")),
+                new CST.Symbol(new Token(TokenType.Word, "this")),
+            };
+            var action = new CST.Step(symbols);
+
+            generator.BuildAction(action);
+
+            Assert.That(generator.Builder.ToString(), Is.EqualTo("            Doer.Do_this();\r\n"));
+        }
+
+        [Test, Ignore("until after handling no-arg version")]
+        public void BuildAction_includes_arguments()
+        {
+            //TODO: prepare a fixture class LoopyWorkflow with instance name Loopy and the method .Do_this__times(int count)
+
+            //  Step:  do this 5 times
+            var symbols = new List<CST.Symbol> {
+                new CST.Symbol(new Token(TokenType.Word, "do")),
+                new CST.Symbol(new Token(TokenType.Word, "this")),
+                new CST.Symbol(new Token(TokenType.Number, "5")),
+                new CST.Symbol(new Token(TokenType.Word, "times")),
+            };
+            var action = new CST.Step(symbols);
+
+            generator.BuildAction(action);
+
+            Assert.That(generator.Builder.ToString(), Is.EqualTo("            Loopy.Do_this__times(5);\r\n"));
         }
     }
 }

@@ -20,6 +20,7 @@ namespace Tabula
             BuildHeader(inputFilePath);
             OpenNamespace();
             OpenClass(inputFilePath);
+            BuildConstructor();
             BuildClassBody();
             CloseClass();
             CloseNamespace();
@@ -70,72 +71,11 @@ namespace Tabula
 
         }
 
-        public class IndentingSBuilder
-        {
-            private bool StartOfLine = true;
-            private StringBuilder _builder;
-            public StringBuilder Builder
-            {
-                get
-                {
-                    if (_builder == null)
-                        _builder = new StringBuilder();
-                    return _builder;
-                }
-                internal set { _builder = value; }
-            }
-
-            internal int indentLevel = 0;
-
-            public void Indent()
-            {
-                indentLevel += 4;
-                _indentation = new string(' ', indentLevel);
-            }
-            public void Dedent()
-            {
-                if (indentLevel <= 0) throw new Exception("Tried to dedent past zero.");
-                indentLevel -= 4;
-                _indentation = new string(' ', indentLevel);
-            }
-
-            private string _indentation = string.Empty;
-            public string Indentation
-            {
-                get { return _indentation; }
-            }
-
-            private void IndentAtStartOfLine()
-            {
-                if (!StartOfLine) return;
-
-                Builder.Append(Indentation);
-                StartOfLine = false;
-            }
-
-            public void Append(string input)
-            {
-                IndentAtStartOfLine();
-                Builder.Append(input);
-            }
-
-            public void AppendLine(string input)
-            {
-                IndentAtStartOfLine();
-                Builder.AppendLine(input);
-                StartOfLine = true;
-            }
-
-            public IndentingSBuilder(int startingIndentLevel)
-            {
-                indentLevel = startingIndentLevel;
-            }
-        }
 
         public void BuildClassBody()
         {
-            var executeMethodBody = new IndentingSBuilder(12);  // namespace + class + inside method
-            var sectionsBody = new IndentingSBuilder(8);  // namespace + class
+            var executeMethodBody = new IndentingStringBuilder(12);  // namespace + class + inside method
+            var sectionsBody = new IndentingStringBuilder(8);  // namespace + class
 
             foreach (var section in Scenario.Sections)
             {
@@ -176,12 +116,12 @@ namespace Tabula
         public void BuildAction(CST.Action action)
         {
             //TODO:  method resolution or 'unfound'
-            //TODO:  rolling into lambda with text of line included
             string workflowName = "WorkflowTodo";
             string methodName = "MethodTodo";
             List<string> args = new List<string> { "this", "that", "todo" };
             string delim = ", ";
-            Builder.AppendLine($"               {workflowName}.{methodName}({string.Join(delim, args)});");
+            Builder.AppendLine($"           {workflowName}.{methodName}({string.Join(delim, args)});");
+            //TODO:  rolling into .Do with lambda and text of line included
         }
 
         public List<string> GetNeededWorkflows()
@@ -219,7 +159,7 @@ namespace Tabula
         }
 
         //  Since workflow instantiation happens in each paragraph, this is (for now) a stub.
-        public void BuildConstructor(List<string> neededImplementors)
+        public void BuildConstructor()
         {
             Builder.Append("        public ");
             Builder.Append(ClassName);

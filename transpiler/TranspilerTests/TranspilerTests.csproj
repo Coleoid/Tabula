@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GeneratorTests.cs" />
+    <Compile Include="IndentingStringBuilderTests.cs" />
     <Compile Include="ParserStateTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="ParserTests_BigBadWolf.cs" />
