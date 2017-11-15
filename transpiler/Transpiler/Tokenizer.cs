@@ -37,18 +37,6 @@ namespace Tabula
             this.Type = type;
             this.Text = text;
         }
-
-        public Token(TokenType type, params string [] parts)
-        {
-            this.Type = type;
-            this.Parts = parts.ToList();
-        }
-
-        public Token(TokenType type, List<string> parts)
-        {
-            this.Type = type;
-            this.Parts = parts;
-        }
     }
 
     public class Tokenizer

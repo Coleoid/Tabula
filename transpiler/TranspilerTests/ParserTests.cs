@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace Tabula
@@ -10,7 +11,7 @@ namespace Tabula
         public void Scenario_gets_tags()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.Tag, "Laughing"),
+                new Token(TokenType.Tag, "Laughing Loudly"),
                 new Token(TokenType.Tag, "Jumping"),
                 new Token(TokenType.ScenarioLabel, "Get active and make noise"),
             };
@@ -196,16 +197,121 @@ namespace Tabula
             Assert.That(cst.Text, Is.EqualTo("09/30/2016"));
         }
 
-        [Test]
-        public void Term_number()
+        [TestCase("23")]
+        [TestCase("44.4")]
+        public void Term_number(string number)
         {
-            var tokens = new List<Token> { new Token(TokenType.Number, "23") };
+            var tokens = new List<Token> { new Token(TokenType.Number, number) };
             var state = new ParserState(tokens);
             var cst = _parser.ParseTerm(state);
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Type, Is.EqualTo(TokenType.Number));
-            Assert.That(cst.Text, Is.EqualTo("23"));
+            Assert.That(cst.Text, Is.EqualTo(number));
         }
+
+
+        [Test]
+        public void ParseBlock_returns_null_when_no_match()
+        {
+            var tokens = new List<Token> { new Token(TokenType.Number, "23") };
+
+            var state = new ParserState(tokens);
+            var block = _parser.ParseBlock(state);
+
+            Assert.That(block, Is.Null);
+        }
+
+        [Test]
+        public void ParseBlock_works_with_an_empty_block()
+        {
+            var tokens = new List<Token> { new Token(TokenType.BlockStart, "..."), new Token(TokenType.BlockEnd, ".") };
+
+            var state = new ParserState(tokens);
+            var block = _parser.ParseBlock(state);
+
+            Assert.That(block, Is.Not.Null);
+            Assert.That(block.Actions, Has.Count.EqualTo(0));
+        }
+
+        [Test]
+        public void ParseBlock_includes_actions()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.BlockStart, "..."),
+                new Token(TokenType.cmd_Use, "Employment Action Edit"),
+                new Token(TokenType.BlockEnd, ".")
+            };
+
+            var state = new ParserState(tokens);
+            var block = _parser.ParseBlock(state);
+
+            Assert.That(block.Actions, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void ParseBlock_throws_descriptively_when_unclosed()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.BlockStart, "..."),
+                new Token(TokenType.cmd_Use, "Employment Action Edit"),
+            };
+
+            var state = new ParserState(tokens);
+
+            var ex = Assert.Throws<Exception>(() => _parser.ParseBlock(state));
+            Assert.That(ex.Message, Is.EqualTo("After the actions in a block, we need a block end, a period."));
+        }
+
+
+
+        //  alias: "Do the magic" => |
+        [Test]
+        public void ParseAlias_throws_descriptively_when_not_followed_by_Action()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.cmd_Alias, "Do the magic"),
+                new Token(TokenType.TableCellSeparator, "|"),
+            };
+
+            var state = new ParserState(tokens);
+            
+            var ex = Assert.Throws<Exception>(() => _parser.ParseCommand_Alias (state));
+            Assert.That(ex.Message, Is.EqualTo("The target of an Alias command must be a step or a block of steps."));
+        }
+
+        [Test]
+        public void ParseAlias_null_case()
+        {
+            var tokens = new List<Token> { new Token(TokenType.Number, "23") };
+            var state = new ParserState(tokens);
+            var alias = _parser.ParseCommand_Alias(state);
+
+            Assert.That(alias, Is.Null);
+                      
+        }
+
+        [Test]
+        public void ParseAlias_correct_case()
+        {
+            var tokens = new List<Token> {
+                                           new Token(TokenType.cmd_Alias, "Test should Work"), 
+                                           new Token(TokenType.cmd_Use, "Employment Action Edit")
+                                         };
+
+            var state = new ParserState(tokens);
+
+            var alias = _parser.ParseCommand_Alias(state);
+            Assert.That(alias, Is.Not.Null);
+            Assert.That(alias.Name, Is.EqualTo("Test should Work"));
+
+            var useCommand = (CST.CommandUse)alias.Action;
+            Assert.That(useCommand, Is.Not.Null);
+
+            Assert.That(useCommand.Workflows ,Has.Count.EqualTo(1));
+            Assert.That(useCommand.Workflows[0], Is.EqualTo("Employment Action Edit"));
+
+        }
+
     }
 }

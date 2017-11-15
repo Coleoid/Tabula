@@ -14,16 +14,6 @@ namespace Tabula
             Scenario = new CST.Scenario();
         }
 
-        public CST.Scenario FileParse(string scenarioText)
-        {
-            var tokenizer = new Tokenizer();
-            var tokens = tokenizer.Tokenize(scenarioText);
-            var state = new ParserState(tokens);
-            var scenario = ParseScenario(state);
-
-            return scenario;
-        }
-
         public CST.Action ParseAction(ParserState state)
         {
             state.AdvanceLines();
