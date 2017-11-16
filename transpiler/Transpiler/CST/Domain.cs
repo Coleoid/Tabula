@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Tabula.CST
 {
@@ -75,6 +76,25 @@ namespace Tabula.CST
         }
 
         public List<Symbol> Symbols { get; set; }
+
+        public string GetCanonicalMethodName()
+        {
+            string name = string.Empty;
+
+            foreach(var symbol in Symbols)
+            {
+                if (symbol.Type != TokenType.Word)
+                {
+                    //TODO: keep track of argments for later
+                }
+                else
+                {
+                    name += symbol.Text.ToLower();
+                }
+            }
+
+            return name;
+        }
     }
 
     public class Symbol : Wrapper

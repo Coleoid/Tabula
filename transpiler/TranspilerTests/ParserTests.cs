@@ -275,8 +275,8 @@ namespace Tabula
             };
 
             var state = new ParserState(tokens);
-            
-            var ex = Assert.Throws<Exception>(() => _parser.ParseCommand_Alias (state));
+
+            var ex = Assert.Throws<Exception>(() => _parser.ParseCommand_Alias(state));
             Assert.That(ex.Message, Is.EqualTo("The target of an Alias command must be a step or a block of steps."));
         }
 
@@ -288,14 +288,14 @@ namespace Tabula
             var alias = _parser.ParseCommand_Alias(state);
 
             Assert.That(alias, Is.Null);
-                      
+
         }
 
         [Test]
         public void ParseAlias_correct_case()
         {
             var tokens = new List<Token> {
-                                           new Token(TokenType.cmd_Alias, "Test should Work"), 
+                                           new Token(TokenType.cmd_Alias, "Test should Work"),
                                            new Token(TokenType.cmd_Use, "Employment Action Edit")
                                          };
 
@@ -308,10 +308,16 @@ namespace Tabula
             var useCommand = (CST.CommandUse)alias.Action;
             Assert.That(useCommand, Is.Not.Null);
 
-            Assert.That(useCommand.Workflows ,Has.Count.EqualTo(1));
+            Assert.That(useCommand.Workflows, Has.Count.EqualTo(1));
             Assert.That(useCommand.Workflows[0], Is.EqualTo("Employment Action Edit"));
 
         }
 
+
+        [Test]
+        public void ParseCommand_Set_test_null()
+        {
+
+        }
     }
 }

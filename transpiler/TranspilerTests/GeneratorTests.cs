@@ -110,7 +110,7 @@ namespace Tabula
             Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
         }
 
-        [Test]
+        [Test, Ignore("until after handling no-arg version")]
         public void BuildAction_without_arguments()
         {
             //TODO: prepare a fixture class DoerWorkflow with instance name Doer and the method .Do_this()
@@ -145,5 +145,83 @@ namespace Tabula
 
             Assert.That(generator.Builder.ToString(), Is.EqualTo("            Loopy.Do_this__times(5);\r\n"));
         }
+
+        [Test]
+        public void BuildAction_remembers_Use_command_workflows()
+        {
+            var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
+            generator.BuildAction(action);
+
+            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
+            Assert.That(generator.WorkflowsInScope[0], Is.EqualTo("FirstWorkflow"));
+
+            action = new CST.CommandUse(new List<string> { "AnotherWorkflow", "AThirdWorkflow" });
+            generator.BuildAction(action);
+
+            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(3));
+            Assert.That(generator.WorkflowsInScope[2], Is.EqualTo("AThirdWorkflow"));
+        }
+
+        [Test]
+        public void BuildAction_will_not_add_duplicate_workflows()
+        {
+            var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
+            generator.BuildAction(action);
+
+            action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
+            generator.BuildAction(action);
+
+            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
+            Assert.That(generator.WorkflowsInScope[0], Is.EqualTo("FirstWorkflow"));
+        }
+
+
+        [Test]
+        public void FindWorkflowImplenting_returns_null_if_none_found()
+        {
+            generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "howdystranger", "helloeverybody" };
+            generator.WorkflowsInScope.Add("GreetingWorkflow");
+
+            string workflow = generator.FindWorkflowImplementing("helloworld");
+
+            Assert.That(workflow, Is.Null);
+        }
+
+        [Test]
+        public void FindWorkflowImplenting_returns_null_if_workflow_not_in_scope()
+        {
+            generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "helloworld" };
+
+            string workflow = generator.FindWorkflowImplementing("helloworld");
+
+            Assert.That(workflow, Is.Null);
+        }
+
+        [Test]
+        public void FindWorkflowImplenting_returns_name_if_method_matched()
+        {
+            generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "howdystranger", "helloworld" };
+            generator.WorkflowsInScope.Add("GreetingWorkflow");
+
+            string workflowName = generator.FindWorkflowImplementing("helloworld");
+
+            Assert.That(workflowName, Is.EqualTo("GreetingWorkflow"));
+        }
+
+        //TODO: Use command will complain sensibly if we try to use a workflow which does not exist...
+
+        //[Test]
+        //public void FindWorkflowImplenting_returns_first_match_if_several_workflows_implement()
+        //{
+        //    //  This is true now, but we may need a different decision later
+        //    generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "howdystranger", "helloworld" };
+        //    generator.WorkflowsInScope.Add("GreetingWorkflow");
+        //    generator.WorkflowsInScope.Add("GreetingWorkflow");
+
+        //    string workflowName = generator.FindWorkflowImplementing("helloworld");
+
+        //    Assert.That(workflowName, Is.EqualTo("GreetingWorkflow"));
+        //}
+
     }
 }

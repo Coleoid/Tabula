@@ -12,6 +12,12 @@ namespace Tabula
         public CST.Scenario Scenario { get; set; }
         public StringBuilder Builder { get; set; }
 
+        public Generator()
+        {
+            WorkflowMethods = new Dictionary<string, List<string>>();
+            WorkflowsInScope = new List<string>();
+        }
+
         public void Generate(CST.Scenario scenario, string inputFilePath, StringBuilder builder)
         {
             Scenario = scenario;
@@ -83,6 +89,8 @@ namespace Tabula
                 var para = section as CST.Paragraph;
                 if (para != null)
                 {
+                    WorkflowsInScope = new List<string>();
+
                     //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
                     sectionsBody.AppendLine(para.MethodName + "()");
                     sectionsBody.AppendLine("{");
@@ -113,15 +121,71 @@ namespace Tabula
             //TODO:  Append the built text into the main Builder
         }
 
+        public List<string> WorkflowsInScope { get; set; }
+
         public void BuildAction(CST.Action action)
         {
-            //TODO:  method resolution or 'unfound'
-            string workflowName = "WorkflowTodo";
-            string methodName = "MethodTodo";
-            List<string> args = new List<string> { "this", "that", "todo" };
-            string delim = ", ";
-            Builder.AppendLine($"           {workflowName}.{methodName}({string.Join(delim, args)});");
-            //TODO:  rolling into .Do with lambda and text of line included
+            if (action is CST.CommandUse useCommand)
+            {
+                for (int i = 0; i < useCommand.Workflows.Count; i++)
+                {
+                    string newWorkflowName = useCommand.Workflows[i];
+
+                    if (WorkflowsInScope.Contains(newWorkflowName))
+                    {
+                        //Don't add to workflowscope
+                    }
+                    else
+                    {
+                        WorkflowsInScope.Add(newWorkflowName);
+                    }
+                }
+            }
+            else if (action is CST.Step)
+            {
+                BuildStep(action as CST.Step);
+            }
+            else
+            {
+                //deal with other command possibilities
+            }
+        }
+
+        public void BuildStep(CST.Step step)
+        {
+            string methodName = step.GetCanonicalMethodName();
+            string workflowName = FindWorkflowImplementing(methodName);
+
+            if (workflowName == null)
+            {
+                //TODO:  NEXT:
+                //TODO: write an 'unfound' line if no workflow found, or a 'do' line if it was.
+                // like: Unfound(     "Hello world", "TuitionBilling.tab:116");
+            }
+            else
+            {
+                List<string> args = new List<string> { "this", "that", "todo" };
+                string delim = ", ";
+                var argsText = string.Join(delim, args);
+
+                Builder.AppendLine($"           {workflowName}.{methodName}({argsText});");
+                //TODO:  rolling into .Do with lambda and text of line included
+            }
+        }
+
+
+        public Dictionary<string, List<string>> WorkflowMethods { get; set; }
+
+
+        public string FindWorkflowImplementing(string methodName)
+        {
+            foreach(var workflowName in WorkflowsInScope)
+            {
+                List<string> methods = WorkflowMethods[workflowName];
+                if (methods.Contains(methodName)) return workflowName;
+            }
+
+            return null;
         }
 
         public List<string> GetNeededWorkflows()

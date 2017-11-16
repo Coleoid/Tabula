@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSTTests.cs" />
     <Compile Include="GeneratorTests.cs" />
     <Compile Include="IndentingStringBuilderTests.cs" />
     <Compile Include="ParserStateTests.cs" />
