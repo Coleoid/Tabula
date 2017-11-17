@@ -168,11 +168,11 @@ namespace Tabula
 
             if (implementation == null)
             {
-                var stepText = "hello world";
+                var stepText = "hello world TODO";
                 var lineNumber = "TODO"; //step.LineNumber;
                 var sourceLocation = $"{InputFilePath}:{lineNumber}";
 
-                //NOW:
+                //NOW: (divert down to get the source line number into our Steps)
                 var unfound = $"            Unfound(      \"{stepText}\", \"{sourceLocation}\");";
                 Builder.AppendLine(unfound);
             }

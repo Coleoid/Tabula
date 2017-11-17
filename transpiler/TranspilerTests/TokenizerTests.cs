@@ -17,12 +17,12 @@ namespace Tabula
         [Test]
         public void Unrecognized_token_skips_remaining_input_and_warns()
         {
-            var tokens = _tokenizer.Tokenize(" \n  %%% 'Hello, World!'");
+            var tokens = _tokenizer.Tokenize(" \n  % 'Hello, World!'");
             Assert.That(tokens, Has.Count.EqualTo(1));
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(1));
 
             var warning = _tokenizer.Warnings[0];
-            Assert.That(warning, Is.EqualTo("Text not tokenizable on line 2, at:\n%%% 'Hello, World!'\n"));
+            Assert.That(warning, Is.EqualTo("Text not tokenizable on line 2 column 3, at:\n% 'Hello, World!'\n"));
         }
 
         [Test]
@@ -111,19 +111,14 @@ namespace Tabula
         public void Tags_in_single_set_of_brackets()
         {
             var tokens = _tokenizer.Tokenize("[serious,monkey,   risky]");
-            Assert.That(tokens, Has.Count.EqualTo(3));
+            Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
             Assert.That(token.Type, Is.EqualTo(TokenType.Tag));
-            Assert.That(token.Text, Is.EqualTo("serious"));
 
-            token = tokens[1];
-            Assert.That(token.Type, Is.EqualTo(TokenType.Tag));
-            Assert.That(token.Text, Is.EqualTo("monkey"));
-
-            token = tokens[2];
-            Assert.That(token.Type, Is.EqualTo(TokenType.Tag));
-            Assert.That(token.Text, Is.EqualTo("risky"));
+            Assert.That(token.Parts[0], Is.EqualTo("serious"));
+            Assert.That(token.Parts[1], Is.EqualTo("monkey"));
+            Assert.That(token.Parts[2], Is.EqualTo("risky"));
         }
 
         [TestCase("123")]

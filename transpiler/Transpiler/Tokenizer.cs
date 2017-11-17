@@ -30,6 +30,10 @@ namespace Tabula
     {
         public TokenType Type;
         public string Text;
+        public int Line;
+        public int Column;
+        public int FullLength;
+        public int StartPosition;
         public List<string> Parts;
 
         public Token(TokenType type, string text)
@@ -42,6 +46,10 @@ namespace Tabula
     public class Tokenizer
     {
         public List<string> Warnings { get; set; }
+        public List<Token> Tokens;
+        public int position;
+        public int line;
+        public int column;
 
         //  Token regexes need to be start-anchored, or they will skip input.
         Regex rxHWS             = new Regex(@"^([\t ]*)");
@@ -65,14 +73,40 @@ namespace Tabula
         public Tokenizer()
         {
             Warnings = new List<string>();
+            Tokens = new List<Token>();
+            position = 0;
+            line = 1;
+            column = 1;
+        }
+
+        public void Advance(int length)
+        {
+            position += length;
+            column += length;
+        }
+
+        public void AdvanceLine()
+        {
+            line++;
+            column = 1;
+        }
+
+        public Token AddToken(TokenType type, string text, int length)
+        {
+            Token token = new Token(type, text);
+            token.Line = line;
+            token.Column = column;
+            token.StartPosition = position;
+            token.FullLength = length;
+
+            Tokens.Add(token);
+            Advance(length);
+
+            return token;
         }
 
         public List<Token> Tokenize(string inputText)
         {
-            var Tokens = new List<Token>();
-            int position = 0;
-            int line = 1;
-
             string remainingText = inputText.Substring(position);
 
             while (position < inputText.Length)
@@ -81,16 +115,15 @@ namespace Tabula
 
                 //  Leading (horizontal) whitespace is skipped past
                 var match = rxHWS.Match(remainingText);
-                position += match.Length;
+                Advance(match.Length);  //  In the future, comments will also advance without adding a token.
                 remainingText = inputText.Substring(position);
 
                 //  Newlines complete commands, so they are recorded as tokens.
                 match = rxNewLine.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.NewLine, "\n"));
-                    position += match.Length;
-                    line++;
+                    AddToken(TokenType.NewLine, "\n", match.Length);
+                    AdvanceLine();
                     continue;
                 }
 
@@ -99,143 +132,132 @@ namespace Tabula
                 //  On a match, we create the token, advance the cursor, and start again.
                 //  Some parse ambiguities are resolved by the order of the matches,
                 //  providing a kind of poor man's LTM (Longest Token Matching).
+                //  If you want theoretical purity, there are a lot of miserable
+                //  experiences out there waiting for you.  Look up "parser generator".
 
                 //  ScenarioLabel before Word to allow 'Scenario: mumph blumb foo'
                 match = rxScenarioLabel.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.ScenarioLabel, match.Groups[2].Value));
-                    position += match.Length;
+                    AddToken(TokenType.ScenarioLabel, match.Groups[2].Value, match.Length);
                     continue;
                 }
 
-                //  SectionLabel before String to allow '"set up people":'
+                //  SectionLabel before String, to allow '"set up people":'
                 match = rxSectionLabel.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.SectionLabel, match.Groups[2].Value));
-                    position += match.Length;
+                    AddToken(TokenType.SectionLabel, match.Groups[2].Value, match.Length);
                     continue;
                 }
 
-                //  Commands before Word to catch keywords: 'set: bob => "Nordberg, Robert"'
+                //  Commands before Word, to allow keywords: 'set: bob => "Nordberg, Robert"'
                 match = rxCommandSet.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.cmd_Set, match.Groups[1].Value));
-                    position += match.Length;
+                    AddToken(TokenType.cmd_Set, match.Groups[1].Value, match.Length);
                     continue;
                 }
 
                 match = rxCommandAlias.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.cmd_Alias, match.Groups[1].Value));
-                    position += match.Length;
+                    AddToken(TokenType.cmd_Alias, match.Groups[1].Value, match.Length);
                     continue;
                 }
 
                 match = rxCommandUse.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.cmd_Use, match.Groups[1].Value));
-                    position += match.Length;
+                    AddToken(TokenType.cmd_Use, match.Groups[1].Value, match.Length);
                     continue;
                 }
 
                 match = rxVariable.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.Variable, match.Groups[1].Value));
-                    position += match.Length;
+                    AddToken(TokenType.Variable, match.Groups[1].Value, match.Length);
                     continue;
                 }
 
                 match = rxWord.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.Word, match.Groups[1].Value));
-                    position += match.Length;
+                    AddToken(TokenType.Word, match.Groups[1].Value, match.Length);
                     continue;
                 }
 
                 match = rxString.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.String, match.Groups[2].Value));
-                    position += match.Length;
+                    AddToken(TokenType.String, match.Groups[2].Value, match.Length);
                     continue;
                 }
 
+                //FIXME:  Not updated to catch token position/length yet
+                //  multiple matches with variable whitespace make the numbers tricky.
                 match = rxTag.Match(remainingText);
                 if (match.Success)
                 {
                     var insideBrackets = match.Groups[1].Value;
-                    var result = Regex.Split(insideBrackets, ", *");
-                    foreach (var tag in result)
-                    {
-                        Tokens.Add(new Token(TokenType.Tag, tag));
-                    }
-                    position += match.Length;
+                    var tags = Regex.Split(insideBrackets, ", *");
+
+                    var token = AddToken(TokenType.Tag, match.Groups[1].Value, match.Length);
+                    token.Parts = tags.ToList();
                     continue;
                 }
 
-                //  Date before Number to allow '11/22/1984'
+                //  Date before Number, to allow '11/22/1984'
                 match = rxDate.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.Date, match.Groups[1].Value));
-                    position += match.Length;
+                    AddToken(TokenType.Date, match.Groups[1].Value, match.Length);
                     continue;
                 }
 
-                //  Number before BlockEnd to allow '.25'
+                //  Number before BlockEnd, to allow '.25'
                 match = rxNumber.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.Number, match.Groups[1].Value));
-                    position += match.Length;
+                    AddToken(TokenType.Number, match.Groups[1].Value, match.Length);
                     continue;
                 }
 
-                //  BlockStart before BlockEnd to allow '...'
+                //  BlockStart before BlockEnd, to allow '...'
                 match = rxBlockStart.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.BlockStart, "..."));
-                    position += match.Length;
+                    AddToken(TokenType.BlockStart, "...", 3);
                     continue;
                 }
 
                 match = rxBlockEnd.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.BlockEnd, "."));
-                    position += match.Length;
+                    AddToken(TokenType.BlockEnd, ".", 1);
                     continue;
                 }
 
                 match = rxTableMarker.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.TableCellSeparator, "|"));
-                    position += match.Length;
+                    AddToken(TokenType.TableCellSeparator, "|", 1);
                     continue;
                 }
 
                 match = rxComma.Match(remainingText);
                 if (match.Success)
                 {
-                    Tokens.Add(new Token(TokenType.Comma, ","));
-                    position += match.Length;
+                    AddToken(TokenType.Comma, ",", 1);
                     continue;
                 }
 
-                //  Finally, if none of the token patterns matched at the cursor position, fail.
-                //  Right now, that's simply 'advance to end of input', to ignore everything
-                //  at, and after, the unrecognized input.
+
+                //  At this point, none of the token patterns matched the next text.
+                //  To escape, we advance to the end of our text and complain.
                 int snippetLength = Math.Min(20, remainingText.Length);
-                Warnings.Add($"Text not tokenizable on line {line}, at:\n{remainingText.Substring(0,snippetLength)}\n");
+                Warnings.Add($"Text not tokenizable on line {line} column {column}, at:\n{remainingText.Substring(0,snippetLength)}\n");
+
                 position = inputText.Length;
 
                 //TODO: Fail softer.
@@ -246,7 +268,6 @@ namespace Tabula
 
             return Tokens;
         }
-
     }
 }
 

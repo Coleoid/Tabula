@@ -300,7 +300,13 @@ namespace Tabula
 
             while (state.NextIs(TokenType.Tag))
             {
-                tags.Add(state.Take().Text);
+                var tag = state.Take();
+
+                if (tag.Parts != null)
+                    tags.AddRange(tag.Parts);
+                else
+                    tags.Add(tag.Text);
+
                 state.AdvanceLines();
             }
 

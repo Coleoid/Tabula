@@ -25,13 +25,11 @@ namespace Tabula
             Assert_TokenSequenceMatches(tokens, 0,
                 TokenType.NewLine,
                 TokenType.Tag,
-                TokenType.Tag,
-                TokenType.Tag,
                 TokenType.NewLine,
                 TokenType.ScenarioLabel
             );
 
-            Assert.That(tokens[5].Text, Does.StartWith("Advanced person"));
+            Assert.That(tokens[3].Text, Does.StartWith("Advanced person"));
         }
 
         [Test]
@@ -39,7 +37,7 @@ namespace Tabula
         {
             var tokens = _tokenizer.Tokenize(BigBadWolf);
 
-            Assert_TokenSequenceMatches(tokens, 8,
+            Assert_TokenSequenceMatches(tokens, 6,
                 TokenType.SectionLabel,
                 TokenType.NewLine,
                 TokenType.cmd_Use,
@@ -50,11 +48,11 @@ namespace Tabula
                 TokenType.NewLine
             );
 
-            Assert.That(tokens[8].Text, Does.StartWith("Enable duty locations"));
-            Assert.That(tokens[10].Text, Does.Match("Global Setting Management"));
-            Assert.That(tokens[12].Text, Does.Match("Enable"));
-            Assert.That(tokens[13].Text, Does.Match("Duty"));
-            Assert.That(tokens[14].Text, Does.Match("Locations"));
+            Assert.That(tokens[6].Text, Does.StartWith("Enable duty locations"));
+            Assert.That(tokens[8].Text, Does.Match("Global Setting Management"));
+            Assert.That(tokens[10].Text, Does.Match("Enable"));
+            Assert.That(tokens[11].Text, Does.Match("Duty"));
+            Assert.That(tokens[12].Text, Does.Match("Locations"));
         }
 
         [Test]
@@ -62,7 +60,7 @@ namespace Tabula
         {
             var tokens = _tokenizer.Tokenize(BigBadWolf);
 
-            Assert_TokenSequenceMatches(tokens, 17,
+            Assert_TokenSequenceMatches(tokens, 15,
                 TokenType.SectionLabel,
                 TokenType.NewLine,
                 TokenType.cmd_Set,
@@ -70,9 +68,9 @@ namespace Tabula
                 TokenType.NewLine
             );
 
-            Assert.That(tokens[17].Text, Does.Match("What we'll call our people in this scenario"));
-            Assert.That(tokens[19].Text, Does.Match("#handle"));
-            Assert.That(tokens[20].Text, Does.Match("FullNameLF"));
+            Assert.That(tokens[15].Text, Does.Match("What we'll call our people in this scenario"));
+            Assert.That(tokens[17].Text, Does.Match("#handle"));
+            Assert.That(tokens[18].Text, Does.Match("FullNameLF"));
         }
 
         [Test]
@@ -80,7 +78,7 @@ namespace Tabula
         {
             var tokens = _tokenizer.Tokenize(BigBadWolf);
 
-            Assert_TokenSequenceMatches(tokens, 22,
+            Assert_TokenSequenceMatches(tokens, 20,
                 TokenType.TableCellSeparator,
                 TokenType.Word,
                 TokenType.TableCellSeparator,
