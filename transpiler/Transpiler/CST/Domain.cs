@@ -83,11 +83,7 @@ namespace Tabula.CST
 
             foreach(var symbol in Symbols)
             {
-                if (symbol.Type != TokenType.Word)
-                {
-                    //TODO: keep track of argments for later
-                }
-                else
+                if (symbol.Type == TokenType.Word)
                 {
                     name += symbol.Text.ToLower();
                 }

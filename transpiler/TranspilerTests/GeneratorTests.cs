@@ -28,7 +28,8 @@ namespace Tabula
         [TestCase("groplet_quality_within_tolerance.tab")]
         public void Header_warns_it_is_generated_and_tells_where_source_file_is(string fileName)
         {
-            generator.BuildHeader(fileName);
+            generator.InputFilePath = fileName;
+            generator.BuildHeader();
 
             var result = builder.ToString();
             var lines = Regex.Split(result, Environment.NewLine);
@@ -44,7 +45,8 @@ namespace Tabula
         [TestCase("scenarios\\my_tests.v4.tab", "my_tests_v4_generated")]
         public void scenario_class_name_matches_file_name(string fileName, string expectedClassName)
         {
-            generator.OpenClass(fileName);
+            generator.InputFilePath = fileName;
+            generator.OpenClass();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($"public class {expectedClassName}"));
@@ -53,7 +55,8 @@ namespace Tabula
         [Test]
         public void Class_declaration_includes_base_and_interface()
         {
-            generator.OpenClass("TuitionBilling");
+            generator.InputFilePath = "TuitionBilling";
+            generator.OpenClass();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($": GeneratedScenarioBase, IGeneratedScenario"));
@@ -66,7 +69,8 @@ namespace Tabula
             var scenario = new CST.Scenario();
             scenario.Label = label;
             generator.Scenario = scenario;
-            generator.OpenClass("TuitionBilling");
+            generator.InputFilePath = "TuitionBilling";
+            generator.OpenClass();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($"  //  {label}"));
@@ -177,41 +181,51 @@ namespace Tabula
 
 
         [Test]
-        public void FindWorkflowImplenting_returns_null_if_none_found()
+        public void FindImplementation_returns_null_if_none_found()
         {
-            generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "howdystranger", "helloeverybody" };
+            var impls = new Dictionary<string, ImplementationInfo>();
+            impls["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" };
+            impls["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" };
+            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
             generator.WorkflowsInScope.Add("GreetingWorkflow");
 
-            string workflow = generator.FindWorkflowImplementing("helloworld");
+            var implementation = generator.FindImplementation("helloworld");
 
-            Assert.That(workflow, Is.Null);
+            Assert.That(implementation, Is.Null);
         }
 
         [Test]
-        public void FindWorkflowImplenting_returns_null_if_workflow_not_in_scope()
+        public void FindImplementation_returns_null_if_workflow_not_in_scope()
         {
-            generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "helloworld" };
+            var impls = new Dictionary<string, ImplementationInfo>();
+            impls["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" };
+            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
 
-            string workflow = generator.FindWorkflowImplementing("helloworld");
+            var implementation = generator.FindImplementation("helloworld");
 
-            Assert.That(workflow, Is.Null);
+            Assert.That(implementation, Is.Null);
         }
 
         [Test]
-        public void FindWorkflowImplenting_returns_name_if_method_matched()
+        public void FindImplementation_returns_implementation_when_lookup_matches()
         {
-            generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "howdystranger", "helloworld" };
+            var impls = new Dictionary<string, ImplementationInfo>();
+            impls["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" };
+            impls["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" };
+            impls["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" };
+            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
             generator.WorkflowsInScope.Add("GreetingWorkflow");
 
-            string workflowName = generator.FindWorkflowImplementing("helloworld");
+            var implementation = generator.FindImplementation("helloworld");
 
-            Assert.That(workflowName, Is.EqualTo("GreetingWorkflow"));
+            Assert.That(implementation, Is.Not.Null);
+            Assert.That(implementation.ClassName, Is.EqualTo("GreetingWorkflow"));
         }
 
         //TODO: Use command will complain sensibly if we try to use a workflow which does not exist...
 
         //[Test]
-        //public void FindWorkflowImplenting_returns_first_match_if_several_workflows_implement()
+        //public void FindImplementation_returns_first_match_if_several_workflows_implement()
         //{
         //    //  This is true now, but we may need a different decision later
         //    generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "howdystranger", "helloworld" };
@@ -223,5 +237,20 @@ namespace Tabula
         //    Assert.That(workflowName, Is.EqualTo("GreetingWorkflow"));
         //}
 
+
+        [Test]
+        public void BuildStep_writes_Unfound_when_no_method_match_found()
+        {
+            var symbols = new List<CST.Symbol> {
+                new CST.Symbol(new Token(TokenType.Word, "hello")),
+                new CST.Symbol(new Token(TokenType.Word, "world")),
+            };
+            var step = new CST.Step(symbols);
+
+            generator.BuildStep(step);
+
+            var result = generator.Builder.ToString();
+            Assert.That(result, Is.EqualTo("            Unfound(      \"hello world\", \"scenario_source.tab:12\");\r\n"));
+        }
     }
 }

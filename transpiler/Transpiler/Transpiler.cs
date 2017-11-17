@@ -7,10 +7,10 @@ namespace Tabula
     {
         public void Transpile(string fileName, string scenarioText, StringBuilder builder)
         {
-            var parser = new Parser();
             var tokenizer = new Tokenizer();
             List<Token> tokenStream = tokenizer.Tokenize(scenarioText);
             var state = new ParserState(tokenStream);
+            var parser = new Parser();
             CST.Scenario scenario = parser.ParseScenario(state);
             var generator = new Generator();
             generator.Generate(scenario, fileName, builder);
