@@ -145,10 +145,10 @@ Add duty assignment at #orgName starting #startDate with status ""Current""
 | #Mimi   | #OA     | 8/15/2012  | 
 
 Using employment of #Lina at #HPD
-Add temporary duty assignment at #OPD from ""1/1/2013"" to ""4/1/2013"" with status ""Past""
+Add temporary duty assignment at #OPD from 1/1/2013 to 4/1/2013 with status ""Past""
 
 Using employment of #Sterky at #OPD
-Add temporary duty assignment at #HPD from ""1/1/2013"" to ""4/1/2013"" with status ""Past""
+Add temporary duty assignment at #HPD from 1/1/2013 to 4/1/2013 with status ""Past""
 Add temporary duty assignment at #OA with status ""Past""
 
 

@@ -19,7 +19,7 @@ namespace Tabula
         {
             builder = new StringBuilder();
             scenario = new CST.Scenario();
-            generator = new Generator { Builder = builder, Scenario = scenario };
+            generator = new Generator { Builder = builder, Scenario = scenario, InputFilePath = "scenario_source.tab" };
         }
 
         //TODO:  Report scenario errors in Visual Studio error list
@@ -239,7 +239,7 @@ namespace Tabula
 
 
         [Test]
-        public void BuildStep_writes_Unfound_when_no_method_match_found()
+        public void BuildStep_writes_Unfound_with_step_text()
         {
             var symbols = new List<CST.Symbol> {
                 new CST.Symbol(new Token(TokenType.Word, "hello")),
@@ -250,7 +250,75 @@ namespace Tabula
             generator.BuildStep(step);
 
             var result = generator.Builder.ToString();
-            Assert.That(result, Is.EqualTo("            Unfound(      \"hello world\", \"scenario_source.tab:12\");\r\n"));
+            Assert.That(result, Contains.Substring("@\"hello world\""));
         }
+
+        [Test]
+        public void BuildStep_writes_Unfound_with_source_file_and_location()
+        {
+            var symbols = new List<CST.Symbol> {
+                new CST.Symbol(new Token(TokenType.Word, "hello") { Line = 12 }),
+                new CST.Symbol(new Token(TokenType.Word, "world")),
+            };
+            var step = new CST.Step(symbols);
+
+            generator.BuildStep(step);
+
+            var result = generator.Builder.ToString();
+            Assert.That(result, Contains.Substring("\"scenario_source.tab:12\""));
+        }
+
+        [Test]
+        public void Do_Call_includes_object_dot_method()
+        {
+            var impls = new Dictionary<string, ImplementationInfo>();
+            impls["mymethodcorrectlyspelled"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" };
+            generator.WorkflowImplementations["myWorkflow"] = impls;
+            generator.WorkflowsInScope.Add("myWorkflow");
+
+            var implementation = generator.FindImplementation("helloworld");
+
+            var symbols = new List<CST.Symbol> {
+                new CST.Symbol(new Token(TokenType.Word, "my") { Line = 12 }),
+                new CST.Symbol(new Token(TokenType.Word, "method")),
+                new CST.Symbol(new Token(TokenType.Word, "correctly")),
+                new CST.Symbol(new Token(TokenType.Word, "spelled")),
+            };
+            var step = new CST.Step(symbols);
+
+            generator.BuildStep(step);
+
+            var result = generator.Builder.ToString();
+            Assert.That(result, Contains.Substring("myWorkflow.MyMethod_correctly_spelled"));
+        }
+
+        [Test]
+        public void Do_Call_includes_arguments()
+        {
+            var impls = new Dictionary<string, ImplementationInfo>();
+            impls["myfriendturnedon"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" };
+            generator.WorkflowImplementations["myWorkflow"] = impls;
+            generator.WorkflowsInScope.Add("myWorkflow");
+
+            var implementation = generator.FindImplementation("helloworld");
+
+            var symbols = new List<CST.Symbol> {
+                new CST.Symbol(new Token(TokenType.Word, "my") { Line = 12 }),
+                new CST.Symbol(new Token(TokenType.Word, "friend")),
+                new CST.Symbol(new Token(TokenType.String, "Bob")),
+                new CST.Symbol(new Token(TokenType.Word, "turned")),
+                new CST.Symbol(new Token(TokenType.Number, "28")),
+                new CST.Symbol(new Token(TokenType.Word, "on")),
+                new CST.Symbol(new Token(TokenType.Date, "15/07/2017")),
+            };
+            var step = new CST.Step(symbols);
+
+            generator.BuildStep(step);
+
+            var result = generator.Builder.ToString();
+            Assert.That(result, Contains.Substring(@"(""Bob"", 28, ""15/07/2017"".To<DateTime>())"));
+        }
+
+
     }
 }

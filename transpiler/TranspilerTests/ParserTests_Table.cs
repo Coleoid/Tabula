@@ -40,6 +40,7 @@ namespace Tabula
             Assert.That(table.Tags, Has.Count.EqualTo(1));
             Assert.That(table.Label, Is.EqualTo("stuff"));
             Assert.That(table.ColumnNames, Has.Count.EqualTo(1));
+            Assert.That(table.ColumnNames[0], Is.EqualTo("Name"));
             Assert.That(table.Rows, Has.Count.EqualTo(2));
         }
 

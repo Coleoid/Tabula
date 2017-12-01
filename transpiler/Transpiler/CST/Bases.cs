@@ -33,6 +33,8 @@ namespace Tabula.CST
 
         public TokenType Type { get => token.Type; }
         public string Text { get => token.Text; }
+        public int LineNumber { get => token.Line; }
+
     }
 
     public class Action : ITaggable

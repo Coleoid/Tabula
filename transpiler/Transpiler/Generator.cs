@@ -9,7 +9,8 @@ namespace Tabula
     {
         public string ClassName { get; set; }
         public string MethodName { get; set; }
-        public List<string> Args { get; set; }
+        //public List<string> Args { get; set; }
+        public string ObjectName { get; set; }
     }
 
     public class Generator
@@ -163,29 +164,50 @@ namespace Tabula
 
         public void BuildStep(CST.Step step)
         {
-            string methodName = step.GetCanonicalMethodName();
-            var implementation = FindImplementation(methodName);
+            string searchName = step.GetCanonicalMethodName();
+            var implementation = FindImplementation(searchName);
 
             if (implementation == null)
             {
-                var stepText = "hello world TODO";
-                var lineNumber = "TODO"; //step.LineNumber;
+                var stepText = step.GetReadableString();
+                var lineNumber = step.Symbols[0].LineNumber;
                 var sourceLocation = $"{InputFilePath}:{lineNumber}";
 
                 //NOW: (divert down to get the source line number into our Steps)
                 var unfound = $"            Unfound(      \"{stepText}\", \"{sourceLocation}\");";
                 Builder.AppendLine(unfound);
             }
-            //NEXT:
-            //else
-            //{
-            //    List<string> args = new List<string> { "this", "that", "todo" };
-            //    string delim = ", ";
-            //    var argsText = string.Join(delim, args);
+            else
+            {
+                //List<CST.Symbol> args = new List<CST.Symbol>();
+                string argsString = "";
+                string delim = "";
+                foreach (var sym in step.Symbols)
+                {
+                    if (sym.Type != TokenType.Word)
+                    {
+                        if (sym.Type == TokenType.String)
+                        {
+                            argsString += delim + "\"" + sym.Text + "\"";
+                        }
+                        else if (sym.Type == TokenType.Date)
+                        {
+                            argsString += delim + "\"" + sym.Text + "\".To<DateTime>()";
+                        }
+                        else
+                        {
+                            argsString += delim + sym.Text;
+                        }
 
-            //    Builder.AppendLine($"           {workflowName}.{methodName}({argsText});");
-            //    //TODO:  rolling into .Do with lambda and text of line included
-            //}
+                        delim = ", ";
+                    }
+                }
+                
+                var workflowName = implementation.ObjectName;
+                var methodName = implementation.MethodName;
+                Builder.AppendLine($"           {workflowName}.{methodName}({argsString});");
+                //TODO:  rolling into .Do with lambda and text of line included
+            }
         }
 
 

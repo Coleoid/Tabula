@@ -91,6 +91,37 @@ namespace Tabula.CST
 
             return name;
         }
+
+        public string GetReadableText()
+        {
+            var stepText = "";
+            string delim = "";
+            foreach (var sym in Symbols)
+            {
+                if (sym.Type == TokenType.String)
+                {
+                    stepText += delim + "\"" + sym.Text + "\"";
+                }
+                else
+                {
+                    stepText += delim + sym.Text;
+                }
+
+                delim = " ";
+            }
+            return stepText;
+
+        }
+
+        public object GetReadableString()
+        {
+            var readableText = GetReadableText();
+
+            string readableString = readableText.Replace("\"", "\"\"");
+            readableString = "@\"" + readableString + "\"";
+
+            return readableString;
+        }
     }
 
     public class Symbol : Wrapper

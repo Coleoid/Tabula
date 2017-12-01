@@ -261,6 +261,11 @@ namespace Tabula
             Assert.That(tokens[2].Type, Is.EqualTo(TokenType.TableCellSeparator));
             Assert.That(tokens[4].Type, Is.EqualTo(TokenType.TableCellSeparator));
 
+            Assert.That(tokens[2].FullLength, Is.EqualTo(1));
+            Assert.That(tokens[2].StartPosition, Is.EqualTo(7));  //  Note, position is zero-based
+            Assert.That(tokens[2].Line, Is.EqualTo(1));           //  while line and column are one-based
+            Assert.That(tokens[2].Column, Is.EqualTo(8));
+
             Assert.That(tokens[1].Type, Is.EqualTo(TokenType.Word));  //TODO: becomes phrase later
             Assert.That(tokens[1].Text, Is.EqualTo("Name"));
 
