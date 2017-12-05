@@ -130,6 +130,14 @@ namespace Tabula.CST
             : base(token)
         { }
 
+        public Symbol(TokenType type, string text)
+            : base(new Token(type, text))
+        { }
+
+        public Symbol(TokenType type, string text, int line)
+            : base(new Token(type, text) { Line = line })
+        { }
+
         internal static Symbol Wrap(Token token)
         {
             return token == null ? null : new Symbol(token);

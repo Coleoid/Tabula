@@ -11,7 +11,7 @@ namespace Tabula
         [TestCase("Save", "save")]
         public void GetCanonicalMethodName_simple_case(string word, string expectedAnswer)
         {
-            var step = new CST.Step(new List<CST.Symbol> { new CST.Symbol(new Token(TokenType.Word, word)) });
+            var step = new CST.Step(new List<CST.Symbol> { new CST.Symbol(TokenType.Word, word) });
 
             string canonicalName = step.GetCanonicalMethodName();
 
@@ -22,8 +22,8 @@ namespace Tabula
         public void GetCanonicalMethodName_multiple_words()
         {
             var step = new CST.Step(new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "Hello")),
-                new CST.Symbol(new Token(TokenType.Word, "world")),
+                new CST.Symbol(TokenType.Word, "Hello"),
+                new CST.Symbol(TokenType.Word, "world"),
             });
 
             string canonicalName = step.GetCanonicalMethodName();
@@ -36,11 +36,11 @@ namespace Tabula
         public void GetCanonicalMethodName_avoids_arguments()
         {
             var step = new CST.Step(new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "Hello")),
-                new CST.Symbol(new Token(TokenType.Date, "11/16/2017")),
-                new CST.Symbol(new Token(TokenType.Word, "today")),
-                new CST.Symbol(new Token(TokenType.Number, "11")),
-                new CST.Symbol(new Token(TokenType.Word, "times")),
+                new CST.Symbol(TokenType.Word, "Hello"),
+                new CST.Symbol(TokenType.Date, "11/16/2017"),
+                new CST.Symbol(TokenType.Word, "today"),
+                new CST.Symbol(TokenType.Number, "11"),
+                new CST.Symbol(TokenType.Word, "times"),
             });
 
             string canonicalName = step.GetCanonicalMethodName();
@@ -53,13 +53,13 @@ namespace Tabula
         public void GetReadableText_handles_fancy_arguments()
         {
             var step = new CST.Step(new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "Hello")),
-                new CST.Symbol(new Token(TokenType.Date, "11/16/2017")),
-                new CST.Symbol(new Token(TokenType.Word, "today")),
-                new CST.Symbol(new Token(TokenType.Number, "11")),
-                new CST.Symbol(new Token(TokenType.Word, "times")),
-                new CST.Symbol(new Token(TokenType.Word, "with")),
-                new CST.Symbol(new Token(TokenType.String, "Bob")),
+                new CST.Symbol(TokenType.Word, "Hello"),
+                new CST.Symbol(TokenType.Date, "11/16/2017"),
+                new CST.Symbol(TokenType.Word, "today"),
+                new CST.Symbol(TokenType.Number, "11"),
+                new CST.Symbol(TokenType.Word, "times"),
+                new CST.Symbol(TokenType.Word, "with"),
+                new CST.Symbol(TokenType.String, "Bob"),
             });
 
             var readableName = step.GetReadableText();
@@ -71,9 +71,9 @@ namespace Tabula
         public void GetReadableString_wraps_in_quotes()
         {
             var step = new CST.Step(new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "Hello")),
-                new CST.Symbol(new Token(TokenType.String, "Bob")),
-                new CST.Symbol(new Token(TokenType.Word, "today")),
+                new CST.Symbol(TokenType.Word, "Hello"),
+                new CST.Symbol(TokenType.String, "Bob"),
+                new CST.Symbol(TokenType.Word, "today"),
             });
 
             var readableName = step.GetReadableString();

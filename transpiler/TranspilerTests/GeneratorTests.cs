@@ -114,21 +114,21 @@ namespace Tabula
             Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
         }
 
-        [Test, Ignore("until after handling no-arg version")]
+        [Test]
         public void BuildAction_without_arguments()
         {
             //TODO: prepare a fixture class DoerWorkflow with instance name Doer and the method .Do_this()
 
             //  Step:  do this
             var symbols = new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "do")),
-                new CST.Symbol(new Token(TokenType.Word, "this")),
+                new CST.Symbol(TokenType.Word, "do", 7),
+                new CST.Symbol(TokenType.Word, "this"),
             };
             var action = new CST.Step(symbols);
 
             generator.BuildAction(action);
 
-            Assert.That(generator.Builder.ToString(), Is.EqualTo("            Doer.Do_this();\r\n"));
+            Assert.That(generator.Builder.ToString(), Contains.Substring("Doer.Do_this()"));
         }
 
         [Test, Ignore("until after handling no-arg version")]
@@ -138,10 +138,10 @@ namespace Tabula
 
             //  Step:  do this 5 times
             var symbols = new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "do")),
-                new CST.Symbol(new Token(TokenType.Word, "this")),
-                new CST.Symbol(new Token(TokenType.Number, "5")),
-                new CST.Symbol(new Token(TokenType.Word, "times")),
+                new CST.Symbol(TokenType.Word, "do"),
+                new CST.Symbol(TokenType.Word, "this"),
+                new CST.Symbol(TokenType.Number, "5"),
+                new CST.Symbol(TokenType.Word, "times"),
             };
             var action = new CST.Step(symbols);
 
@@ -242,8 +242,8 @@ namespace Tabula
         public void BuildStep_writes_Unfound_with_step_text()
         {
             var symbols = new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "hello")),
-                new CST.Symbol(new Token(TokenType.Word, "world")),
+                new CST.Symbol(TokenType.Word, "hello"),
+                new CST.Symbol(TokenType.Word, "world"),
             };
             var step = new CST.Step(symbols);
 
@@ -257,8 +257,8 @@ namespace Tabula
         public void BuildStep_writes_Unfound_with_source_file_and_location()
         {
             var symbols = new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "hello") { Line = 12 }),
-                new CST.Symbol(new Token(TokenType.Word, "world")),
+                new CST.Symbol(TokenType.Word, "hello", 12),
+                new CST.Symbol(TokenType.Word, "world"),
             };
             var step = new CST.Step(symbols);
 
@@ -279,10 +279,10 @@ namespace Tabula
             var implementation = generator.FindImplementation("helloworld");
 
             var symbols = new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "my") { Line = 12 }),
-                new CST.Symbol(new Token(TokenType.Word, "method")),
-                new CST.Symbol(new Token(TokenType.Word, "correctly")),
-                new CST.Symbol(new Token(TokenType.Word, "spelled")),
+                new CST.Symbol(TokenType.Word, "my"),
+                new CST.Symbol(TokenType.Word, "method"),
+                new CST.Symbol(TokenType.Word, "correctly"),
+                new CST.Symbol(TokenType.Word, "spelled"),
             };
             var step = new CST.Step(symbols);
 
@@ -303,13 +303,13 @@ namespace Tabula
             var implementation = generator.FindImplementation("helloworld");
 
             var symbols = new List<CST.Symbol> {
-                new CST.Symbol(new Token(TokenType.Word, "my") { Line = 12 }),
-                new CST.Symbol(new Token(TokenType.Word, "friend")),
-                new CST.Symbol(new Token(TokenType.String, "Bob")),
-                new CST.Symbol(new Token(TokenType.Word, "turned")),
-                new CST.Symbol(new Token(TokenType.Number, "28")),
-                new CST.Symbol(new Token(TokenType.Word, "on")),
-                new CST.Symbol(new Token(TokenType.Date, "15/07/2017")),
+                new CST.Symbol(TokenType.Word, "my"),
+                new CST.Symbol(TokenType.Word, "friend"),
+                new CST.Symbol(TokenType.String, "Bob"),
+                new CST.Symbol(TokenType.Word, "turned"),
+                new CST.Symbol(TokenType.Number, "28"),
+                new CST.Symbol(TokenType.Word, "on"),
+                new CST.Symbol(TokenType.Date, "15/07/2017"),
             };
             var step = new CST.Step(symbols);
 
