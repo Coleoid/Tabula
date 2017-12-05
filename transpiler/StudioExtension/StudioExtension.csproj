@@ -173,7 +173,6 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
     </Compile>
     <Compile Include="BaseCodeGenerator.cs" />
     <Compile Include="BaseCodeGeneratorWithSite.cs" />
-    <Compile Include="SourceCodeGenerator.cs" />
     <Compile Include="TabulaClassGenerator.cs" />
     <EmbeddedResource Include="XmlClassGeneratorSchema.xsd">
       <SubType>Designer</SubType>

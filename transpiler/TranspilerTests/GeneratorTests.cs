@@ -66,8 +66,7 @@ namespace Tabula
         public void Class_declaration_includes_scenario_label_as_comment()
         {
             var label = "AC-39393: Snock the cubid foratically";
-            var scenario = new CST.Scenario();
-            scenario.Label = label;
+            var scenario = new CST.Scenario { Label = label };
             generator.Scenario = scenario;
             generator.InputFilePath = "TuitionBilling";
             generator.OpenClass();
@@ -181,11 +180,13 @@ namespace Tabula
 
 
         [Test]
-        public void FindImplementation_returns_null_if_none_found()
+        public void FindImplementation_returns_null_if_no_impl_has_match_for_step()
         {
-            var impls = new Dictionary<string, ImplementationInfo>();
-            impls["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" };
-            impls["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" };
+            var impls = new Dictionary<string, ImplementationInfo>
+            {
+                ["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" },
+                ["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" }
+            };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
             generator.WorkflowsInScope.Add("GreetingWorkflow");
 
@@ -195,10 +196,12 @@ namespace Tabula
         }
 
         [Test]
-        public void FindImplementation_returns_null_if_workflow_not_in_scope()
+        public void FindImplementation_only_searches_impls_in_scope()
         {
-            var impls = new Dictionary<string, ImplementationInfo>();
-            impls["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" };
+            var impls = new Dictionary<string, ImplementationInfo>
+            {
+                ["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" }
+            };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
 
             var implementation = generator.FindImplementation("helloworld");
@@ -209,10 +212,12 @@ namespace Tabula
         [Test]
         public void FindImplementation_returns_implementation_when_lookup_matches()
         {
-            var impls = new Dictionary<string, ImplementationInfo>();
-            impls["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" };
-            impls["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" };
-            impls["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" };
+            var impls = new Dictionary<string, ImplementationInfo>
+            {
+                ["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" },
+                ["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" },
+                ["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" }
+            };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
             generator.WorkflowsInScope.Add("GreetingWorkflow");
 
@@ -224,18 +229,24 @@ namespace Tabula
 
         //TODO: Use command will complain sensibly if we try to use a workflow which does not exist...
 
-        //[Test]
-        //public void FindImplementation_returns_first_match_if_several_workflows_implement()
-        //{
-        //    //  This is true now, but we may need a different decision later
-        //    generator.WorkflowMethods["GreetingWorkflow"] = new List<string> { "howdystranger", "helloworld" };
-        //    generator.WorkflowsInScope.Add("GreetingWorkflow");
-        //    generator.WorkflowsInScope.Add("GreetingWorkflow");
+        [Test]
+        public void FindImplementation_returns_first_match_if_several_workflows_implement()
+        {
+            var impls = new Dictionary<string, ImplementationInfo>
+            {
+                ["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" },
+                ["howdystranger"] = new ImplementationInfo { ClassName = "SheriffWorkflow", MethodName = "Howdy_stranger" }
+            };
+            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
 
-        //    string workflowName = generator.FindWorkflowImplementing("helloworld");
+            generator.WorkflowsInScope.Add("GreetingWorkflow");
+            generator.WorkflowsInScope.Add("SheriffWorkflow");
 
-        //    Assert.That(workflowName, Is.EqualTo("GreetingWorkflow"));
-        //}
+            var workflow = generator.FindImplementation("helloworld");
+
+            //  This test documents current behavior, but the opposite behavior (last added = first found) may be better
+            Assert.That(workflow.ClassName, Is.EqualTo("GreetingWorkflow"));
+        }
 
 
         [Test]
@@ -271,12 +282,12 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_object_dot_method()
         {
-            var impls = new Dictionary<string, ImplementationInfo>();
-            impls["mymethodcorrectlyspelled"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" };
+            var impls = new Dictionary<string, ImplementationInfo>
+            {
+                ["mymethodcorrectlyspelled"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" }
+            };
             generator.WorkflowImplementations["myWorkflow"] = impls;
             generator.WorkflowsInScope.Add("myWorkflow");
-
-            var implementation = generator.FindImplementation("helloworld");
 
             var symbols = new List<CST.Symbol> {
                 new CST.Symbol(TokenType.Word, "my"),
@@ -295,12 +306,12 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_arguments()
         {
-            var impls = new Dictionary<string, ImplementationInfo>();
-            impls["myfriendturnedon"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" };
+            var impls = new Dictionary<string, ImplementationInfo>
+            {
+                ["myfriendturnedon"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" }
+            };
             generator.WorkflowImplementations["myWorkflow"] = impls;
             generator.WorkflowsInScope.Add("myWorkflow");
-
-            var implementation = generator.FindImplementation("helloworld");
 
             var symbols = new List<CST.Symbol> {
                 new CST.Symbol(TokenType.Word, "my"),

@@ -97,8 +97,7 @@ namespace Tabula
             foreach (var section in Scenario.Sections)
             {
 
-                var para = section as CST.Paragraph;
-                if (para != null)
+                if (section is CST.Paragraph para)
                 {
                     WorkflowsInScope = new List<string>();
 
@@ -117,8 +116,7 @@ namespace Tabula
                     executeMethodBody.AppendLine(para.MethodName + "();");
                 }
 
-                var table = section as CST.Table;
-                if (table != null)
+                if (section is CST.Table table)
                 {
                     //generate table (table generator method, technically)
                     //get staged paragraph name
