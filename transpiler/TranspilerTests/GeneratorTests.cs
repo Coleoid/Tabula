@@ -114,42 +114,6 @@ namespace Tabula
         }
 
         [Test]
-        public void BuildAction_without_arguments()
-        {
-            //TODO: prepare a fixture class DoerWorkflow with instance name Doer and the method .Do_this()
-
-            //  Step:  do this
-            var symbols = new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "do", 7),
-                new CST.Symbol(TokenType.Word, "this"),
-            };
-            var action = new CST.Step(symbols);
-
-            generator.BuildAction(action);
-
-            Assert.That(generator.Builder.ToString(), Contains.Substring("Doer.Do_this()"));
-        }
-
-        [Test, Ignore("until after handling no-arg version")]
-        public void BuildAction_includes_arguments()
-        {
-            //TODO: prepare a fixture class LoopyWorkflow with instance name Loopy and the method .Do_this__times(int count)
-
-            //  Step:  do this 5 times
-            var symbols = new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "do"),
-                new CST.Symbol(TokenType.Word, "this"),
-                new CST.Symbol(TokenType.Number, "5"),
-                new CST.Symbol(TokenType.Word, "times"),
-            };
-            var action = new CST.Step(symbols);
-
-            generator.BuildAction(action);
-
-            Assert.That(generator.Builder.ToString(), Is.EqualTo("            Loopy.Do_this__times(5);\r\n"));
-        }
-
-        [Test]
         public void BuildAction_remembers_Use_command_workflows()
         {
             var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
