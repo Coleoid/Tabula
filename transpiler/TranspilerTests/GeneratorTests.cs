@@ -182,11 +182,12 @@ namespace Tabula
         [Test]
         public void FindImplementation_returns_null_if_no_impl_has_match_for_step()
         {
-            var impls = new Dictionary<string, ImplementationInfo>
+            var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                ["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" },
-                ["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" }
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
+                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
             };
+
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
             generator.WorkflowsInScope.Add("GreetingWorkflow");
 
@@ -198,9 +199,9 @@ namespace Tabula
         [Test]
         public void FindImplementation_only_searches_impls_in_scope()
         {
-            var impls = new Dictionary<string, ImplementationInfo>
+            var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                ["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" }
+                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "HelloWorld" }),
             };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
 
@@ -212,11 +213,11 @@ namespace Tabula
         [Test]
         public void FindImplementation_returns_implementation_when_lookup_matches()
         {
-            var impls = new Dictionary<string, ImplementationInfo>
+            var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                ["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" },
-                ["helloeverybody"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" },
-                ["helloworld"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_World" }
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
+                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
+                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "HelloWorld" }),
             };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
             generator.WorkflowsInScope.Add("GreetingWorkflow");
@@ -230,22 +231,22 @@ namespace Tabula
         //TODO: Use command will complain sensibly if we try to use a workflow which does not exist...
 
         [Test]
-        public void FindImplementation_returns_first_match_if_several_workflows_implement()
+        public void FindImplementation_returns_last_match_if_several_workflows_implement()
         {
-            var impls = new Dictionary<string, ImplementationInfo>
+            var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                ["howdystranger"] = new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" },
-                ["howdystranger"] = new ImplementationInfo { ClassName = "SheriffWorkflow", MethodName = "Howdy_stranger" }
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "SheriffWorkflow", MethodName = "Howdy_stranger" })
             };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
 
             generator.WorkflowsInScope.Add("GreetingWorkflow");
             generator.WorkflowsInScope.Add("SheriffWorkflow");
 
-            var workflow = generator.FindImplementation("helloworld");
+            var workflow = generator.FindImplementation("howdystranger");
 
-            //  This test documents current behavior, but the opposite behavior (last added = first found) may be better
-            Assert.That(workflow.ClassName, Is.EqualTo("GreetingWorkflow"));
+            //  last added being returned allows for overriding, sounds more sensible at the moment
+            Assert.That(workflow.ClassName, Is.EqualTo("SheriffWorkflow"));
         }
 
 
@@ -282,9 +283,9 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_object_dot_method()
         {
-            var impls = new Dictionary<string, ImplementationInfo>
+            var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                ["mymethodcorrectlyspelled"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" }
+                new KeyValuePair<string, ImplementationInfo>("mymethodcorrectlyspelled", new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" }),
             };
             generator.WorkflowImplementations["myWorkflow"] = impls;
             generator.WorkflowsInScope.Add("myWorkflow");
@@ -306,9 +307,9 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_arguments()
         {
-            var impls = new Dictionary<string, ImplementationInfo>
+            var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                ["myfriendturnedon"] = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" }
+                new KeyValuePair<string, ImplementationInfo>("myfriendturnedon", new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" }),
             };
             generator.WorkflowImplementations["myWorkflow"] = impls;
             generator.WorkflowsInScope.Add("myWorkflow");

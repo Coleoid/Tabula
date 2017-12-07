@@ -92,6 +92,7 @@ namespace Tabula.CST
             return name;
         }
 
+        //TODO:  Keep watch on string representations, eventual rework
         public string GetReadableText()
         {
             var stepText = "";
@@ -113,6 +114,7 @@ namespace Tabula.CST
 
         }
 
+        //TODO:  Keep watch on string representations, eventual rework
         public object GetReadableString()
         {
             var readableText = GetReadableText();

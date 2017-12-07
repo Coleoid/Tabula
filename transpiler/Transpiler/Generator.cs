@@ -9,7 +9,8 @@ namespace Tabula
     {
         public string ClassName { get; set; }
         public string MethodName { get; set; }
-        //public List<string> Args { get; set; }
+
+        //  in-scope instance of the variable, which should
         public string ObjectName { get; set; }
     }
 
@@ -18,14 +19,18 @@ namespace Tabula
         private string GeneratorVersion = "0.1";
 
         public string GeneratedClassName { get; set; }
+
         public CST.Scenario Scenario { get; set; }
+
         public StringBuilder Builder { get; set; }
+
         public string InputFilePath { get; set; }
-        public Dictionary<string, Dictionary<string, ImplementationInfo>> WorkflowImplementations { get; set; }
+
+        public Dictionary<string, List<KeyValuePair<string, ImplementationInfo>>> WorkflowImplementations { get; set; }
 
         public Generator()
         {
-            WorkflowImplementations = new Dictionary<string, Dictionary<string, ImplementationInfo>>();
+            WorkflowImplementations = new Dictionary<string, List<KeyValuePair<string, ImplementationInfo>>>();
             WorkflowsInScope = new List<string>();
         }
 
@@ -171,17 +176,16 @@ namespace Tabula
                 var lineNumber = step.Symbols[0].LineNumber;
                 var sourceLocation = $"{InputFilePath}:{lineNumber}";
 
-                //NOW: (divert down to get the source line number into our Steps)
                 var unfound = $"            Unfound(      \"{stepText}\", \"{sourceLocation}\");";
                 Builder.AppendLine(unfound);
             }
             else
             {
-                //List<CST.Symbol> args = new List<CST.Symbol>();
                 string argsString = "";
                 string delim = "";
                 foreach (var sym in step.Symbols)
                 {
+                    //TODO:  Keep watch on string representations, eventual rework
                     if (sym.Type != TokenType.Word)
                     {
                         if (sym.Type == TokenType.String)
@@ -214,9 +218,9 @@ namespace Tabula
         {
             foreach(var workflowName in WorkflowsInScope)
             {
-                var implementations = WorkflowImplementations[workflowName];
-                if (implementations.ContainsKey(lookupName))
-                    return implementations[lookupName];
+                var methods = WorkflowImplementations[workflowName];
+                var found = methods.LastOrDefault(i => i.Key == lookupName);
+                if (found.Key == lookupName) return found.Value;
             }
 
             return null;
