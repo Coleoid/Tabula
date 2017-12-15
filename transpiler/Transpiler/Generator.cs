@@ -170,48 +170,55 @@ namespace Tabula
             string searchName = step.GetCanonicalMethodName();
             var implementation = FindImplementation(searchName);
 
+            var lineNumber = step.Symbols[0].LineNumber;
+            var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
+
             if (implementation == null)
             {
-                var stepText = step.GetReadableString();
-                var lineNumber = step.Symbols[0].LineNumber;
-                var sourceLocation = $"{InputFilePath}:{lineNumber}";
-
-                var unfound = $"            Unfound(      \"{stepText}\", \"{sourceLocation}\");";
+                var stepText = "\"" + step.GetReadableString() + "\"";
+                var unfound = $"            Unfound(      {stepText}, {sourceLocation});";
                 Builder.AppendLine(unfound);
             }
             else
             {
-                string argsString = "";
-                string delim = "";
-                foreach (var sym in step.Symbols)
-                {
-                    //TODO:  Keep watch on string representations, eventual rework
-                    if (sym.Type != TokenType.Word)
-                    {
-                        if (sym.Type == TokenType.String)
-                        {
-                            argsString += delim + "\"" + sym.Text + "\"";
-                        }
-                        else if (sym.Type == TokenType.Date)
-                        {
-                            argsString += delim + "\"" + sym.Text + "\".To<DateTime>()";
-                        }
-                        else
-                        {
-                            argsString += delim + sym.Text;
-                        }
-
-                        delim = ", ";
-                    }
-                }
-                
-                var workflowName = implementation.ObjectName;
-                var methodName = implementation.MethodName;
-                Builder.AppendLine($"           {workflowName}.{methodName}({argsString});");
-                //TODO:  rolling into .Do with lambda and text of line included
+                var call = ComposeCall(step, implementation);
+                var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
+                Builder.AppendLine($"           Do(() =>       {call}. {sourceLocation}, {quotedCall});");
             }
         }
 
+        public string ComposeCall(CST.Step step, ImplementationInfo implementation)
+        {
+            string argsString = "";
+            string delim = "";
+            foreach (var sym in step.Symbols)
+            {
+                //TODO:  Keep watch on string representations, eventual rework
+                if (sym.Type != TokenType.Word)
+                {
+                    if (sym.Type == TokenType.String)
+                    {
+                        argsString += delim + "\"" + sym.Text + "\"";
+                    }
+                    else if (sym.Type == TokenType.Date)
+                    {
+                        argsString += delim + "\"" + sym.Text + "\".To<DateTime>()";
+                    }
+                    else
+                    {
+                        argsString += delim + sym.Text;
+                    }
+
+                    delim = ", ";
+                }
+            }
+
+            var workflowName = implementation.ObjectName;
+            var methodName = implementation.MethodName;
+            var call = $"{workflowName}.{methodName}({argsString})";
+
+            return call;
+        }
 
 
         public ImplementationInfo FindImplementation(string lookupName)

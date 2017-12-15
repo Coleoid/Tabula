@@ -215,13 +215,12 @@ namespace Tabula
 
 
         [Test]
-        public void BuildStep_writes_Unfound_with_step_text()
+        public void BuildStep_Unfound_includes_step_text()
         {
-            var symbols = new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "hello"),
-                new CST.Symbol(TokenType.Word, "world"),
-            };
-            var step = new CST.Step(symbols);
+            var step = new CST.Step(12,
+                (TokenType.Word, "hello"),
+                (TokenType.Word, "world")
+            );
 
             generator.BuildStep(step);
 
@@ -230,13 +229,12 @@ namespace Tabula
         }
 
         [Test]
-        public void BuildStep_writes_Unfound_with_source_file_and_location()
+        public void BuildStep_Unfound_includes_source_file_and_location()
         {
-            var symbols = new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "hello", 12),
-                new CST.Symbol(TokenType.Word, "world"),
-            };
-            var step = new CST.Step(symbols);
+            var step = new CST.Step(12,
+                (TokenType.Word, "hello"),
+                (TokenType.Word, "world")
+            );
 
             generator.BuildStep(step);
 
@@ -245,7 +243,7 @@ namespace Tabula
         }
 
         [Test]
-        public void Do_Call_includes_object_dot_method()
+        public void Do_Call_includes_numerous_parts()
         {
             var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
@@ -254,40 +252,45 @@ namespace Tabula
             generator.WorkflowImplementations["myWorkflow"] = impls;
             generator.WorkflowsInScope.Add("myWorkflow");
 
-            var symbols = new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "my"),
-                new CST.Symbol(TokenType.Word, "method"),
-                new CST.Symbol(TokenType.Word, "correctly"),
-                new CST.Symbol(TokenType.Word, "spelled"),
-            };
-            var step = new CST.Step(symbols);
+            var step = new CST.Step(34,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "method"),
+                (TokenType.Word, "correctly"),
+                (TokenType.Word, "spelled")
+            );
 
             generator.BuildStep(step);
 
             var result = generator.Builder.ToString();
-            Assert.That(result, Contains.Substring("myWorkflow.MyMethod_correctly_spelled"));
+            Assert.That(result, Contains.Substring("Do(() =>     "));
+            Assert.That(result, Contains.Substring("myWorkflow.MyMethod_correctly_spelled()"));
+            Assert.That(result, Contains.Substring("\"scenario_source.tab:34\""));
         }
 
         [Test]
         public void Do_Call_includes_arguments()
         {
+            var ii = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" };
+
+            //target code: generator.AddImplementation(ii);
+            //to replace:
             var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                new KeyValuePair<string, ImplementationInfo>("myfriendturnedon", new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" }),
+                new KeyValuePair<string, ImplementationInfo>("myfriendturnedon", ii),
             };
             generator.WorkflowImplementations["myWorkflow"] = impls;
+
             generator.WorkflowsInScope.Add("myWorkflow");
 
-            var symbols = new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "my"),
-                new CST.Symbol(TokenType.Word, "friend"),
-                new CST.Symbol(TokenType.String, "Bob"),
-                new CST.Symbol(TokenType.Word, "turned"),
-                new CST.Symbol(TokenType.Number, "28"),
-                new CST.Symbol(TokenType.Word, "on"),
-                new CST.Symbol(TokenType.Date, "15/07/2017"),
-            };
-            var step = new CST.Step(symbols);
+            var step = new CST.Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.String, "Bob"),
+                (TokenType.Word, "turned"),
+                (TokenType.Number, "28"),
+                (TokenType.Word, "on"),
+                (TokenType.Date, "15/07/2017")
+            );
 
             generator.BuildStep(step);
 

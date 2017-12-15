@@ -70,12 +70,21 @@ namespace Tabula.CST
 
     public class Step : Action, ITaggable
     {
+        public List<Symbol> Symbols { get; set; }
+
         public Step(List<Symbol> symbols)
         {
             Symbols = symbols;
         }
 
-        public List<Symbol> Symbols { get; set; }
+        public Step(int line, params (TokenType Word, string)[] syms)
+        {
+            Symbols = new List<Symbol>();
+            foreach(var (type, text) in syms)
+            {
+                Symbols.Add(new Symbol(type, text, line));
+            }
+        }
 
         public string GetCanonicalMethodName()
         {
