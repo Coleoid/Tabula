@@ -59,6 +59,7 @@
     <Compile Include="TokenizerTests_BigBadWolf.cs" />
     <Compile Include="TranspilerTests.cs" />
     <Compile Include="TranspilerUnitTestBase.cs" />
+    <Compile Include="WorkflowIntrospectorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Transpiler\Transpiler.csproj">

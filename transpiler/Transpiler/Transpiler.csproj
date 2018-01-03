@@ -54,6 +54,7 @@
     <Compile Include="Parser.cs" />
     <Compile Include="Tokenizer.cs" />
     <Compile Include="Transpiler.cs" />
+    <Compile Include="WorkflowIntrospector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

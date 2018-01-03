@@ -14,6 +14,18 @@ namespace Tabula
         public string ObjectName { get; set; }
     }
 
+    public class MethodDetails
+    {
+        string Name { get; set; }
+        string SearchKey { get; set; }
+        List<string> Args { get; set; }
+    }
+
+    public class WorkflowDetails
+    {
+        public Dictionary<string, MethodDetails> Methods { get; set; }
+    }
+
     public class Generator
     {
         private string GeneratorVersion = "0.1";
@@ -25,6 +37,11 @@ namespace Tabula
         public StringBuilder Builder { get; set; }
 
         public string InputFilePath { get; set; }
+
+
+        //API: Find implementation object name from a search key
+        //API: Find method name from a search key
+        //API: Restrict finding to the objects in (compile-time) scope
 
         public Dictionary<string, List<KeyValuePair<string, ImplementationInfo>>> WorkflowImplementations { get; set; }
 
@@ -41,12 +58,12 @@ namespace Tabula
             InputFilePath = inputFilePath;
 
             BuildHeader();
-            OpenNamespace();
-            OpenClass();
+            BuildNamespaceOpen();
+            BuildClassOpen();
             BuildConstructor();
             BuildClassBody();
-            CloseClass();
-            CloseNamespace();
+            BuildClassClose();
+            BuildNamespaceClose();
         }
 
         public void BuildHeader()
@@ -62,14 +79,14 @@ namespace Tabula
             Builder.AppendLine();
         }
 
-        public void OpenNamespace()
+        public void BuildNamespaceOpen()
         {
             Builder.AppendLine("namespace Tabula");
             Builder.AppendLine("{");
         }
 
 
-        public void OpenClass()
+        public void BuildClassOpen()
         {
             GeneratedClassName = ClassNameFromInputFilePath();
             Builder.AppendLine($"    public class {GeneratedClassName}  //  {Scenario.Label}");
@@ -239,17 +256,6 @@ namespace Tabula
             nws.Sort();
             var unws = nws.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 
-            //TODO:
-            //  The 'peepEnrollment = new PeopleEnrollmentWorkflow();' lines are placed in
-            //   each paragraph (or block) method, as the use command is encountered.
-            //  And I need to think out not messing up the state of any workflows which rely
-            //   on their state.  Perhaps we manually stash and replace workflow instances?
-            //  Or, since I'm doing local initialization, I could switch to local declaration,
-            //   also.  Then we need to find a way to know which workflows to pass as arguments,
-            //   and do so with all consumers of the block.  More complex.
-            //  I don't know where the real use cases will push us, so starting simple (and
-            //   working to uncover the forces involved) seems like the plan.
-
             return unws;
         }
 
@@ -262,7 +268,7 @@ namespace Tabula
         {
             foreach (var workflow in GetNeededWorkflows())
             {
-                var varName = nameOfWorkflowInstance(workflow);
+                var varName = GetNameOfWorkflowInstance(workflow);
                 Builder.AppendFormat("public {0} {1};{2}", workflow, varName, Environment.NewLine);
             }
         }
@@ -278,20 +284,47 @@ namespace Tabula
             Builder.AppendLine("        }");
         }
 
-        public void CloseClass()
+        public void BuildClassClose()
         {
             Builder.AppendLine("    }");
         }
 
-        public void CloseNamespace()
+        public void BuildNamespaceClose()
         {
             Builder.AppendLine("}");
         }
 
-        public string nameOfWorkflowInstance(string workflowName)
+        public string GetNameOfWorkflowInstance(string workflowName)
         {
             var lastDot = workflowName.LastIndexOf('.');
             return workflowName.Substring(lastDot + 1).Replace("Workflow", "");
         }
+
+        public void AddImplementation(ImplementationInfo ii)
+        {
+            var impls = WorkflowImplementations.ContainsKey(ii.ObjectName)
+                ? WorkflowImplementations[ii.ObjectName]
+                : new List<KeyValuePair<string, ImplementationInfo>>();
+
+            var searchName = ii.MethodName;
+            impls.Add(new KeyValuePair<string, ImplementationInfo>(SearchName(ii.MethodName), ii));
+            WorkflowImplementations[ii.ObjectName] = impls;
+        }
+
+        public string SearchName(string methodName)
+        {
+            return methodName.Replace("_", "").ToLower();
+        }
+
+        //TODO:  Figure out point of entry for testing/implementing proper workflow info stashing
+    //    public string InstanceNameFromClassName(string className)
+    //    {
+    //        foreach (var key in WorkflowImplementations.Keys)
+    //        {
+    //            var impl = WorkflowImplementations[key];
+    //            if (impl == className)
+    //                return key;
+    //        }
+    //    }
     }
 }

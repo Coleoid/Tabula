@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -46,7 +47,7 @@ namespace Tabula
         public void scenario_class_name_matches_file_name(string fileName, string expectedClassName)
         {
             generator.InputFilePath = fileName;
-            generator.OpenClass();
+            generator.BuildClassOpen();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($"public class {expectedClassName}"));
@@ -56,7 +57,7 @@ namespace Tabula
         public void Class_declaration_includes_base_and_interface()
         {
             generator.InputFilePath = "TuitionBilling";
-            generator.OpenClass();
+            generator.BuildClassOpen();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($": GeneratedScenarioBase, IGeneratedScenario"));
@@ -69,7 +70,7 @@ namespace Tabula
             var scenario = new CST.Scenario { Label = label };
             generator.Scenario = scenario;
             generator.InputFilePath = "TuitionBilling";
-            generator.OpenClass();
+            generator.BuildClassOpen();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($"  //  {label}"));
@@ -108,7 +109,7 @@ namespace Tabula
         [TestCase("ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow", "AddEnrollment")]
         public void instance_name_known_from_workflow(string workflowName, string expectedInstanceName)
         {
-            string instanceName = generator.nameOfWorkflowInstance(workflowName);
+            string instanceName = generator.GetNameOfWorkflowInstance(workflowName);
 
             Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
         }
@@ -245,11 +246,7 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_numerous_parts()
         {
-            var impls = new List<KeyValuePair<string, ImplementationInfo>>
-            {
-                new KeyValuePair<string, ImplementationInfo>("mymethodcorrectlyspelled", new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" }),
-            };
-            generator.WorkflowImplementations["myWorkflow"] = impls;
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" } );
             generator.WorkflowsInScope.Add("myWorkflow");
 
             var step = new CST.Step(34,
@@ -270,16 +267,7 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_arguments()
         {
-            var ii = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" };
-
-            //target code: generator.AddImplementation(ii);
-            //to replace:
-            var impls = new List<KeyValuePair<string, ImplementationInfo>>
-            {
-                new KeyValuePair<string, ImplementationInfo>("myfriendturnedon", ii),
-            };
-            generator.WorkflowImplementations["myWorkflow"] = impls;
-
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" });
             generator.WorkflowsInScope.Add("myWorkflow");
 
             var step = new CST.Step(222,
@@ -289,15 +277,89 @@ namespace Tabula
                 (TokenType.Word, "turned"),
                 (TokenType.Number, "28"),
                 (TokenType.Word, "on"),
-                (TokenType.Date, "15/07/2017")
+                (TokenType.Date, "07/15/2017")
             );
 
             generator.BuildStep(step);
 
             var result = generator.Builder.ToString();
-            Assert.That(result, Contains.Substring(@"(""Bob"", 28, ""15/07/2017"".To<DateTime>())"));
+            var expectedArguments = @"(""Bob"", 28, ""07/15/2017"".To<DateTime>())";
+            var requotedArguments = expectedArguments.Replace("\"", "\"\"");
+            Assert.That(result, Contains.Substring(expectedArguments));
+            Assert.That(result, Contains.Substring(requotedArguments));
         }
 
 
+        [Test]
+        public void AddImplementation_stores_implementation_under_object_name()
+        {
+            var ii = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" };
+
+            generator.AddImplementation(ii);
+
+            Assert.That(generator.WorkflowImplementations, Has.Count.EqualTo(1));
+            Assert.That(generator.WorkflowImplementations.ContainsKey("myWorkflow"));
+        }
+
+        [Test]
+        public void AddImplementation_puts_methods_from_same_class_into_same_collection()
+        {
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "foo_bar" });
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "bar_barian" });
+
+            Assert.That(generator.WorkflowImplementations, Has.Count.EqualTo(1));
+            var impl = generator.WorkflowImplementations["myWorkflow"];
+            Assert.That(impl, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void AddImplementation_puts_methods_from_different_classes_into_different_collection()
+        {
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "foo_bar" });
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "yourWorkflow", MethodName = "bar_barian" });
+
+            Assert.That(generator.WorkflowImplementations, Has.Count.EqualTo(2));
+            var impl = generator.WorkflowImplementations["myWorkflow"];
+            Assert.That(impl, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void AddImplementation_resolves_ClassName_to_ObjectName()
+        {
+            var ii = new ImplementationInfo { ClassName = "Namespace.Of.App.MyWorkflow", MethodName = "HelloWorld" };
+
+            //TODO:  The mapping of "Namespace.Of.App.MyWorkflow" to "myWorkflow"
+
+            generator.AddImplementation(ii);
+
+            var impl = generator.WorkflowImplementations["myWorkflow"];
+            Assert.That(impl, Has.Count.EqualTo(1));
+            Assert.That(impl[0].Key, Is.EqualTo("helloworld"));
+        }
+
+        //TODO:  Get the ClassName/ObjectName teased apart.  ClassName stays in ImplInfo, ObjectName goes to... Scope?
+        //TODO:  Scoping of workflows
+
+        [TestCase("My_friend__turned__on__", "myfriendturnedon")]
+        [TestCase("hello___WORLD", "helloworld")]
+        public void AddImplementation_stores_info_under_method_search_key(string methodName, string searchKey)
+        {
+            var ii = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = methodName };
+
+            generator.AddImplementation(ii);
+
+            var impl = generator.WorkflowImplementations["myWorkflow"];
+            Assert.That(impl, Has.Count.EqualTo(1));
+            Assert.That(impl[0].Key, Is.EqualTo(searchKey));
+        }
+
+        class UnknownAction : CST.Action { }
+
+        [Test]
+        public void BuildAction_explains_when_an_unknown_action_type_arrives()
+        {
+            var ex = Assert.Throws<NotImplementedException>(() => generator.BuildAction(new UnknownAction()));
+            Assert.That(ex.Message, Is.EqualTo("So Tabula.GeneratorTests+UnknownAction is an action now, huh?  Tell me what to do about that, please."));
+        }
     }
 }
