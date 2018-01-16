@@ -7,24 +7,30 @@ namespace Tabula
 {
     public class ImplementationInfo
     {
-        public string ClassName { get; set; }
         public string MethodName { get; set; }
+
+        public List<string> Arguments { get; set; }
 
         //  in-scope instance of the variable, which should
         public string ObjectName { get; set; }
+
+        public ImplementationInfo()
+        {
+            Arguments = new List<string>();
+        }
     }
 
-    public class MethodDetails
-    {
-        string Name { get; set; }
-        string SearchKey { get; set; }
-        List<string> Args { get; set; }
-    }
+    //public class MethodDetails
+    //{
+    //    string Name { get; set; }
+    //    string SearchKey { get; set; }
+    //    List<string> Args { get; set; }
+    //}
 
-    public class WorkflowDetails
-    {
-        public Dictionary<string, MethodDetails> Methods { get; set; }
-    }
+    //public class WorkflowDetails
+    //{
+    //    public Dictionary<string, MethodDetails> Methods { get; set; }
+    //}
 
     public class Generator
     {
@@ -184,13 +190,17 @@ namespace Tabula
 
         public void BuildStep(CST.Step step)
         {
-            string searchName = step.GetCanonicalMethodName();
+            //FUTURE:  method search names should include argument count, and FindImplementation should include a count argument
+
+            int stepArgCount = step.Symbols.Where(s => s.Type != TokenType.Word).Count();
+
+            string searchName = step.GetMethodSearchName();
             var implementation = FindImplementation(searchName);
 
             var lineNumber = step.Symbols[0].LineNumber;
             var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
 
-            if (implementation == null)
+            if (implementation == null || stepArgCount != implementation.Arguments.Count())
             {
                 var stepText = "\"" + step.GetReadableString() + "\"";
                 var unfound = $"            Unfound(      {stepText}, {sourceLocation});";
@@ -243,7 +253,7 @@ namespace Tabula
             foreach(var workflowName in WorkflowsInScope)
             {
                 var methods = WorkflowImplementations[workflowName];
-                var found = methods.LastOrDefault(i => i.Key == lookupName);
+                var found = methods.LastOrDefault(m => m.Key == lookupName);
                 if (found.Key == lookupName) return found.Value;
             }
 

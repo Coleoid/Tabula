@@ -86,7 +86,7 @@ namespace Tabula.CST
             }
         }
 
-        public string GetCanonicalMethodName()
+        public string GetMethodSearchName()
         {
             string name = string.Empty;
 

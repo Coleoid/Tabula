@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Linq;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace Tabula
 {
@@ -9,53 +9,50 @@ namespace Tabula
     public class WorkflowIntrospectorTests
     {
         [Test]
-        public void Introspector_will_find_public_void_methods()
+        public void Implementations_from_methods()
         {
-
             var introspector = new WorkflowIntrospector();
-            MethodInfo method = introspector.GetMethodInfo();
 
-            Assert.That(method.Name, Is.EqualTo("Snaff_the_Blonker"));
-        }
+            var iis = introspector.GetImplementationInfoForType(this.GetType());
 
-        public Assembly resolveAssembly(object sender, ResolveEventArgs args)
-        {
-            return Assembly.ReflectionOnlyLoadFrom(@"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\TestopiaAPI.dll");
+            Assert.That(iis.Exists(ii => ii.MethodName == "Implementations_from_methods"));
         }
 
         [Test]
-        public void ReflectionOnly_can_reflect_on_scenarios_loaded_dynamically()
+        public void can_find_CommentsModalWorkflow()
         {
-            AppDomain curDomain = AppDomain.CurrentDomain;
-            curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
+            var introspector = new WorkflowIntrospector();
 
-            //Assembly asm = Assembly.ReflectionOnlyLoadFrom(@"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\ScenarioContext.dll");
-            var asms = curDomain.GetAssemblies();
-            Assembly asm = asms.SingleOrDefault(a => a.FullName.StartsWith("System.Configuration"));
+            List<Type> types = introspector.GetLoadedTypes();
 
+            Assert.That(types.Exists(t => t.Name == "CommentsModalWorkflow"));
+        }
 
-            foreach (var type in asm.ExportedTypes)
-            {
-                Console.WriteLine(type.Name);
+        [Test]
+        public void can_find_methods_of_CommentsModalWorkflow()
+        {
+            var introspector = new WorkflowIntrospector();
+            List<Type> types = introspector.GetLoadedTypes();
+            var myComments = types.Single(t => t.Name == "CommentsModalWorkflow");
 
-                //foreach (var mi in type.GetMethods())
-                //{
-                //    Console.WriteLine(mi.Name);
-                //}
-            }
+            var iis = introspector.GetImplementationInfoForType(myComments);
 
-            //Type t = asm.GetType("Test");
-            //MethodInfo m = t.GetMethod("TestMethod");
-            //ParameterInfo[] p = m.GetParameters();
+            Assert.That(iis.Exists(i => i.MethodName == "Add_comment__"));
+        }
 
-            //Console.WriteLine("\r\nAttributes for assembly: '{0}'", asm);
-            //ShowAttributeData(CustomAttributeData.GetCustomAttributes(asm));
-            //Console.WriteLine("\r\nAttributes for type: '{0}'", t);
-            //ShowAttributeData(CustomAttributeData.GetCustomAttributes(t));
-            //Console.WriteLine("\r\nAttributes for member: '{0}'", m);
-            //ShowAttributeData(CustomAttributeData.GetCustomAttributes(m));
-            //Console.WriteLine("\r\nAttributes for parameter: '{0}'", p);
-            //ShowAttributeData(CustomAttributeData.GetCustomAttributes(p[0]));
+        [Test]
+        public void can_find_arguments_of_method()
+        {
+            var introspector = new WorkflowIntrospector();
+            List<Type> types = introspector.GetLoadedTypes();
+            var myComments = types.Single(t => t.Name == "CommentsModalWorkflow");
+
+            var iis = introspector.GetImplementationInfoForType(myComments);
+            var ii = iis.Single(i => i.MethodName == "Verify_comment__text_is__");
+
+            Assert.That(ii.Arguments.Count(), Is.EqualTo(2));
+            Assert.That(ii.Arguments[0], Is.EqualTo("rowNum"));
+            Assert.That(ii.Arguments[1], Is.EqualTo("text"));
         }
 
     }

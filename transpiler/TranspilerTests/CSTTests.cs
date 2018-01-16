@@ -13,7 +13,7 @@ namespace Tabula
         {
             var step = new CST.Step(new List<CST.Symbol> { new CST.Symbol(TokenType.Word, word) });
 
-            string canonicalName = step.GetCanonicalMethodName();
+            string canonicalName = step.GetMethodSearchName();
 
             Assert.That(canonicalName, Is.EqualTo(expectedAnswer));
         }
@@ -26,7 +26,7 @@ namespace Tabula
                 new CST.Symbol(TokenType.Word, "world"),
             });
 
-            string canonicalName = step.GetCanonicalMethodName();
+            string canonicalName = step.GetMethodSearchName();
 
             Assert.That(canonicalName, Is.EqualTo("helloworld"));
         }
@@ -43,7 +43,7 @@ namespace Tabula
                 new CST.Symbol(TokenType.Word, "times"),
             });
 
-            string canonicalName = step.GetCanonicalMethodName();
+            string canonicalName = step.GetMethodSearchName();
 
             Assert.That(canonicalName, Is.EqualTo("hellotodaytimes"));
         }

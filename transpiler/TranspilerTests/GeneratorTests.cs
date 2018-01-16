@@ -47,10 +47,10 @@ namespace Tabula
         public void scenario_class_name_matches_file_name(string fileName, string expectedClassName)
         {
             generator.InputFilePath = fileName;
-            generator.BuildClassOpen();
 
-            var classText = builder.ToString();
-            Assert.That(classText, Does.Contain($"public class {expectedClassName}"));
+            var className = generator.ClassNameFromInputFilePath();
+
+            Assert.That(className, Is.EqualTo(expectedClassName));
         }
 
         [Test]
@@ -149,8 +149,8 @@ namespace Tabula
         {
             var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
-                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
+                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
             };
 
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
@@ -166,7 +166,7 @@ namespace Tabula
         {
             var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "HelloWorld" }),
+                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "HelloWorld" }),
             };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
 
@@ -180,9 +180,9 @@ namespace Tabula
         {
             var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
-                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
-                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "HelloWorld" }),
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
+                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
+                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "HelloWorld" }),
             };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
             generator.WorkflowsInScope.Add("GreetingWorkflow");
@@ -190,7 +190,7 @@ namespace Tabula
             var implementation = generator.FindImplementation("helloworld");
 
             Assert.That(implementation, Is.Not.Null);
-            Assert.That(implementation.ClassName, Is.EqualTo("GreetingWorkflow"));
+            Assert.That(implementation.ObjectName, Is.EqualTo("GreetingWorkflow"));
         }
 
         //TODO: Use command will complain sensibly if we try to use a workflow which does not exist...
@@ -200,8 +200,8 @@ namespace Tabula
         {
             var impls = new List<KeyValuePair<string, ImplementationInfo>>
             {
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ClassName = "SheriffWorkflow", MethodName = "Howdy_stranger" })
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
+                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "SheriffWorkflow", MethodName = "Howdy_stranger" })
             };
             generator.WorkflowImplementations["GreetingWorkflow"] = impls;
 
@@ -211,7 +211,7 @@ namespace Tabula
             var workflow = generator.FindImplementation("howdystranger");
 
             //  last added being returned allows for overriding, sounds more sensible at the moment
-            Assert.That(workflow.ClassName, Is.EqualTo("SheriffWorkflow"));
+            Assert.That(workflow.ObjectName, Is.EqualTo("SheriffWorkflow"));
         }
 
 
@@ -267,7 +267,12 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_arguments()
         {
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" });
+            var args = new List<string>();
+            args.Add("name");
+            args.Add("age");
+            args.Add("birthday");
+
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__", Arguments = args });
             generator.WorkflowsInScope.Add("myWorkflow");
 
             var step = new CST.Step(222,
@@ -285,10 +290,35 @@ namespace Tabula
             var result = generator.Builder.ToString();
             var expectedArguments = @"(""Bob"", 28, ""07/15/2017"".To<DateTime>())";
             var requotedArguments = expectedArguments.Replace("\"", "\"\"");
+            Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
             Assert.That(result, Contains.Substring(expectedArguments));
             Assert.That(result, Contains.Substring(requotedArguments));
         }
 
+
+        [Test]
+        public void BuilStep_will_complain_on_arg_count_mismatch()
+        {
+            var args = new List<string>();
+            args.Add("name");
+            args.Add("comment");
+            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "user__made_comment__", Arguments = args });
+            generator.WorkflowsInScope.Add("myWorkflow");
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "user"),
+                (TokenType.String, "Bob"),
+                (TokenType.Word, "made"),
+                (TokenType.Word, "comment") //,
+                // (TokenType.String, "where am I?")
+            );
+
+            generator.BuildStep(step);
+
+            var result = generator.Builder.ToString();
+            Assert.That(result, Contains.Substring("Unfound"));
+            Assert.That(result, Contains.Substring("@\"user \"\"Bob\"\" made comment\""));
+        }
 
         [Test]
         public void AddImplementation_stores_implementation_under_object_name()
@@ -321,20 +351,6 @@ namespace Tabula
             Assert.That(generator.WorkflowImplementations, Has.Count.EqualTo(2));
             var impl = generator.WorkflowImplementations["myWorkflow"];
             Assert.That(impl, Has.Count.EqualTo(1));
-        }
-
-        [Test]
-        public void AddImplementation_resolves_ClassName_to_ObjectName()
-        {
-            var ii = new ImplementationInfo { ClassName = "Namespace.Of.App.MyWorkflow", MethodName = "HelloWorld" };
-
-            //TODO:  The mapping of "Namespace.Of.App.MyWorkflow" to "myWorkflow"
-
-            generator.AddImplementation(ii);
-
-            var impl = generator.WorkflowImplementations["myWorkflow"];
-            Assert.That(impl, Has.Count.EqualTo(1));
-            Assert.That(impl[0].Key, Is.EqualTo("helloworld"));
         }
 
         //TODO:  Get the ClassName/ObjectName teased apart.  ClassName stays in ImplInfo, ObjectName goes to... Scope?
