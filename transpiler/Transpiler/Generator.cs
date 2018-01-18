@@ -5,33 +5,6 @@ using System.Text;
 
 namespace Tabula
 {
-    public class ImplementationInfo
-    {
-        public string MethodName { get; set; }
-
-        public List<string> Arguments { get; set; }
-
-        //  in-scope instance of the variable, which should
-        public string ObjectName { get; set; }
-
-        public ImplementationInfo()
-        {
-            Arguments = new List<string>();
-        }
-    }
-
-    //public class MethodDetails
-    //{
-    //    string Name { get; set; }
-    //    string SearchKey { get; set; }
-    //    List<string> Args { get; set; }
-    //}
-
-    //public class WorkflowDetails
-    //{
-    //    public Dictionary<string, MethodDetails> Methods { get; set; }
-    //}
-
     public class Generator
     {
         private string GeneratorVersion = "0.1";
@@ -44,17 +17,20 @@ namespace Tabula
 
         public string InputFilePath { get; set; }
 
+        public Dictionary<string, WorkflowDetail> Workflows { get; private set; }
+        public List<WorkflowDetail> WorkflowsInScope { get; set; }
+        public WorkflowIntrospector Library { get; private set; }
 
-        //API: Find implementation object name from a search key
-        //API: Find method name from a search key
+
+        //API: Find workflow details from a search key
+        //API: Find method details from a search key
         //API: Restrict finding to the objects in (compile-time) scope
-
-        public Dictionary<string, List<KeyValuePair<string, ImplementationInfo>>> WorkflowImplementations { get; set; }
 
         public Generator()
         {
-            WorkflowImplementations = new Dictionary<string, List<KeyValuePair<string, ImplementationInfo>>>();
-            WorkflowsInScope = new List<string>();
+            Workflows = new Dictionary<string, WorkflowDetail>();
+            WorkflowsInScope = new List<WorkflowDetail>();
+            Library = new WorkflowIntrospector();
         }
 
         public void Generate(CST.Scenario scenario, string inputFilePath, StringBuilder builder)
@@ -127,8 +103,6 @@ namespace Tabula
 
                 if (section is CST.Paragraph para)
                 {
-                    WorkflowsInScope = new List<string>();
-
                     //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
                     sectionsBody.AppendLine(para.MethodName + "()");
                     sectionsBody.AppendLine("{");
@@ -158,17 +132,20 @@ namespace Tabula
             //TODO:  Append the built text into the main Builder
         }
 
-        public List<string> WorkflowsInScope { get; set; }
-
         public void BuildAction(CST.Action action)
         {
             if (action is CST.CommandUse useCommand)
             {
-                foreach (var newWorkflowName in useCommand.Workflows)
+                foreach (var label in useCommand.Workflows)
                 {
-                    if (!WorkflowsInScope.Contains(newWorkflowName))
+                    var searchName = Formatter.UseLabel_to_InstanceName(label);
+                    if (!Library.KnownWorkflows.ContainsKey(searchName))
+                        throw new Exception($"Don't know of a workflow matching {label}.");
+
+                    var workflow = Library.KnownWorkflows[searchName];
+                    if (!WorkflowsInScope.Contains(workflow))
                     {
-                        WorkflowsInScope.Add(newWorkflowName);
+                        WorkflowsInScope.Add(workflow);
                     }
                 }
             }
@@ -185,7 +162,9 @@ namespace Tabula
                 throw new NotImplementedException("TODO: Add the alias to the implementations");
             }
             else
+            {
                 throw new NotImplementedException($"So {action.GetType().FullName} is an action now, huh?  Tell me what to do about that, please.");
+            }
         }
 
         public void BuildStep(CST.Step step)
@@ -195,12 +174,12 @@ namespace Tabula
             int stepArgCount = step.Symbols.Where(s => s.Type != TokenType.Word).Count();
 
             string searchName = step.GetMethodSearchName();
-            var implementation = FindImplementation(searchName);
+            (WorkflowDetail workflow, MethodDetail method) = FindWorkflowMethod(searchName);
 
             var lineNumber = step.Symbols[0].LineNumber;
             var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
 
-            if (implementation == null || stepArgCount != implementation.Arguments.Count())
+            if (method == null || stepArgCount != method.Args.Count())
             {
                 var stepText = "\"" + step.GetReadableString() + "\"";
                 var unfound = $"            Unfound(      {stepText}, {sourceLocation});";
@@ -208,13 +187,13 @@ namespace Tabula
             }
             else
             {
-                var call = ComposeCall(step, implementation);
+                var call = ComposeCall(step, workflow, method);
                 var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
                 Builder.AppendLine($"           Do(() =>       {call}. {sourceLocation}, {quotedCall});");
             }
         }
 
-        public string ComposeCall(CST.Step step, ImplementationInfo implementation)
+        public string ComposeCall(CST.Step step, WorkflowDetail workflow, MethodDetail method)
         {
             string argsString = "";
             string delim = "";
@@ -240,24 +219,23 @@ namespace Tabula
                 }
             }
 
-            var workflowName = implementation.ObjectName;
-            var methodName = implementation.MethodName;
+            var workflowName = workflow.InstanceName;
+            var methodName = method.Name;
             var call = $"{workflowName}.{methodName}({argsString})";
 
             return call;
         }
 
 
-        public ImplementationInfo FindImplementation(string lookupName)
+        public (WorkflowDetail workflow, MethodDetail method) FindWorkflowMethod(string searchName)
         {
-            foreach(var workflowName in WorkflowsInScope)
+            foreach(var workflow in WorkflowsInScope)
             {
-                var methods = WorkflowImplementations[workflowName];
-                var found = methods.LastOrDefault(m => m.Key == lookupName);
-                if (found.Key == lookupName) return found.Value;
+                if (workflow.Methods.ContainsKey(searchName))
+                    return (workflow, workflow.Methods[searchName]);
             }
 
-            return null;
+            return (null, null);
         }
 
         public List<string> GetNeededWorkflows()
@@ -278,7 +256,7 @@ namespace Tabula
         {
             foreach (var workflow in GetNeededWorkflows())
             {
-                var varName = GetNameOfWorkflowInstance(workflow);
+                var varName = Formatter.ClassName_to_InstanceName(workflow);
                 Builder.AppendFormat("public {0} {1};{2}", workflow, varName, Environment.NewLine);
             }
         }
@@ -302,28 +280,6 @@ namespace Tabula
         public void BuildNamespaceClose()
         {
             Builder.AppendLine("}");
-        }
-
-        public string GetNameOfWorkflowInstance(string workflowName)
-        {
-            var lastDot = workflowName.LastIndexOf('.');
-            return workflowName.Substring(lastDot + 1).Replace("Workflow", "");
-        }
-
-        public void AddImplementation(ImplementationInfo ii)
-        {
-            var impls = WorkflowImplementations.ContainsKey(ii.ObjectName)
-                ? WorkflowImplementations[ii.ObjectName]
-                : new List<KeyValuePair<string, ImplementationInfo>>();
-
-            var searchName = ii.MethodName;
-            impls.Add(new KeyValuePair<string, ImplementationInfo>(SearchName(ii.MethodName), ii));
-            WorkflowImplementations[ii.ObjectName] = impls;
-        }
-
-        public string SearchName(string methodName)
-        {
-            return methodName.Replace("_", "").ToLower();
         }
 
         //TODO:  Figure out point of entry for testing/implementing proper workflow info stashing

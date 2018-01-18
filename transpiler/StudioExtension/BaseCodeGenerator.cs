@@ -63,13 +63,11 @@ namespace Tabula
             codeFileNameSpace = wszDefaultNamespace;
             codeGeneratorProgress = pGenerateProgress;
 
-            //JC
-            //byte[] bytes = GenerateCode(bstrInputFileContents);
             byte[] bytes = GenerateCode(bstrInputFileContents);
 
             if (bytes == null)
             {
-                // This signals that GenerateCode() has failed. Tasklist items have been put up in GenerateCode()
+                //  A null return means GenerateCode() failed.  Tasklist items have been put up in GenerateCode()
                 rgbOutputFileContents = null;
                 pcbOutput = 0;
 

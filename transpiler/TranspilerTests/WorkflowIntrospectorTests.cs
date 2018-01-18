@@ -13,9 +13,10 @@ namespace Tabula
         {
             var introspector = new WorkflowIntrospector();
 
-            var iis = introspector.GetImplementationInfoForType(this.GetType());
+            var detail = introspector.GetWorkflowDetail(this.GetType());
+            var method = detail.Methods["implementationsfrommethods"];
 
-            Assert.That(iis.Exists(ii => ii.MethodName == "Implementations_from_methods"));
+            Assert.That(method.Name == "Implementations_from_methods");
         }
 
         [Test]
@@ -35,9 +36,9 @@ namespace Tabula
             List<Type> types = introspector.GetLoadedTypes();
             var myComments = types.Single(t => t.Name == "CommentsModalWorkflow");
 
-            var iis = introspector.GetImplementationInfoForType(myComments);
-
-            Assert.That(iis.Exists(i => i.MethodName == "Add_comment__"));
+            WorkflowDetail detail = introspector.GetWorkflowDetail(myComments);
+            var method = detail.Methods["addcomment"];
+            Assert.That(method.Name == "Add_comment__");
         }
 
         [Test]
@@ -47,12 +48,12 @@ namespace Tabula
             List<Type> types = introspector.GetLoadedTypes();
             var myComments = types.Single(t => t.Name == "CommentsModalWorkflow");
 
-            var iis = introspector.GetImplementationInfoForType(myComments);
-            var ii = iis.Single(i => i.MethodName == "Verify_comment__text_is__");
+            var detail = introspector.GetWorkflowDetail(myComments);
+            var method = detail.Methods["verifycommenttextis"];
 
-            Assert.That(ii.Arguments.Count(), Is.EqualTo(2));
-            Assert.That(ii.Arguments[0], Is.EqualTo("rowNum"));
-            Assert.That(ii.Arguments[1], Is.EqualTo("text"));
+            Assert.That(method.Args.Count(), Is.EqualTo(2));
+            Assert.That(method.Args[0], Is.EqualTo("rowNum"));
+            Assert.That(method.Args[1], Is.EqualTo("text"));
         }
 
     }

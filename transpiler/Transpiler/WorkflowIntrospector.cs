@@ -3,41 +3,52 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tabula
 {
-
     public class WorkflowIntrospector
     {
-        public MethodInfo GetMethodInfo()
+        public Dictionary<string, WorkflowDetail> KnownWorkflows { get; set; }
+
+        public WorkflowIntrospector()
         {
-            var mis = typeof(WorkflowIntrospector).GetMethods();
-            return mis.First(mi => mi.Name.StartsWith("Snaff"));
+            KnownWorkflows = new Dictionary<string, WorkflowDetail>();
         }
 
-        public List<ImplementationInfo> GetImplementationInfoForType(Type type)
+        public WorkflowDetail GetWorkflowDetail(Type type)
         {
-            List<ImplementationInfo> iis = new List<ImplementationInfo>();
-            var mis = type.GetMethods();
+            if (type == null) return null;
+            if (!type.Name.Contains("Workflow")) return null;
+            if (KnownWorkflows.ContainsKey(type.Name))
+                return KnownWorkflows[type.Name];
 
-            foreach (var mi in mis)
+            var detail = new WorkflowDetail
             {
-                var ii = new ImplementationInfo { MethodName = mi.Name, ObjectName = "foo", Arguments = new List<string>() };
-                foreach (ParameterInfo p in mi.GetParameters())
-                {
-                    ii.Arguments.Add(p.Name);
-                }
-                
+                Name = type.Name,
+                InstanceName = Formatter.ClassName_to_InstanceName(type.Name),
+                Parent = GetWorkflowDetail(type.BaseType)
+            };
 
-                iis.Add(ii);
+            var myMethods = type.GetMethods().Where(mi => mi.DeclaringType == type);
+            foreach (var mi in myMethods)
+            {
+                var searchName = Formatter.MethodName_to_SearchName(mi.Name);
+                var method = new MethodDetail
+                {
+                    Name = mi.Name,
+                    Args = mi.GetParameters().Select(i => i.Name).ToList()
+                };
+
+                detail.Methods[searchName] = method;
             }
 
-            return iis;
+            KnownWorkflows[type.Name] = detail;
+            return detail;
         }
-    
-        public Assembly resolveAssembly(object sender, ResolveEventArgs args)
+
+        //TODO:  path(s) pulled from config
+        //TODO:  correctly handle .exes as a separate branch, not special-cased
+        private Assembly resolveAssembly(object sender, ResolveEventArgs args)
         {
             string dllName = args.Name.Substring(0, args.Name.IndexOf(","));
 
@@ -52,6 +63,7 @@ namespace Tabula
         }
 
 
+        //TODO:  dll(s) containing workflow classes pulled from config
         public List<Type> GetLoadedTypes()
         {
             AppDomain curDomain = AppDomain.CurrentDomain;
@@ -62,6 +74,5 @@ namespace Tabula
 
             return asm.ExportedTypes.ToList();
         }
-
     }
 }

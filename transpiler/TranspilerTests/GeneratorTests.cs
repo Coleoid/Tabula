@@ -109,30 +109,42 @@ namespace Tabula
         [TestCase("ScenarioContext.Implementations.Curriculum.AddEnrollmentWorkflow", "AddEnrollment")]
         public void instance_name_known_from_workflow(string workflowName, string expectedInstanceName)
         {
-            string instanceName = generator.GetNameOfWorkflowInstance(workflowName);
+            string instanceName = Formatter.ClassName_to_InstanceName(workflowName);
 
             Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
         }
 
         [Test]
-        public void BuildAction_remembers_Use_command_workflows()
+        public void BuildAction_Use_command_Adds_workflows_to_scope()
         {
+            var first = new WorkflowDetail { Name = "FirstWorkflow" };
+            var another = new WorkflowDetail { Name = "AnotherWorkflow" };
+            var third = new WorkflowDetail { Name = "AThirdWorkflow" };
+            generator.Library.KnownWorkflows["firstworkflow"] = first;
+            generator.Library.KnownWorkflows["anotherworkflow"] = another;
+            generator.Library.KnownWorkflows["athirdworkflow"] = third;
+
+            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(0));
+
             var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
             generator.BuildAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
-            Assert.That(generator.WorkflowsInScope[0], Is.EqualTo("FirstWorkflow"));
+            Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
 
             action = new CST.CommandUse(new List<string> { "AnotherWorkflow", "AThirdWorkflow" });
             generator.BuildAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(3));
-            Assert.That(generator.WorkflowsInScope[2], Is.EqualTo("AThirdWorkflow"));
+            Assert.That(generator.WorkflowsInScope[2], Is.SameAs(third));
         }
 
         [Test]
         public void BuildAction_will_not_add_duplicate_workflows()
         {
+            var first = new WorkflowDetail { Name = "FirstWorkflow" };
+            generator.Library.KnownWorkflows["firstworkflow"] = first;
+
             var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
             generator.BuildAction(action);
 
@@ -140,78 +152,70 @@ namespace Tabula
             generator.BuildAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
-            Assert.That(generator.WorkflowsInScope[0], Is.EqualTo("FirstWorkflow"));
+            Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
         }
 
 
         [Test]
-        public void FindImplementation_returns_null_if_no_impl_has_match_for_step()
+        public void FindWorkflowMethod_returns_nulls_if_no_workflow_has_method_matching_step()
         {
-            var impls = new List<KeyValuePair<string, ImplementationInfo>>
-            {
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
-                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
-            };
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
+            detail.AddMethod(new MethodDetail { Name = "Hello_Everybody" });
 
-            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
-            generator.WorkflowsInScope.Add("GreetingWorkflow");
+            generator.Library.KnownWorkflows["GreetingWorkflow"] = detail;
+            generator.WorkflowsInScope.Add(detail);
 
-            var implementation = generator.FindImplementation("helloworld");
+            (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
 
-            Assert.That(implementation, Is.Null);
+            Assert.That(workflow, Is.Null);
+            Assert.That(method, Is.Null);
         }
 
         [Test]
-        public void FindImplementation_only_searches_impls_in_scope()
+        public void FindWorkflowMethod_only_searches_impls_in_scope()
         {
-            var impls = new List<KeyValuePair<string, ImplementationInfo>>
-            {
-                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "HelloWorld" }),
-            };
-            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "HelloWorld" });
+            generator.Library.KnownWorkflows["GreetingWorkflow"] = detail;
 
-            var implementation = generator.FindImplementation("helloworld");
+            (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
 
-            Assert.That(implementation, Is.Null);
+            Assert.That(workflow, Is.Null);
+            Assert.That(method, Is.Null);
         }
 
         [Test]
-        public void FindImplementation_returns_implementation_when_lookup_matches()
+        public void FindWorkflowMethod_returns_implementation_when_lookup_matches()
         {
-            var impls = new List<KeyValuePair<string, ImplementationInfo>>
-            {
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
-                new KeyValuePair<string, ImplementationInfo>("helloeverybody", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Hello_Everybody" }),
-                new KeyValuePair<string, ImplementationInfo>("helloworld", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "HelloWorld" }),
-            };
-            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
-            generator.WorkflowsInScope.Add("GreetingWorkflow");
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "HelloWorld" });
 
-            var implementation = generator.FindImplementation("helloworld");
+            generator.WorkflowsInScope.Add(detail);
 
-            Assert.That(implementation, Is.Not.Null);
-            Assert.That(implementation.ObjectName, Is.EqualTo("GreetingWorkflow"));
+            (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
+
+            Assert.That(workflow, Is.Not.Null);
+            Assert.That(method, Is.Not.Null);
         }
 
         //TODO: Use command will complain sensibly if we try to use a workflow which does not exist...
 
         [Test]
-        public void FindImplementation_returns_last_match_if_several_workflows_implement()
+        public void FindWorkflowMethod_returns_last_match_if_several_workflows_implement()
         {
-            var impls = new List<KeyValuePair<string, ImplementationInfo>>
-            {
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "GreetingWorkflow", MethodName = "Howdy_stranger" }),
-                new KeyValuePair<string, ImplementationInfo>("howdystranger", new ImplementationInfo { ObjectName = "SheriffWorkflow", MethodName = "Howdy_stranger" })
-            };
-            generator.WorkflowImplementations["GreetingWorkflow"] = impls;
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
+            generator.WorkflowsInScope.Add(detail);
 
-            generator.WorkflowsInScope.Add("GreetingWorkflow");
-            generator.WorkflowsInScope.Add("SheriffWorkflow");
+            detail = new WorkflowDetail { Name = "SheriffWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
+            generator.WorkflowsInScope.Add(detail);
 
-            var workflow = generator.FindImplementation("howdystranger");
+            (var workflow, var method) = generator.FindWorkflowMethod("howdystranger");
 
             //  last added being returned allows for overriding, sounds more sensible at the moment
-            Assert.That(workflow.ObjectName, Is.EqualTo("SheriffWorkflow"));
+            Assert.That(workflow.Name, Is.EqualTo("SheriffWorkflow"));
         }
 
 
@@ -246,8 +250,9 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_numerous_parts()
         {
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "MyMethod_correctly_spelled" } );
-            generator.WorkflowsInScope.Add("myWorkflow");
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "MyMethod_correctly_spelled" });
+            generator.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(34,
                 (TokenType.Word, "my"),
@@ -267,13 +272,15 @@ namespace Tabula
         [Test]
         public void Do_Call_includes_arguments()
         {
-            var args = new List<string>();
-            args.Add("name");
-            args.Add("age");
-            args.Add("birthday");
+            var args = new List<string> {
+                "name",
+                "age",
+                "birthday"
+            };
 
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__", Arguments = args });
-            generator.WorkflowsInScope.Add("myWorkflow");
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
+            generator.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "my"),
@@ -299,18 +306,20 @@ namespace Tabula
         [Test]
         public void BuilStep_will_complain_on_arg_count_mismatch()
         {
-            var args = new List<string>();
-            args.Add("name");
-            args.Add("comment");
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "user__made_comment__", Arguments = args });
-            generator.WorkflowsInScope.Add("myWorkflow");
+            var args = new List<string> {
+                "name",
+                "comment"
+            };
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
+            generator.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "user"),
                 (TokenType.String, "Bob"),
                 (TokenType.Word, "made"),
                 (TokenType.Word, "comment") //,
-                // (TokenType.String, "where am I?")
+                // (TokenType.String, "where am I?")  // if we add this token, we find the method
             );
 
             generator.BuildStep(step);
@@ -320,54 +329,9 @@ namespace Tabula
             Assert.That(result, Contains.Substring("@\"user \"\"Bob\"\" made comment\""));
         }
 
-        [Test]
-        public void AddImplementation_stores_implementation_under_object_name()
-        {
-            var ii = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "My_friend__turned__on__" };
-
-            generator.AddImplementation(ii);
-
-            Assert.That(generator.WorkflowImplementations, Has.Count.EqualTo(1));
-            Assert.That(generator.WorkflowImplementations.ContainsKey("myWorkflow"));
-        }
-
-        [Test]
-        public void AddImplementation_puts_methods_from_same_class_into_same_collection()
-        {
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "foo_bar" });
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "bar_barian" });
-
-            Assert.That(generator.WorkflowImplementations, Has.Count.EqualTo(1));
-            var impl = generator.WorkflowImplementations["myWorkflow"];
-            Assert.That(impl, Has.Count.EqualTo(2));
-        }
-
-        [Test]
-        public void AddImplementation_puts_methods_from_different_classes_into_different_collection()
-        {
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "myWorkflow", MethodName = "foo_bar" });
-            generator.AddImplementation(new ImplementationInfo { ObjectName = "yourWorkflow", MethodName = "bar_barian" });
-
-            Assert.That(generator.WorkflowImplementations, Has.Count.EqualTo(2));
-            var impl = generator.WorkflowImplementations["myWorkflow"];
-            Assert.That(impl, Has.Count.EqualTo(1));
-        }
-
+        
         //TODO:  Get the ClassName/ObjectName teased apart.  ClassName stays in ImplInfo, ObjectName goes to... Scope?
         //TODO:  Scoping of workflows
-
-        [TestCase("My_friend__turned__on__", "myfriendturnedon")]
-        [TestCase("hello___WORLD", "helloworld")]
-        public void AddImplementation_stores_info_under_method_search_key(string methodName, string searchKey)
-        {
-            var ii = new ImplementationInfo { ObjectName = "myWorkflow", MethodName = methodName };
-
-            generator.AddImplementation(ii);
-
-            var impl = generator.WorkflowImplementations["myWorkflow"];
-            Assert.That(impl, Has.Count.EqualTo(1));
-            Assert.That(impl[0].Key, Is.EqualTo(searchKey));
-        }
 
         class UnknownAction : CST.Action { }
 
