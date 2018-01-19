@@ -18,7 +18,12 @@ namespace Tabula
         public WorkflowDetail GetWorkflowDetail(Type type)
         {
             if (type == null) return null;
-            if (!type.Name.Contains("Workflow")) return null;
+            if (type.BaseType == null) return null;
+
+            if (!type.BaseType.Name.Contains("Workflow")
+                && type.Name != "Workflow" )
+                return null;
+
             if (KnownWorkflows.ContainsKey(type.Name))
                 return KnownWorkflows[type.Name];
 
@@ -45,6 +50,8 @@ namespace Tabula
             KnownWorkflows[type.Name] = detail;
             return detail;
         }
+
+        #region Reflective details
 
         //TODO:  path(s) pulled from config
         //TODO:  correctly handle .exes as a separate branch, not special-cased
@@ -74,5 +81,6 @@ namespace Tabula
 
             return asm.ExportedTypes.ToList();
         }
+        #endregion
     }
 }

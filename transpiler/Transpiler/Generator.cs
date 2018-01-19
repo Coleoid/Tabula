@@ -229,7 +229,7 @@ namespace Tabula
 
         public (WorkflowDetail workflow, MethodDetail method) FindWorkflowMethod(string searchName)
         {
-            foreach(var workflow in WorkflowsInScope)
+            foreach(var workflow in (WorkflowsInScope as IEnumerable<WorkflowDetail>).Reverse())
             {
                 if (workflow.Methods.ContainsKey(searchName))
                     return (workflow, workflow.Methods[searchName]);
@@ -246,11 +246,6 @@ namespace Tabula
 
             return unws;
         }
-
-        //public void AddWorkflow(string workflowName)
-        //{
-        //    NeededWorkflows.Add(workflowName);
-        //}
 
         public void BuildDeclarations()
         {

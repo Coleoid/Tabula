@@ -114,15 +114,32 @@ namespace Tabula
             Assert.That(instanceName, Is.EqualTo(expectedInstanceName));
         }
 
+        [TestCase("FirstWorkflow")]
+        [TestCase("first workflow")]
+        [TestCase("FIRST")]
+        public void BuildAction_Use_command_finds_workflows_under_several_spellings(string requestedWorkflow)
+        {
+            var first = new WorkflowDetail { Name = "FirstWorkflow" };
+            generator.Library.KnownWorkflows["first"] = first;
+
+            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(0));
+
+            var action = new CST.CommandUse(new List<string> { requestedWorkflow });
+            generator.BuildAction(action);
+
+            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
+            Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
+        }
+
         [Test]
         public void BuildAction_Use_command_Adds_workflows_to_scope()
         {
             var first = new WorkflowDetail { Name = "FirstWorkflow" };
             var another = new WorkflowDetail { Name = "AnotherWorkflow" };
             var third = new WorkflowDetail { Name = "AThirdWorkflow" };
-            generator.Library.KnownWorkflows["firstworkflow"] = first;
-            generator.Library.KnownWorkflows["anotherworkflow"] = another;
-            generator.Library.KnownWorkflows["athirdworkflow"] = third;
+            generator.Library.KnownWorkflows["first"] = first;
+            generator.Library.KnownWorkflows["another"] = another;
+            generator.Library.KnownWorkflows["athird"] = third;
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(0));
 
@@ -143,7 +160,7 @@ namespace Tabula
         public void BuildAction_will_not_add_duplicate_workflows()
         {
             var first = new WorkflowDetail { Name = "FirstWorkflow" };
-            generator.Library.KnownWorkflows["firstworkflow"] = first;
+            generator.Library.KnownWorkflows["first"] = first;
 
             var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
             generator.BuildAction(action);
@@ -163,7 +180,7 @@ namespace Tabula
             detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
             detail.AddMethod(new MethodDetail { Name = "Hello_Everybody" });
 
-            generator.Library.KnownWorkflows["GreetingWorkflow"] = detail;
+            generator.Library.KnownWorkflows["greeting"] = detail;
             generator.WorkflowsInScope.Add(detail);
 
             (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
@@ -177,7 +194,7 @@ namespace Tabula
         {
             var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "HelloWorld" });
-            generator.Library.KnownWorkflows["GreetingWorkflow"] = detail;
+            generator.Library.KnownWorkflows["greeting"] = detail;
 
             (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
 
