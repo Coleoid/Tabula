@@ -58,6 +58,13 @@ namespace Tabula
             StartOfLine = true;
         }
 
+        public void AppendLine()
+        {
+            //probably don't need:  IndentAtStartOfLine();
+            Builder.AppendLine();
+            StartOfLine = true;
+        }
+
         public IndentingStringBuilder(int startingIndentLevel)
         {
             indentLevel = startingIndentLevel;

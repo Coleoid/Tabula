@@ -14,6 +14,8 @@ namespace Tabula
         public CST.Scenario Scenario { get; set; }
 
         public StringBuilder Builder { get; set; }
+        public IndentingStringBuilder executeMethodBody { get; set; }
+        public IndentingStringBuilder sectionsBody { get; set; }
 
         public string InputFilePath { get; set; }
 
@@ -38,6 +40,8 @@ namespace Tabula
             Scenario = scenario;
             Builder = builder;
             InputFilePath = inputFilePath;
+            executeMethodBody = new IndentingStringBuilder(12);  // namespace + class + inside method
+            sectionsBody = new IndentingStringBuilder(8);  // namespace + class
 
             BuildHeader();
             BuildNamespaceOpen();
@@ -95,41 +99,44 @@ namespace Tabula
 
         public void BuildClassBody()
         {
-            var executeMethodBody = new IndentingStringBuilder(12);  // namespace + class + inside method
-            var sectionsBody = new IndentingStringBuilder(8);  // namespace + class
 
             foreach (var section in Scenario.Sections)
             {
-
-                if (section is CST.Paragraph para)
-                {
-                    //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
-                    sectionsBody.AppendLine(para.MethodName + "()");
-                    sectionsBody.AppendLine("{");
-                    sectionsBody.Indent();
-                    foreach (var action in para.Actions)
-                    {
-                        BuildAction(action);
-                    }
-                    sectionsBody.Dedent();
-                    sectionsBody.AppendLine("}");
-
-                    //TODO:  Handle called, uncalled, and final paragraph cases
-                    executeMethodBody.AppendLine(para.MethodName + "();");
-                }
-
+                if (section is CST.Paragraph paragraph)
+                    BuildParagraph(paragraph);
                 if (section is CST.Table table)
-                {
-                    //generate table (table generator method, technically)
-                    //get staged paragraph name
-                    //AppendLine RunParaOverTable( {paraName}, {tableName} );
-                }
+                    BuildTable(table);
             }
 
             //TODO:  write final paragraph call unless a table has already run over it.
-
+            //like:  FinishScenario() or similar
 
             //TODO:  Append the built text into the main Builder
+        }
+
+        public void BuildParagraph(CST.Paragraph paragraph)
+        {
+            //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
+            sectionsBody.AppendLine(paragraph.MethodName + "()");
+            sectionsBody.AppendLine("{");
+            sectionsBody.Indent();
+            foreach (var action in paragraph.Actions)
+            {
+                BuildAction(action);
+            }
+            sectionsBody.Dedent();
+            sectionsBody.AppendLine("}");
+            sectionsBody.AppendLine();
+
+            //TODO:  Handle called, uncalled, and final paragraph cases
+            executeMethodBody.AppendLine(paragraph.MethodName + "();");
+        }
+
+        public void BuildTable(CST.Table table)
+        {
+            //generate table (table generator method, technically)
+            //get staged paragraph name
+            //AppendLine RunParaOverTable( {paraName}, {tableName} );
         }
 
         public void BuildAction(CST.Action action)

@@ -358,5 +358,37 @@ namespace Tabula
             var ex = Assert.Throws<NotImplementedException>(() => generator.BuildAction(new UnknownAction()));
             Assert.That(ex.Message, Is.EqualTo("So Tabula.GeneratorTests+UnknownAction is an action now, huh?  Tell me what to do about that, please."));
         }
+
+        [Test]
+        public void BuildParagraph_gets_all_the_bits_together()
+        {
+            var args = new List<string> {
+                "name",
+                "comment"
+            };
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
+            generator.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "user"),
+                (TokenType.String, "Bob"),
+                (TokenType.Word, "made"),
+                (TokenType.Word, "comment"),
+                (TokenType.String, "where am I?")
+            );
+
+            var paragraph = new CST.Paragraph
+            {
+                Label = "short paragraph",
+            };
+            paragraph.Actions.Add(step);
+
+            generator.BuildParagraph(paragraph);
+
+            var result = generator.Builder.ToString();
+            Assert.That(result, Contains.Substring("public void paragraph_from_221_to_222()"));
+            Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
+        }
     }
 }
