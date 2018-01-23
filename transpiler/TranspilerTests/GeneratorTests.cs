@@ -270,7 +270,7 @@ namespace Tabula
 
             generator.BuildStep(step);
 
-            var result = generator.Builder.ToString();
+            var result = generator.sectionsBody.ToString();
             Assert.That(result, Contains.Substring(part), description);
         }
 
@@ -298,7 +298,7 @@ namespace Tabula
             );
 
             generator.BuildStep(step);
-            var result = generator.Builder.ToString();
+            var result = generator.sectionsBody.ToString();
 
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
 
@@ -332,7 +332,7 @@ namespace Tabula
 
             generator.BuildStep(step);
 
-            var result = generator.Builder.ToString();
+            var result = generator.sectionsBody.ToString();
             Assert.That(result, Contains.Substring("Unfound"));
             Assert.That(result, Contains.Substring("@\"user \"\"Bob\"\" made comment\""));
         }
