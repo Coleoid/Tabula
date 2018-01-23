@@ -125,7 +125,7 @@ namespace Tabula
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(0));
 
             var action = new CST.CommandUse(new List<string> { requestedWorkflow });
-            generator.BuildAction(action);
+            generator.DispatchAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
             Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
@@ -144,13 +144,13 @@ namespace Tabula
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(0));
 
             var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
-            generator.BuildAction(action);
+            generator.DispatchAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
             Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
 
             action = new CST.CommandUse(new List<string> { "AnotherWorkflow", "AThirdWorkflow" });
-            generator.BuildAction(action);
+            generator.DispatchAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(3));
             Assert.That(generator.WorkflowsInScope[2], Is.SameAs(third));
@@ -163,10 +163,10 @@ namespace Tabula
             generator.Library.KnownWorkflows["first"] = first;
 
             var action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
-            generator.BuildAction(action);
+            generator.DispatchAction(action);
 
             action = new CST.CommandUse(new List<string> { "FirstWorkflow" });
-            generator.BuildAction(action);
+            generator.DispatchAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
             Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
@@ -231,13 +231,13 @@ namespace Tabula
 
             (var workflow, var method) = generator.FindWorkflowMethod("howdystranger");
 
-            //  last added being returned allows for overriding, sounds more sensible at the moment
+            //  tie breaking on last added allows for overriding, sounds more sensible at the moment
             Assert.That(workflow.Name, Is.EqualTo("SheriffWorkflow"));
         }
 
 
         [Test]
-        public void BuildStep_Unfound_includes_step_text()
+        public void BuildStep_Unfound_includes_source_text_and_location()
         {
             var step = new CST.Step(12,
                 (TokenType.Word, "hello"),
@@ -246,26 +246,16 @@ namespace Tabula
 
             generator.BuildStep(step);
 
-            var result = generator.Builder.ToString();
+            var result = generator.sectionsBody.ToString();
             Assert.That(result, Contains.Substring("@\"hello world\""));
-        }
-
-        [Test]
-        public void BuildStep_Unfound_includes_source_file_and_location()
-        {
-            var step = new CST.Step(12,
-                (TokenType.Word, "hello"),
-                (TokenType.Word, "world")
-            );
-
-            generator.BuildStep(step);
-
-            var result = generator.Builder.ToString();
             Assert.That(result, Contains.Substring("\"scenario_source.tab:12\""));
         }
 
-        [Test]
-        public void Do_Call_includes_numerous_parts()
+
+        [TestCase("Do call with lambda", "Do(() =>")]
+        [TestCase("source location", "\"scenario_source.tab:34\"")]
+        [TestCase("workflow instance and method name", "myWorkflow.MyMethod_correctly_spelled()")]
+        public void Step_Call_includes_(string description, string part)
         {
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "MyMethod_correctly_spelled" });
@@ -281,13 +271,11 @@ namespace Tabula
             generator.BuildStep(step);
 
             var result = generator.Builder.ToString();
-            Assert.That(result, Contains.Substring("Do(() =>     "));
-            Assert.That(result, Contains.Substring("myWorkflow.MyMethod_correctly_spelled()"));
-            Assert.That(result, Contains.Substring("\"scenario_source.tab:34\""));
+            Assert.That(result, Contains.Substring(part), description);
         }
 
         [Test]
-        public void Do_Call_includes_arguments()
+        public void Step_Call_includes_arguments()
         {
             var args = new List<string> {
                 "name",
@@ -310,18 +298,21 @@ namespace Tabula
             );
 
             generator.BuildStep(step);
-
             var result = generator.Builder.ToString();
-            var expectedArguments = @"(""Bob"", 28, ""07/15/2017"".To<DateTime>())";
-            var requotedArguments = expectedArguments.Replace("\"", "\"\"");
+
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
+
+            //  string arguments are quoted, ints aren't, dates go through conversion
+            var expectedArguments = @"(""Bob"", 28, ""07/15/2017"".To<DateTime>())";
+            //  to aid debugging, the Do() call includes a string copy of the args
+            var requotedArguments = expectedArguments.Replace("\"", "\"\"");
             Assert.That(result, Contains.Substring(expectedArguments));
             Assert.That(result, Contains.Substring(requotedArguments));
         }
 
 
         [Test]
-        public void BuilStep_will_complain_on_arg_count_mismatch()
+        public void BuildStep_Unfound_on_arg_count_mismatch()
         {
             var args = new List<string> {
                 "name",
@@ -353,10 +344,11 @@ namespace Tabula
         class UnknownAction : CST.Action { }
 
         [Test]
-        public void BuildAction_explains_when_an_unknown_action_type_arrives()
+        public void DispatchAction_explains_when_an_unknown_action_type_arrives()
         {
-            var ex = Assert.Throws<NotImplementedException>(() => generator.BuildAction(new UnknownAction()));
-            Assert.That(ex.Message, Is.EqualTo("So Tabula.GeneratorTests+UnknownAction is an action now, huh?  Tell me what to do about that, please."));
+            var ex = Assert.Throws<NotImplementedException>(() => generator.DispatchAction(new UnknownAction()));
+            Assert.That(ex.Message, Is.EqualTo(
+                "The dispatcher doesn't have a case for [Tabula.GeneratorTests+UnknownAction].  Please extend it."));
         }
 
         [Test]
@@ -370,7 +362,7 @@ namespace Tabula
             detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
             generator.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new CST.Step(22,
                 (TokenType.Word, "user"),
                 (TokenType.String, "Bob"),
                 (TokenType.Word, "made"),
@@ -381,13 +373,14 @@ namespace Tabula
             var paragraph = new CST.Paragraph
             {
                 Label = "short paragraph",
+                MethodName = "paragraph_from_021_to_022"
             };
             paragraph.Actions.Add(step);
 
             generator.BuildParagraph(paragraph);
 
-            var result = generator.Builder.ToString();
-            Assert.That(result, Contains.Substring("public void paragraph_from_221_to_222()"));
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("public void paragraph_from_021_to_022()"));
             Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
         }
     }

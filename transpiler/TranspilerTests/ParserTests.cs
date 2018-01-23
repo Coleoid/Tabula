@@ -20,6 +20,8 @@ namespace Tabula
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Tags, Has.Count.EqualTo(2));
+            Assert.That(cst.Tags[0], Is.EqualTo("Laughing Loudly"));
+            Assert.That(cst.Tags[1], Is.EqualTo("Jumping"));
         }
 
         [Test]
@@ -77,6 +79,68 @@ namespace Tabula
         }
 
         [Test]
+        public void Paragraph_gets_suitable_name()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.cmd_Use, "Student Enrollment") { Line = 42 },
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.cmd_Set, "#Fred") { Line = 43 },
+                new Token(TokenType.String, "Boxley, Frederick"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search") { Line = 44 },
+                new Token(TokenType.Word, "here"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search") { Line = 45 },
+                new Token(TokenType.Word, "there"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search") { Line = 46 },
+                new Token(TokenType.Word, "elsewhere"),
+                new Token(TokenType.NewLine, "\n"),
+            };
+            var state = new ParserState(tokens);
+
+            var para = _parser.ParseParagraph(state);
+
+
+            Assert.That(para.MethodName, Is.EqualTo("paragraph_from_042_to_046"));
+        }
+
+        [Test]
+        public void Paragraph_name_correct_with_block_at_end()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.cmd_Use, "Student Enrollment") { Line = 42 },
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.cmd_Set, "#Fred") { Line = 43 },
+                new Token(TokenType.String, "Boxley, Frederick"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.cmd_Alias, "Search") { Line = 44 },
+                new Token(TokenType.BlockStart, "...") { Line = 44 },
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search") { Line = 45 },
+                new Token(TokenType.Word, "there"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.BlockEnd, ".") { Line = 46 },
+            };
+            var state = new ParserState(tokens);
+
+            var para = _parser.ParseParagraph(state);
+
+            var alias = para.Actions[2] as CST.CommandAlias;
+            var block = alias.Action;
+
+            Assert.That(block.startLine, Is.EqualTo(44));
+            Assert.That(block.endLine, Is.EqualTo(46));
+
+            Assert.That(para.MethodName, Is.EqualTo("paragraph_from_042_to_046"));
+        }
+
+        //TODO:  block_gets_proper_start_and_end_line_numbers()
+        //TODO:  alias_gets_proper_start_and_end_line_numbers()
+
+
+        //TODO:  Paragraph label is mandatory.
+        [Test]
         public void Paragraph_with_set_and_alias()
         {
             var tokens = new List<Token> {
@@ -105,7 +169,7 @@ namespace Tabula
         public void Step_two_words()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.Word, "Say"),
+                new Token(TokenType.Word, "Say") { Line = 7 },
                 new Token(TokenType.Word, "Hello"),
             };
             var state = new ParserState(tokens);
@@ -113,6 +177,8 @@ namespace Tabula
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Symbols, Has.Count.EqualTo(2));
+            Assert.That(cst.startLine, Is.EqualTo(7));
+            Assert.That(cst.endLine, Is.EqualTo(7));
         }
 
         [Test]
@@ -225,12 +291,14 @@ namespace Tabula
         [Test]
         public void ParseBlock_works_with_an_empty_block()
         {
-            var tokens = new List<Token> { new Token(TokenType.BlockStart, "..."), new Token(TokenType.BlockEnd, ".") };
+            var tokens = new List<Token> { new Token(TokenType.BlockStart, "...") { Line = 5 }, new Token(TokenType.BlockEnd, ".") { Line = 6 } };
 
             var state = new ParserState(tokens);
             var block = _parser.ParseBlock(state);
 
             Assert.That(block, Is.Not.Null);
+            Assert.That(block.startLine, Is.EqualTo(5));
+            Assert.That(block.endLine, Is.EqualTo(6));
             Assert.That(block.Actions, Has.Count.EqualTo(0));
         }
 
@@ -296,7 +364,7 @@ namespace Tabula
         {
             var tokens = new List<Token> {
                                            new Token(TokenType.cmd_Alias, "Test should Work"),
-                                           new Token(TokenType.cmd_Use, "Employment Action Edit")
+                                           new Token(TokenType.cmd_Use, "Employment Action Edit") { Line = 18 }
                                          };
 
             var state = new ParserState(tokens);
@@ -304,6 +372,8 @@ namespace Tabula
             var alias = _parser.ParseCommand_Alias(state);
             Assert.That(alias, Is.Not.Null);
             Assert.That(alias.Name, Is.EqualTo("Test should Work"));
+            Assert.That(alias.startLine, Is.EqualTo(18));
+            Assert.That(alias.endLine, Is.EqualTo(18));
 
             var useCommand = (CST.CommandUse)alias.Action;
             Assert.That(useCommand, Is.Not.Null);
@@ -314,10 +384,5 @@ namespace Tabula
         }
 
 
-        [Test]
-        public void ParseCommand_Set_test_null()
-        {
-
-        }
     }
 }

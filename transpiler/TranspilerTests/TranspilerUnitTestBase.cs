@@ -118,17 +118,17 @@ alias: ""Add employment actions for #employeeName at #orgName"" => ...
 
 ""Add employment actions"":
 Add employment actions for #Lina at #HPD
-| actionName      | empType  | apptType  | empTitle   | newStatus              | effectiveDate |
+| actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate |
 | Testopia Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    |
 | Separation      | Reserve  | Full Time | Chief      | ""Separated (Inactive)"" | 12/15/2008    |
 
 Add employment actions for #Gio at #HPD
-| actionName      | empType  | apptType  | empTitle   | newStatus              | effectiveDate |
+| actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate |
 | Testopia Update | Reserve  | Full Time | Chief      | ""Active (Active)""      | 10/15/2008    |
 | Testopia Update | Reserve  | Full Time | Chief      | ""On Leave (Active)""    | 12/15/2008    |
 
 Add employment actions for #Sterky at #OPD
-| actionName      | empType  | apptType  | empTitle   | newStatus              | effectiveDate | comment          |
+| actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate | comment          |
 | Testopia Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    | Testopia Comment |
 | Separation      | Civiilan | Contract  | Lackey     | ""Separated (Inactive)"" | 12/15/2008    |                  |
 

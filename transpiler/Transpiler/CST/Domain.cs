@@ -60,7 +60,7 @@ namespace Tabula.CST
     public class Paragraph : Section
     {
         public List<Action> Actions { get; internal set; }
-        public string MethodName { get; internal set; }
+        public string MethodName { get; set; }
 
         public Paragraph()
         {

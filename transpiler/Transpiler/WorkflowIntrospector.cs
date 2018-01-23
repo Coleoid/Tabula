@@ -15,14 +15,20 @@ namespace Tabula
             KnownWorkflows = new Dictionary<string, WorkflowDetail>();
         }
 
+        public bool IsWorkflow(Type type)
+        {
+            if (type == null) return false;
+            if (type.BaseType == null) return false;
+
+            if (type.BaseType.Name.Contains("Workflow") || type.Name == "Workflow")
+                return true;
+
+            return false;
+        }
+
         public WorkflowDetail GetWorkflowDetail(Type type)
         {
-            if (type == null) return null;
-            if (type.BaseType == null) return null;
-
-            if (!type.BaseType.Name.Contains("Workflow")
-                && type.Name != "Workflow" )
-                return null;
+            if (!IsWorkflow(type)) return null;
 
             if (KnownWorkflows.ContainsKey(type.Name))
                 return KnownWorkflows[type.Name];

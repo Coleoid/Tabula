@@ -70,5 +70,10 @@ namespace Tabula
             indentLevel = startingIndentLevel;
             _indentation = new string(' ', indentLevel);
         }
+
+        public override string ToString()
+        {
+            return Builder.ToString();
+        }
     }
 }

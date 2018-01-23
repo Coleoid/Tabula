@@ -5,6 +5,15 @@ using System.Text;
 
 namespace Tabula
 {
+    //  It is a truism that generated code is ugly.
+    //  In Tabula, the generated code is a first-class result.  Effort is spent to keep it readable.
+
+    //  BuildXxx methods primarily fill StringBuilders, which will finally be assembled into
+    //  the StringBuilder sent to us by Visual Studio, which is waiting to receive our new
+    //  C# code.
+
+    //  IndentingStringBuilders factor out indenting each new line.
+
     public class Generator
     {
         private string GeneratorVersion = "0.1";
@@ -33,6 +42,8 @@ namespace Tabula
             Workflows = new Dictionary<string, WorkflowDetail>();
             WorkflowsInScope = new List<WorkflowDetail>();
             Library = new WorkflowIntrospector();
+            executeMethodBody = new IndentingStringBuilder(12);  // namespace + class + inside method
+            sectionsBody = new IndentingStringBuilder(8);  // namespace + class
         }
 
         public void Generate(CST.Scenario scenario, string inputFilePath, StringBuilder builder)
@@ -40,8 +51,6 @@ namespace Tabula
             Scenario = scenario;
             Builder = builder;
             InputFilePath = inputFilePath;
-            executeMethodBody = new IndentingStringBuilder(12);  // namespace + class + inside method
-            sectionsBody = new IndentingStringBuilder(8);  // namespace + class
 
             BuildHeader();
             BuildNamespaceOpen();
@@ -117,13 +126,10 @@ namespace Tabula
         public void BuildParagraph(CST.Paragraph paragraph)
         {
             //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
-            sectionsBody.AppendLine(paragraph.MethodName + "()");
+            sectionsBody.AppendLine( $"public void {paragraph.MethodName}()");
             sectionsBody.AppendLine("{");
             sectionsBody.Indent();
-            foreach (var action in paragraph.Actions)
-            {
-                BuildAction(action);
-            }
+            DispatchActions(paragraph.Actions);
             sectionsBody.Dedent();
             sectionsBody.AppendLine("}");
             sectionsBody.AppendLine();
@@ -139,22 +145,17 @@ namespace Tabula
             //AppendLine RunParaOverTable( {paraName}, {tableName} );
         }
 
-        public void BuildAction(CST.Action action)
+        public void DispatchActions(List<CST.Action> actions)
+        {
+            foreach (var action in actions)
+                DispatchAction(action);
+        }
+
+        public void DispatchAction(CST.Action action)
         {
             if (action is CST.CommandUse useCommand)
             {
-                foreach (var label in useCommand.Workflows)
-                {
-                    var searchName = Formatter.UseLabel_to_InstanceName(label);
-                    if (!Library.KnownWorkflows.ContainsKey(searchName))
-                        throw new Exception($"Don't know of a workflow matching {label}.");
-
-                    var workflow = Library.KnownWorkflows[searchName];
-                    if (!WorkflowsInScope.Contains(workflow))
-                    {
-                        WorkflowsInScope.Add(workflow);
-                    }
-                }
+                UseWorkflow(useCommand);
             }
             else if (action is CST.Step step)
             {
@@ -170,7 +171,24 @@ namespace Tabula
             }
             else
             {
-                throw new NotImplementedException($"So {action.GetType().FullName} is an action now, huh?  Tell me what to do about that, please.");
+                throw new NotImplementedException(
+                    $"The dispatcher doesn't have a case for [{action.GetType().FullName}].  Please extend it.");
+            }
+        }
+
+        private void UseWorkflow(CST.CommandUse useCommand)
+        {
+            foreach (var label in useCommand.Workflows)
+            {
+                var searchName = Formatter.UseLabel_to_InstanceName(label);
+                if (!Library.KnownWorkflows.ContainsKey(searchName))
+                    throw new Exception($"Don't know of a workflow matching {label}.");
+
+                var workflow = Library.KnownWorkflows[searchName];
+                if (!WorkflowsInScope.Contains(workflow))
+                {
+                    WorkflowsInScope.Add(workflow);
+                }
             }
         }
 
@@ -189,14 +207,14 @@ namespace Tabula
             if (method == null || stepArgCount != method.Args.Count())
             {
                 var stepText = "\"" + step.GetReadableString() + "\"";
-                var unfound = $"            Unfound(      {stepText}, {sourceLocation});";
-                Builder.AppendLine(unfound);
+                var unfound = $"Unfound(      {stepText}, {sourceLocation});";
+                sectionsBody.AppendLine(unfound);
             }
             else
             {
                 var call = ComposeCall(step, workflow, method);
                 var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
-                Builder.AppendLine($"           Do(() =>       {call}. {sourceLocation}, {quotedCall});");
+                sectionsBody.AppendLine($"Do(() =>       {call}. {sourceLocation}, {quotedCall});");
             }
         }
 
