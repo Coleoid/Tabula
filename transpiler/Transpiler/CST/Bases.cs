@@ -40,8 +40,8 @@ namespace Tabula.CST
     public class Action : ITaggable
     {
         public List<string> Tags { get; set; }
-        public int startLine { get; set; }
-        public int endLine { get; set; }
+        public int StartLine { get; set; }
+        public int EndLine { get; set; }
     }
 
     public class Section : CST_Entity

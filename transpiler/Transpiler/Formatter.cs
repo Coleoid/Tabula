@@ -4,20 +4,26 @@ namespace Tabula
 {
     public static class Formatter
     {
-        public static string MethodName_to_SearchName(string methodName)
+        public static string SearchName_from_MethodName(string methodName)
         {
             return methodName.Replace("_", "").ToLower();
         }
 
-        public static string ClassName_to_InstanceName(string workflowName)
+        public static string InstanceName_from_TypeName(string typeName)
         {
-            var lastDot = workflowName.LastIndexOf('.');
-            return workflowName.Substring(lastDot + 1).Replace("Workflow", "");
+            var lastDot = typeName.LastIndexOf('.');
+            return typeName.Substring(lastDot + 1).Replace("Workflow", "");
         }
 
-        public static string UseLabel_to_InstanceName(string useLabel)
+        public static string SearchName_from_Use_label(string useLabel)
         {
             return useLabel.ToLower().Replace("workflow", "").Replace(" ", "");
+        }
+
+        internal static string SearchName_from_TypeName(string typeName)
+        {
+            var lastDot = typeName.LastIndexOf('.');
+            return typeName.Substring(lastDot + 1).ToLower().Replace("workflow", "");
         }
     }
 }

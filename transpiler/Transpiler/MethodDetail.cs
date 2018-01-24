@@ -31,7 +31,7 @@ namespace Tabula
             set
             {
                 _name = value;
-                _searchName = Formatter.MethodName_to_SearchName(value);
+                _searchName = Formatter.SearchName_from_MethodName(value);
             }
         }
 

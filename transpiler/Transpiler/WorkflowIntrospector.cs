@@ -8,71 +8,88 @@ namespace Tabula
 {
     public class WorkflowIntrospector
     {
-        public Dictionary<string, WorkflowDetail> KnownWorkflows { get; set; }
+        public Dictionary<Type, WorkflowDetail> CachedWorkflows { get; set; }
+
+        //FUTURE:  Multiple types per search name
+        public Dictionary<string, Type> TypeFromSearchName { get; set; }
+
+        //FUTURE:  Make Location a list, for users with distributed dependencies
+        public string Location { get; set; }
 
         public WorkflowIntrospector()
         {
-            KnownWorkflows = new Dictionary<string, WorkflowDetail>();
+            CachedWorkflows = new Dictionary<Type, WorkflowDetail>();
+            TypeFromSearchName = new Dictionary<string, Type>();
+            Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
         }
 
+        //FUTURE:  The decision clause will need to be user-overridable, for projects with
+        //  different library/inheritance structures.
         public bool IsWorkflow(Type type)
         {
             if (type == null) return false;
             if (type.BaseType == null) return false;
 
-            if (type.BaseType.Name.Contains("Workflow") || type.Name == "Workflow")
-                return true;
-
-            return false;
+            //  May need elaboration.  Quick check shows it at least 99% accurate.
+            return type.BaseType.Name.Contains("Workflow") 
+                || type.Name == "Workflow";
         }
 
+        //  In the dll (or dlls) containing workflows, inherited methods should be found
+        //  when they're in a pertinent parent class.
+        //  WorkflowDetail.Parent is populated by GetWorkflowDetail recursively.
+        //  For this reason, GetWorkflowDetail() returns null when asked for a non-workflow,
+        //  and IsWorkflow() is extra bulletproof.
         public WorkflowDetail GetWorkflowDetail(Type type)
         {
             if (!IsWorkflow(type)) return null;
 
-            if (KnownWorkflows.ContainsKey(type.Name))
-                return KnownWorkflows[type.Name];
+            if (CachedWorkflows.ContainsKey(type))
+                return CachedWorkflows[type];
 
-            var detail = new WorkflowDetail
+            string searchType = Formatter.SearchName_from_TypeName(type.Name);
+            TypeFromSearchName[searchType] = type;
+
+            var workflow = new WorkflowDetail
             {
                 Name = type.Name,
-                InstanceName = Formatter.ClassName_to_InstanceName(type.Name),
+                InstanceName = Formatter.InstanceName_from_TypeName(type.Name),
                 Parent = GetWorkflowDetail(type.BaseType)
             };
 
             var myMethods = type.GetMethods().Where(mi => mi.DeclaringType == type);
             foreach (var mi in myMethods)
             {
-                var searchName = Formatter.MethodName_to_SearchName(mi.Name);
                 var method = new MethodDetail
                 {
                     Name = mi.Name,
                     Args = mi.GetParameters().Select(i => i.Name).ToList()
                 };
 
-                detail.Methods[searchName] = method;
+                var searchMethod = Formatter.SearchName_from_MethodName(mi.Name);
+                workflow.Methods[searchMethod] = method;
             }
 
-            KnownWorkflows[type.Name] = detail;
-            return detail;
+            CachedWorkflows[type] = workflow;
+            return workflow;
         }
 
-        #region Reflective details
+        #region Reflective sausage-making
 
-        //TODO:  path(s) pulled from config
-        //TODO:  correctly handle .exes as a separate branch, not special-cased
+        //TODO:  location(s) pulled from config
         private Assembly resolveAssembly(object sender, ResolveEventArgs args)
         {
-            string dllName = args.Name.Substring(0, args.Name.IndexOf(","));
+            string libName = args.Name.Substring(0, args.Name.IndexOf(","));
 
-            string dllPath = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\" + dllName + ".dll";
-            if (dllName == "Crypto")
-                dllPath = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\crypto.exe";
+            string libPath = Location + libName + ".dll";
+            if (File.Exists(libPath))
+                return Assembly.ReflectionOnlyLoadFrom(libPath);
 
-            if (File.Exists(dllPath))
-                return Assembly.ReflectionOnlyLoadFrom(dllPath);
-            else
-                return Assembly.ReflectionOnlyLoad(args.Name);
+            string exePath = Location + libName + ".exe";
+            if (File.Exists(exePath))
+                return Assembly.ReflectionOnlyLoadFrom(exePath);
+
+            return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
 
@@ -82,7 +99,7 @@ namespace Tabula
             AppDomain curDomain = AppDomain.CurrentDomain;
             curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
 
-            Assembly asm = Assembly.ReflectionOnlyLoadFrom(@"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\ScenarioContext.dll");
+            Assembly asm = Assembly.ReflectionOnlyLoadFrom(Location + "ScenarioContext.dll");
             var asms = curDomain.GetAssemblies();
 
             return asm.ExportedTypes.ToList();

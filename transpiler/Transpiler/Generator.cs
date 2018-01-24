@@ -176,19 +176,18 @@ namespace Tabula
             }
         }
 
-        private void UseWorkflow(CST.CommandUse useCommand)
+        public void UseWorkflow(CST.CommandUse useCommand)
         {
             foreach (var label in useCommand.Workflows)
             {
-                var searchName = Formatter.UseLabel_to_InstanceName(label);
-                if (!Library.KnownWorkflows.ContainsKey(searchName))
-                    throw new Exception($"Don't know of a workflow matching {label}.");
+                var searchName = Formatter.SearchName_from_Use_label(label);
+                if (!Library.TypeFromSearchName.ContainsKey(searchName))
+                    throw new Exception($"Tabula found no workflow matching [{label}].");
 
-                var workflow = Library.KnownWorkflows[searchName];
-                if (!WorkflowsInScope.Contains(workflow))
-                {
-                    WorkflowsInScope.Add(workflow);
-                }
+                var type = Library.TypeFromSearchName[searchName];
+                var workflow = Library.CachedWorkflows[type];
+                WorkflowsInScope.Remove(workflow);
+                WorkflowsInScope.Add(workflow);
             }
         }
 
@@ -263,21 +262,32 @@ namespace Tabula
             return (null, null);
         }
 
-        public List<string> GetNeededWorkflows()
+        public List<Type> GetNeededTypes()
         {
-            List<string> nws = Scenario.NeededWorkflows;
-            nws.Sort();
-            var unws = nws.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
+            List<string> nws = Scenario.SeenWorkflowRequests.ToList();
 
-            return unws;
+            var types = new List<Type>();
+            foreach (var request in Scenario.SeenWorkflowRequests)
+            {
+                var searchName = Formatter.SearchName_from_Use_label(request);
+
+                if (!Library.TypeFromSearchName.ContainsKey(searchName))
+                    throw new Exception("argh");
+
+                var type = Library.TypeFromSearchName[searchName];
+                if (!types.Contains(type))
+                    types.Add(type);
+            }
+
+            return types.OrderBy(t => t.Namespace).ThenBy(t => t.Name).ToList();
         }
 
         public void BuildDeclarations()
         {
-            foreach (var workflow in GetNeededWorkflows())
+            foreach (var type in GetNeededTypes())
             {
-                var varName = Formatter.ClassName_to_InstanceName(workflow);
-                Builder.AppendFormat("public {0} {1};{2}", workflow, varName, Environment.NewLine);
+                var instance = Formatter.InstanceName_from_TypeName(type.Name);
+                Builder.AppendLine($"public {type.Namespace}.{type.Name} {instance};");
             }
         }
 

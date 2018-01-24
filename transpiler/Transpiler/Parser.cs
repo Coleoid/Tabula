@@ -65,7 +65,7 @@ namespace Tabula
                 throw new Exception("After the actions in a block, we need a block end, a period.");
             var end = state.Take(TokenType.BlockEnd);
 
-            return new CST.Block(actions) { startLine = start.Line, endLine = end.Line};
+            return new CST.Block(actions) { StartLine = start.Line, EndLine = end.Line};
         }
 
         public CST.CommandAlias ParseCommand_Alias(ParserState state)
@@ -79,8 +79,8 @@ namespace Tabula
                 throw new Exception("The target of an Alias command must be a step or a block of steps.");
 
             var alias = new CST.CommandAlias(aliasToken.Text, action);
-            alias.startLine = action.startLine;
-            alias.endLine = action.endLine;
+            alias.StartLine = action.StartLine;
+            alias.EndLine = action.EndLine;
             return alias;
         }
 
@@ -109,8 +109,8 @@ namespace Tabula
                 workflows.AddRange(Regex.Split(state.Take().Text, ", *"));
                 state.AdvanceLines();
             }
-            Scenario.NeededWorkflows.AddRange(workflows);
-            return new CST.CommandUse(workflows) { startLine = token.Line , endLine = token.Line};
+            Scenario.SeenWorkflowRequests.AddRange(workflows);
+            return new CST.CommandUse(workflows) { StartLine = token.Line , EndLine = token.Line};
         }
 
         public CST.Paragraph ParseParagraph(ParserState state)
@@ -126,8 +126,8 @@ namespace Tabula
                 return null;
             }
 
-            string start = paragraph.Actions[0].startLine.ToString("D3");
-            string end = paragraph.Actions.Last().endLine.ToString("D3");
+            string start = paragraph.Actions[0].StartLine.ToString("D3");
+            string end = paragraph.Actions.Last().EndLine.ToString("D3");
             paragraph.MethodName = $"paragraph_from_{start}_to_{end}";
 
             return paragraph;
@@ -202,7 +202,7 @@ namespace Tabula
 
             state.AdvanceLines();
 
-            return new CST.Step(symbols) { startLine = symbols[0].LineNumber, endLine = symbols[0].LineNumber };
+            return new CST.Step(symbols) { StartLine = symbols[0].LineNumber, EndLine = symbols[0].LineNumber };
         }
 
         public List<CST.Step> ParseSteps(ParserState state)

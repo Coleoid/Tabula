@@ -129,8 +129,8 @@ namespace Tabula
             var alias = para.Actions[2] as CST.CommandAlias;
             var block = alias.Action;
 
-            Assert.That(block.startLine, Is.EqualTo(44));
-            Assert.That(block.endLine, Is.EqualTo(46));
+            Assert.That(block.StartLine, Is.EqualTo(44));
+            Assert.That(block.EndLine, Is.EqualTo(46));
 
             Assert.That(para.MethodName, Is.EqualTo("paragraph_from_042_to_046"));
         }
@@ -177,8 +177,8 @@ namespace Tabula
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Symbols, Has.Count.EqualTo(2));
-            Assert.That(cst.startLine, Is.EqualTo(7));
-            Assert.That(cst.endLine, Is.EqualTo(7));
+            Assert.That(cst.StartLine, Is.EqualTo(7));
+            Assert.That(cst.EndLine, Is.EqualTo(7));
         }
 
         [Test]
@@ -297,8 +297,8 @@ namespace Tabula
             var block = _parser.ParseBlock(state);
 
             Assert.That(block, Is.Not.Null);
-            Assert.That(block.startLine, Is.EqualTo(5));
-            Assert.That(block.endLine, Is.EqualTo(6));
+            Assert.That(block.StartLine, Is.EqualTo(5));
+            Assert.That(block.EndLine, Is.EqualTo(6));
             Assert.That(block.Actions, Has.Count.EqualTo(0));
         }
 
@@ -372,8 +372,8 @@ namespace Tabula
             var alias = _parser.ParseCommand_Alias(state);
             Assert.That(alias, Is.Not.Null);
             Assert.That(alias.Name, Is.EqualTo("Test should Work"));
-            Assert.That(alias.startLine, Is.EqualTo(18));
-            Assert.That(alias.endLine, Is.EqualTo(18));
+            Assert.That(alias.StartLine, Is.EqualTo(18));
+            Assert.That(alias.EndLine, Is.EqualTo(18));
 
             var useCommand = (CST.CommandUse)alias.Action;
             Assert.That(useCommand, Is.Not.Null);
