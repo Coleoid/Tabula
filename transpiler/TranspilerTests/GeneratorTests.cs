@@ -174,8 +174,7 @@ namespace Tabula
                 (TokenType.Word, "user"),
                 (TokenType.String, "Bob"),
                 (TokenType.Word, "made"),
-                (TokenType.Word, "comment") //,
-                // (TokenType.String, "where am I?")  // if we add this token, we find the method
+                (TokenType.Word, "comment")
             );
 
             generator.BuildStep(step);

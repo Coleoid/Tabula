@@ -17,7 +17,8 @@ namespace Tabula
 
         public static string SearchName_from_Use_label(string useLabel)
         {
-            return useLabel.ToLower().Replace("workflow", "").Replace(" ", "");
+            return useLabel.ToLower().Replace("workflow", "").Replace(" ", "")
+                .Replace(Environment.NewLine, "").Replace("\r", "");
         }
 
         internal static string SearchName_from_TypeName(string typeName)

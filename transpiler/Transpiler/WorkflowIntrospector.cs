@@ -23,6 +23,14 @@ namespace Tabula
             Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
         }
 
+        public void DetailLoadedTypes()
+        {
+            foreach (var type in GetLoadedTypes())
+            {
+                GetWorkflowDetail(type);
+            }
+        }
+
         //FUTURE:  The decision clause will need to be user-overridable, for projects with
         //  different library/inheritance structures.
         public bool IsWorkflow(Type type)

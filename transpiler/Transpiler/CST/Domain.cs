@@ -84,6 +84,7 @@ namespace Tabula.CST
             {
                 Symbols.Add(new Symbol(type, text, line));
             }
+            StartLine = line;
         }
 
         public string GetMethodSearchName()

@@ -8,7 +8,7 @@ namespace Tabula
     //  It is a truism that generated code is ugly.
     //  In Tabula, the generated code is a first-class result.  Effort is spent to keep it readable.
 
-    //  BuildXxx methods primarily fill StringBuilders, which will finally be assembled into
+    //  Build{Xxx} methods primarily fill StringBuilders, which will finally be assembled into
     //  the StringBuilder sent to us by Visual Studio, which is waiting to receive our new
     //  C# code.
 
@@ -16,7 +16,7 @@ namespace Tabula
 
     public class Generator
     {
-        private string GeneratorVersion = "0.1";
+        private string GeneratorVersion = "0.2";
 
         public string GeneratedClassName { get; set; }
 
@@ -33,17 +33,13 @@ namespace Tabula
         public WorkflowIntrospector Library { get; private set; }
 
 
-        //API: Find workflow details from a search key
-        //API: Find method details from a search key
-        //API: Restrict finding to the objects in (compile-time) scope
-
         public Generator()
         {
             Workflows = new Dictionary<string, WorkflowDetail>();
             WorkflowsInScope = new List<WorkflowDetail>();
             Library = new WorkflowIntrospector();
-            executeMethodBody = new IndentingStringBuilder(12);  // namespace + class + inside method
-            sectionsBody = new IndentingStringBuilder(8);  // namespace + class
+            executeMethodBody = new IndentingStringBuilder(12);  // 12 = namespace + class + inside method
+            sectionsBody = new IndentingStringBuilder(8);  // 8 = namespace + class
         }
 
         public void Generate(CST.Scenario scenario, string inputFilePath, StringBuilder builder)
@@ -55,6 +51,7 @@ namespace Tabula
             BuildHeader();
             BuildNamespaceOpen();
             BuildClassOpen();
+            BuildDeclarations();
             BuildConstructor();
             BuildClassBody();
             BuildClassClose();
@@ -102,13 +99,43 @@ namespace Tabula
                 InputFilePath = InputFilePath.Remove(lastDot);
 
             return InputFilePath.Replace(' ', '_').Replace('.', '_') + "_generated";
+        }
 
+        public void BuildDeclarations()
+        {
+            foreach (var type in GetNeededWorkflowTypes())
+            {
+                var instance = Formatter.InstanceName_from_TypeName(type.Name);
+                Builder.AppendLine($"public {type.Namespace}.{type.Name} {instance};");
+            }
+        }
+
+        //TODO:  Workflow instantiation.  I should have the 
+        public void BuildConstructor()
+        {
+            Builder.Append("        public ");
+            Builder.Append(GeneratedClassName);
+            Builder.AppendLine("()");
+            Builder.AppendLine("            : base()");
+            Builder.AppendLine("        {");
+
+            BuildInstantiations();
+
+            Builder.AppendLine("        }");
+        }
+
+        public void BuildInstantiations()
+        {
+            foreach (var type in GetNeededWorkflowTypes())
+            {
+                var instance = Formatter.InstanceName_from_TypeName(type.Name);
+                Builder.AppendLine($"            {instance} = new {type.Namespace}.{type.Name}();");
+            }
         }
 
 
         public void BuildClassBody()
         {
-
             foreach (var section in Scenario.Sections)
             {
                 if (section is CST.Paragraph paragraph)
@@ -163,7 +190,7 @@ namespace Tabula
             }
             else if (action is CST.CommandSet setCommand)
             {
-                throw new NotImplementedException("TODO: Stash value in runtime context");
+                BuildSetCommand(setCommand);
             }
             else if (action is CST.CommandAlias aliasCommand)
             {
@@ -200,7 +227,7 @@ namespace Tabula
             string searchName = step.GetMethodSearchName();
             (WorkflowDetail workflow, MethodDetail method) = FindWorkflowMethod(searchName);
 
-            var lineNumber = step.Symbols[0].LineNumber;
+            var lineNumber = step.StartLine;
             var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
 
             if (method == null || stepArgCount != method.Args.Count())
@@ -213,7 +240,7 @@ namespace Tabula
             {
                 var call = ComposeCall(step, workflow, method);
                 var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
-                sectionsBody.AppendLine($"Do(() =>       {call}. {sourceLocation}, {quotedCall});");
+                sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
             }
         }
 
@@ -221,26 +248,29 @@ namespace Tabula
         {
             string argsString = "";
             string delim = "";
-            foreach (var sym in step.Symbols)
+            foreach (var sym in step.Symbols.Where(s => s.Type != TokenType.Word))
             {
-                //TODO:  Keep watch on string representations, eventual rework
-                if (sym.Type != TokenType.Word)
+                switch (sym.Type)
                 {
-                    if (sym.Type == TokenType.String)
-                    {
-                        argsString += delim + "\"" + sym.Text + "\"";
-                    }
-                    else if (sym.Type == TokenType.Date)
-                    {
-                        argsString += delim + "\"" + sym.Text + "\".To<DateTime>()";
-                    }
-                    else
-                    {
-                        argsString += delim + sym.Text;
-                    }
+                    case TokenType.String:
+                        argsString += delim + $"\"{sym.Text}\"";
+                        break;
 
-                    delim = ", ";
+                    case TokenType.Date:
+                        argsString += delim + $"\"{sym.Text}\".To<DateTime>()";
+                        break;
+
+                    case TokenType.Number:
+                        argsString += delim + sym.Text;
+                        break;
+
+                    case TokenType.Variable:
+                        throw new Exception("Not composing variables into calls yet.");
+
+                    default:
+                        throw new Exception($"Did not expect to get a token type [{sym.Type}].");
                 }
+                delim = ", ";
             }
 
             var workflowName = workflow.InstanceName;
@@ -262,7 +292,9 @@ namespace Tabula
             return (null, null);
         }
 
-        public List<Type> GetNeededTypes()
+        /// <summary> All the workflow types requested by the scenario </summary>
+        /// <returns> List sorted by namespace, then name </returns>
+        public List<Type> GetNeededWorkflowTypes()
         {
             List<string> nws = Scenario.SeenWorkflowRequests.ToList();
 
@@ -272,7 +304,7 @@ namespace Tabula
                 var searchName = Formatter.SearchName_from_Use_label(request);
 
                 if (!Library.TypeFromSearchName.ContainsKey(searchName))
-                    throw new Exception("argh");
+                    throw new Exception($"Tabula found no workflow matching [{request}].");
 
                 var type = Library.TypeFromSearchName[searchName];
                 if (!types.Contains(type))
@@ -282,24 +314,14 @@ namespace Tabula
             return types.OrderBy(t => t.Namespace).ThenBy(t => t.Name).ToList();
         }
 
-        public void BuildDeclarations()
+        public void BuildSetCommand(CST.CommandSet commandSet)
         {
-            foreach (var type in GetNeededTypes())
-            {
-                var instance = Formatter.InstanceName_from_TypeName(type.Name);
-                Builder.AppendLine($"public {type.Namespace}.{type.Name} {instance};");
-            }
-        }
+            var lineNumber = commandSet.StartLine;
+            var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
 
-        //  Since workflow instantiation happens in each paragraph, this is (for now) a stub.
-        public void BuildConstructor()
-        {
-            Builder.Append("        public ");
-            Builder.Append(GeneratedClassName);
-            Builder.AppendLine("()");
-            Builder.AppendLine("            : base()");
-            Builder.AppendLine("        {");
-            Builder.AppendLine("        }");
+            var call = $"Var[\"{commandSet.Name}\"] = {commandSet.Term};";
+            var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
+            sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
         }
 
         public void BuildClassClose()
@@ -311,16 +333,5 @@ namespace Tabula
         {
             Builder.AppendLine("}");
         }
-
-        //TODO:  Figure out point of entry for testing/implementing proper workflow info stashing
-    //    public string InstanceNameFromClassName(string className)
-    //    {
-    //        foreach (var key in WorkflowImplementations.Keys)
-    //        {
-    //            var impl = WorkflowImplementations[key];
-    //            if (impl == className)
-    //                return key;
-    //        }
-    //    }
     }
 }

@@ -94,14 +94,23 @@ namespace Tabula
         }
 
         [Test]
-        public void Use_command_complains_sensibly_when_workflow_unfound()
+        public void BuildDeclarations_complains_sensibly_when_workflow_unfound()
         {
-            var action = new CST.CommandUse(new List<string> { "P equals NP workflow" });
-            var ex = Assert.Throws<Exception>(() =>generator.UseWorkflow(action));
+            scenario.SeenWorkflowRequests = new List<string> { "P equals NP workflow" };
+            var ex = Assert.Throws<Exception>(() => generator.BuildDeclarations());
 
             Assert.That(ex.Message, Is.EqualTo("Tabula found no workflow matching [P equals NP workflow]."));
         }
 
+        //  In normal use, we'll stop before we hit this exception, at BuildDeclarations()
+        [Test]
+        public void Use_command_complains_sensibly_when_workflow_unfound()
+        {
+            var action = new CST.CommandUse(new List<string> { "P equals NP workflow" });
+            var ex = Assert.Throws<Exception>(() => generator.UseWorkflow(action));
+
+            Assert.That(ex.Message, Is.EqualTo("Tabula found no workflow matching [P equals NP workflow]."));
+        }
 
         [Test]
         public void FindWorkflowMethod_returns_nulls_if_no_workflow_has_method_matching_step()
