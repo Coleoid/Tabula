@@ -48,14 +48,47 @@ namespace Tabula
             Builder = builder;
             InputFilePath = inputFilePath;
 
+            ComposeSections();
+
             BuildHeader();
             BuildNamespaceOpen();
             BuildClassOpen();
+            BuildExecuteScenario();
+            BuildSectionMethods();
             BuildDeclarations();
             BuildConstructor();
-            BuildClassBody();
             BuildClassClose();
             BuildNamespaceClose();
+        }
+
+        public void ComposeSections()
+        {
+            foreach (var section in Scenario.Sections)
+            {
+                if (section is CST.Paragraph paragraph)
+                {
+                    BuildParagraph(paragraph);
+                    //TODO: Stage paragraph for inclusion into ExecuteScenario()
+                }
+                if (section is CST.Table table)
+                {
+                    BuildTable(table);
+                    //TODO: Stage table for inclusion into ExecuteScenario()
+                }
+            }
+
+            //TODO:  write final paragraph call unless a table has already run over it.
+            //like:  FinishScenario() or similar
+
+            //TODO:  Append the built text into the main Builder
+            //TODO:  Handle called, uncalled, and final paragraph cases
+            //executeMethodBody.AppendLine(paragraph.MethodName + "();");
+        }
+
+        public void BuildExecuteScenario()
+        {
+            //Builder.AppendLine 
+            //Builder.Append(executeMethodBody.Builder);
         }
 
         public void BuildHeader()
@@ -134,20 +167,8 @@ namespace Tabula
         }
 
 
-        public void BuildClassBody()
+        public void BuildSectionMethods()
         {
-            foreach (var section in Scenario.Sections)
-            {
-                if (section is CST.Paragraph paragraph)
-                    BuildParagraph(paragraph);
-                if (section is CST.Table table)
-                    BuildTable(table);
-            }
-
-            //TODO:  write final paragraph call unless a table has already run over it.
-            //like:  FinishScenario() or similar
-
-            //TODO:  Append the built text into the main Builder
         }
 
         public void BuildParagraph(CST.Paragraph paragraph)
@@ -160,9 +181,6 @@ namespace Tabula
             sectionsBody.Dedent();
             sectionsBody.AppendLine("}");
             sectionsBody.AppendLine();
-
-            //TODO:  Handle called, uncalled, and final paragraph cases
-            executeMethodBody.AppendLine(paragraph.MethodName + "();");
         }
 
         public void BuildTable(CST.Table table)

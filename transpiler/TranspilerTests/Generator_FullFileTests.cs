@@ -18,12 +18,13 @@ namespace Tabula
         }
 
         [Test]
-        public void generating_from_an_empty_scenario_is_not_insane()
+        public void generating_from_an_empty_scenario_creates_runnable_class()
         {
             generator.Generate(new CST.Scenario(), "path\\scenario_source.tab", builder);
 
             var fullClass = builder.ToString();
             Assert.That(fullClass, Contains.Substring("class scenario_source_generated"));
+            Assert.That(fullClass, Contains.Substring("public void ExecuteBody()"));
         }
 
         [Test]
