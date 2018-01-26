@@ -2,17 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+//using Tabula.CST;  // explicit namespacing here is helping my clarity
 
 namespace Tabula
 {
-    //  It is a truism that generated code is ugly.
-    //  In Tabula, the generated code is a first-class result.  Effort is spent to keep it readable.
-
-    //  Build{Xxx} methods primarily fill StringBuilders, which will finally be assembled into
-    //  the StringBuilder sent to us by Visual Studio, which is waiting to receive our new
-    //  C# code.
-
-    //  IndentingStringBuilders factor out indenting each new line.
+    //  In Tabula, the generated code is a first-class result.
+    //  Effort is spent to keep it readable.
 
     public class Generator
     {
@@ -38,7 +33,9 @@ namespace Tabula
             Workflows = new Dictionary<string, WorkflowDetail>();
             WorkflowsInScope = new List<WorkflowDetail>();
             Library = new WorkflowIntrospector();
-            executeMethodBody = new IndentingStringBuilder(12);  // 12 = namespace + class + inside method
+    
+            //  IndentingStringBuilders factor out indenting each new line.
+            executeMethodBody = new IndentingStringBuilder(12);  // 12 = namespace + class + method
             sectionsBody = new IndentingStringBuilder(8);  // 8 = namespace + class
         }
 
@@ -48,54 +45,125 @@ namespace Tabula
             Builder = builder;
             InputFilePath = inputFilePath;
 
-            ComposeSections();
+            //  Several parts (e.g., the list of needed worrkflows) are built into
+            //  different StringBuilders as the CST is walked by PrepareSections(),
+            //  then assembled with Write{Xxx}() methods at the end.
+            PrepareSections();
 
-            BuildHeader();
-            BuildNamespaceOpen();
-            BuildClassOpen();
-            BuildExecuteScenario();
-            BuildSectionMethods();
-            BuildDeclarations();
-            BuildConstructor();
-            BuildClassClose();
-            BuildNamespaceClose();
+            WriteHeader();
+            WriteNamespaceOpen();
+            WriteClassOpen();
+            WriteExecuteScenario();
+            WriteSectionMethods();
+            WriteDeclarations();
+            WriteConstructor();
+            WriteClassClose();
+            WriteNamespaceClose();
         }
 
-        public void ComposeSections()
+        #region Prepare Sections (Paragraphs and Tables)
+        public void PrepareSections()
         {
             foreach (var section in Scenario.Sections)
             {
                 if (section is CST.Paragraph paragraph)
-                {
-                    BuildParagraph(paragraph);
-                    //TODO: Stage paragraph for inclusion into ExecuteScenario()
-                }
-                if (section is CST.Table table)
-                {
-                    BuildTable(table);
-                    //TODO: Stage table for inclusion into ExecuteScenario()
-                }
+                    PrepareParagraph(paragraph);
+                else if (section is CST.Table table)
+                    PrepareTable(table);
+                else
+                    throw new Exception($"Tabula needs code to prepare section type [{section.GetType().FullName}].");
             }
 
-            //TODO:  write final paragraph call unless a table has already run over it.
-            //like:  FinishScenario() or similar
-
-            //TODO:  Append the built text into the main Builder
-            //TODO:  Handle called, uncalled, and final paragraph cases
-            //executeMethodBody.AppendLine(paragraph.MethodName + "();");
+            ClearStage();
         }
 
-        public void BuildExecuteScenario()
+        public void PrepareParagraph(CST.Paragraph paragraph)
         {
-            //Builder.AppendLine 
-            //Builder.Append(executeMethodBody.Builder);
+            //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
+            sectionsBody.AppendLine($"public void {paragraph.MethodName}()");
+            sectionsBody.AppendLine("{");
+            sectionsBody.Indent();
+            PrepareActions(paragraph.Actions);
+            sectionsBody.Dedent();
+            sectionsBody.AppendLine("}");
+            sectionsBody.AppendLine();
+
+            StageParagraph(paragraph.MethodName);
         }
 
-        public void BuildHeader()
+        public void PrepareTable(CST.Table table)
+        {
+            sectionsBody.AppendLine($"public Table {table.MethodName}()");  //TODO: label as comment if any
+            sectionsBody.AppendLine("{");
+            sectionsBody.Indent();
+            sectionsBody.AppendLine("return new Table {");
+            sectionsBody.Indent();
+            PrepareRows(table);
+            sectionsBody.Dedent();
+            sectionsBody.AppendLine("};");
+            sectionsBody.Dedent();
+
+            StageTable("tableName");  //TODO
+        }
+
+        private void PrepareRows(CST.Table table)
+        {
+            //TODO: header row in CST.Table
+            //sectionsBody.AppendLine("Header = new List<string> {");
+            //string headerText = "{ \"" + string.Join("\", \"", table.Header.Select(c => Formatter.Reescape(c))) + "\" }";
+
+            sectionsBody.AppendLine("Data = new List<List<string>> {");
+            sectionsBody.Indent();
+            foreach (var row in table.Rows)
+            {
+                sectionsBody.Append("new List<string>          {");
+                string cellsText = "{ \"" + string.Join("\", \"", row.Cells.Select(c => Formatter.Reescape(c))) + "\" }";
+                sectionsBody.AppendLine($"new List<string>          {cellsText}");
+            }
+            sectionsBody.Dedent();
+            sectionsBody.AppendLine("}");
+        }
+
+        public void StageParagraph(string paragraphName)
+        {
+            ClearStage();
+            stagedParagraph = paragraphName;
+            paragraphPending = true;
+        }
+
+        public void StageTable(string tableName)
+        {
+            if (stagedParagraph == null) throw new Exception("Tables must come after paragraphs.");
+
+            executeMethodBody.AppendLine($"RunParaOverTable( {stagedParagraph}, {tableName} );");
+            paragraphPending = false;
+        }
+
+        private bool paragraphPending = false;
+        private string stagedParagraph;
+        public void ClearStage()
+        {
+            if (!paragraphPending) return;
+
+            executeMethodBody.AppendLine(stagedParagraph + "();");
+            paragraphPending = false;
+        }
+
+        #endregion
+
+        public void WriteExecuteScenario()
+        {
+            Builder.AppendLine("        public void ExecuteScenario()");
+            Builder.AppendLine("        {");
+            Builder.Append(executeMethodBody.Builder);
+            Builder.AppendLine("        }");
+        }
+
+        public void WriteHeader()
         {
             Builder.AppendLine($"//  This file was generated by TabulaClassGenerator version {GeneratorVersion}.");
             Builder.AppendLine($"//  To change this file, change the Tabula scenario at {InputFilePath}.");
-            Builder.AppendLine($"//  Version {GeneratorVersion} only generates this rudimentary paste.  You have been warned.");
+            Builder.AppendLine($"//  Version {GeneratorVersion} is not yet alpha.  You have been warned.");
             Builder.AppendLine("using System;");
             Builder.AppendLine("using System.Collections.Generic;");
             Builder.AppendLine("using Acadis.Constants.Accounting;");
@@ -104,22 +172,22 @@ namespace Tabula
             Builder.AppendLine();
         }
 
-        public void BuildNamespaceOpen()
+        public void WriteNamespaceOpen()
         {
             Builder.AppendLine("namespace Tabula");
             Builder.AppendLine("{");
         }
 
 
-        public void BuildClassOpen()
+        public void WriteClassOpen()
         {
-            GeneratedClassName = ClassNameFromInputFilePath();
+            GeneratedClassName = GetGeneratedClassName();
             Builder.AppendLine($"    public class {GeneratedClassName}  //  {Scenario.Label}");
             Builder.AppendLine("        : GeneratedScenarioBase, IGeneratedScenario");
             Builder.AppendLine("    {");
         }
 
-        public string ClassNameFromInputFilePath()
+        public string GetGeneratedClassName()
         {
             //  remove everything before the last backslash
             int lastBackslash = InputFilePath.LastIndexOf("\\");
@@ -134,7 +202,7 @@ namespace Tabula
             return InputFilePath.Replace(' ', '_').Replace('.', '_') + "_generated";
         }
 
-        public void BuildDeclarations()
+        public void WriteDeclarations()
         {
             foreach (var type in GetNeededWorkflowTypes())
             {
@@ -143,8 +211,7 @@ namespace Tabula
             }
         }
 
-        //TODO:  Workflow instantiation.  I should have the 
-        public void BuildConstructor()
+        public void WriteConstructor()
         {
             Builder.Append("        public ");
             Builder.Append(GeneratedClassName);
@@ -152,12 +219,12 @@ namespace Tabula
             Builder.AppendLine("            : base()");
             Builder.AppendLine("        {");
 
-            BuildInstantiations();
+            WriteInstantiations();
 
             Builder.AppendLine("        }");
         }
 
-        public void BuildInstantiations()
+        public void WriteInstantiations()
         {
             foreach (var type in GetNeededWorkflowTypes())
             {
@@ -167,36 +234,17 @@ namespace Tabula
         }
 
 
-        public void BuildSectionMethods()
+        public void WriteSectionMethods()
         {
         }
 
-        public void BuildParagraph(CST.Paragraph paragraph)
-        {
-            //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
-            sectionsBody.AppendLine( $"public void {paragraph.MethodName}()");
-            sectionsBody.AppendLine("{");
-            sectionsBody.Indent();
-            DispatchActions(paragraph.Actions);
-            sectionsBody.Dedent();
-            sectionsBody.AppendLine("}");
-            sectionsBody.AppendLine();
-        }
-
-        public void BuildTable(CST.Table table)
-        {
-            //generate table (table generator method, technically)
-            //get staged paragraph name
-            //AppendLine RunParaOverTable( {paraName}, {tableName} );
-        }
-
-        public void DispatchActions(List<CST.Action> actions)
+        public void PrepareActions(List<CST.Action> actions)
         {
             foreach (var action in actions)
-                DispatchAction(action);
+                PrepareAction(action);
         }
 
-        public void DispatchAction(CST.Action action)
+        public void PrepareAction(CST.Action action)
         {
             if (action is CST.CommandUse useCommand)
             {
@@ -212,12 +260,12 @@ namespace Tabula
             }
             else if (action is CST.CommandAlias aliasCommand)
             {
-                throw new NotImplementedException("TODO: Add the alias to the implementations");
+                throw new NotImplementedException("TODO: Prepare Alias Command");
             }
             else
             {
                 throw new NotImplementedException(
-                    $"The dispatcher doesn't have a case for [{action.GetType().FullName}].  Please extend it.");
+                    $"Tabula needs code to prepare action type [{action.GetType().FullName}].");
             }
         }
 
@@ -342,12 +390,12 @@ namespace Tabula
             sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
         }
 
-        public void BuildClassClose()
+        public void WriteClassClose()
         {
             Builder.AppendLine("    }");
         }
 
-        public void BuildNamespaceClose()
+        public void WriteNamespaceClose()
         {
             Builder.AppendLine("}");
         }

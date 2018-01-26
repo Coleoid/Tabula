@@ -34,7 +34,7 @@ namespace Tabula
         public void DispatchAction_sends_Use_commands_to_UseWorkflow()
         {
             var action = new CST.CommandUse(new List<string> { "FirstTestWorkflow" });
-            generator.DispatchAction(action);
+            generator.PrepareAction(action);
 
             Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
             Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
@@ -97,7 +97,7 @@ namespace Tabula
         public void BuildDeclarations_complains_sensibly_when_workflow_unfound()
         {
             scenario.SeenWorkflowRequests = new List<string> { "P equals NP workflow" };
-            var ex = Assert.Throws<Exception>(() => generator.BuildDeclarations());
+            var ex = Assert.Throws<Exception>(() => generator.WriteDeclarations());
 
             Assert.That(ex.Message, Is.EqualTo("Tabula found no workflow matching [P equals NP workflow]."));
         }
@@ -176,7 +176,7 @@ namespace Tabula
         [Test]
         public void declarations_empty_to_start()
         {
-            generator.BuildDeclarations();
+            generator.WriteDeclarations();
             var declarations = builder.ToString();
 
             Assert.That(declarations, Is.EqualTo(string.Empty));
@@ -191,7 +191,7 @@ namespace Tabula
                 "FirstTest WORKFLOW"
             };
 
-            generator.BuildDeclarations();
+            generator.WriteDeclarations();
 
             var declarations = builder.ToString();
             var lines = Regex.Split(declarations, Environment.NewLine);

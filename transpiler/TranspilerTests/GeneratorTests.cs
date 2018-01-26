@@ -8,6 +8,9 @@ using System.Text.RegularExpressions;
 
 namespace Tabula
 {
+    //  Version 0.1 only generates this rudimentary paste.  You have been warned.
+    //  Version 0.2 is not yet alpha.  You have been warned.
+
     [TestFixture]
     public class GeneratorTests
     {
@@ -30,7 +33,7 @@ namespace Tabula
         public void Header_warns_it_is_generated_and_tells_where_source_file_is(string fileName)
         {
             generator.InputFilePath = fileName;
-            generator.BuildHeader();
+            generator.WriteHeader();
 
             var result = builder.ToString();
             var lines = Regex.Split(result, Environment.NewLine);
@@ -48,7 +51,7 @@ namespace Tabula
         {
             generator.InputFilePath = fileName;
 
-            var className = generator.ClassNameFromInputFilePath();
+            var className = generator.GetGeneratedClassName();
 
             Assert.That(className, Is.EqualTo(expectedClassName));
         }
@@ -56,7 +59,7 @@ namespace Tabula
         [Test]
         public void Class_declaration_includes_base_and_interface()
         {
-            generator.BuildClassOpen();
+            generator.WriteClassOpen();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($": GeneratedScenarioBase, IGeneratedScenario"));
@@ -69,7 +72,7 @@ namespace Tabula
             var scenario = new CST.Scenario { Label = label };
             generator.Scenario = scenario;
             generator.InputFilePath = "TuitionBilling";
-            generator.BuildClassOpen();
+            generator.WriteClassOpen();
 
             var classText = builder.ToString();
             Assert.That(classText, Does.Contain($"  //  {label}"));
@@ -193,9 +196,9 @@ namespace Tabula
         [Test]
         public void DispatchAction_explains_when_an_unknown_action_type_arrives()
         {
-            var ex = Assert.Throws<NotImplementedException>(() => generator.DispatchAction(new UnknownAction()));
+            var ex = Assert.Throws<NotImplementedException>(() => generator.PrepareAction(new UnknownAction()));
             Assert.That(ex.Message, Is.EqualTo(
-                "The dispatcher doesn't have a case for [Tabula.GeneratorTests+UnknownAction].  Please extend it."));
+                "Tabula needs code to prepare action type [Tabula.GeneratorTests+UnknownAction]."));
         }
 
         [Test]
@@ -224,7 +227,7 @@ namespace Tabula
             };
             paragraph.Actions.Add(step);
 
-            generator.BuildParagraph(paragraph);
+            generator.PrepareParagraph(paragraph);
 
             var result = generator.sectionsBody.ToString();
             Assert.That(result, Contains.Substring("public void paragraph_from_021_to_022()"));

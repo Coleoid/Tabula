@@ -24,7 +24,7 @@ namespace Tabula
 
             var fullClass = builder.ToString();
             Assert.That(fullClass, Contains.Substring("class scenario_source_generated"));
-            Assert.That(fullClass, Contains.Substring("public void ExecuteBody()"));
+            Assert.That(fullClass, Contains.Substring("public void ExecuteScenario()"));
         }
 
         [Test]

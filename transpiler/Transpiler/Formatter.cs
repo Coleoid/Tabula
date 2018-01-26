@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Tabula
 {
@@ -25,6 +27,16 @@ namespace Tabula
         {
             var lastDot = typeName.LastIndexOf('.');
             return typeName.Substring(lastDot + 1).ToLower().Replace("workflow", "");
+        }
+
+        internal static string Reescape(string text)
+        {
+            return text.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
+
+        internal static List<string> Reescape(List<string> text)
+        {
+            return text.Select(t => Reescape(t)).ToList();
         }
     }
 }
