@@ -2,15 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Tabula
 {
-    //  Version 0.1 only generates this rudimentary paste.  You have been warned.
-    //  Version 0.2 is not yet alpha.  You have been warned.
-
     [TestFixture]
     public class GeneratorTests
     {

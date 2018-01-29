@@ -43,10 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CST\Bases.cs" />
-    <Compile Include="CST\Domain.cs" />
+    <Compile Include="CST\Action.cs" />
     <Compile Include="CST\Scenario.cs" />
-    <Compile Include="CST\Table.cs" />
+    <Compile Include="CST\Section.cs" />
+    <Compile Include="CST\Step.cs" />
+    <Compile Include="CST\Wrapper.cs" />
     <Compile Include="Formatter.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="IndentingStringBuilder.cs" />

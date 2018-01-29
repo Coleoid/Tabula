@@ -3,7 +3,11 @@ using System.Collections.Generic;
 
 namespace Tabula.CST
 {
-    public class Scenario: CST_Entity
+
+    /// <summary>
+    /// An entire test file.
+    /// </summary>
+    public class Scenario : CST_Entity
     {
         public List<Section> Sections { get; set; }
         public List<string> SeenWorkflowRequests { get; set; }
@@ -13,6 +17,22 @@ namespace Tabula.CST
         {
             Sections = new List<Section>();
             SeenWorkflowRequests = new List<string>();
+        }
+    }
+
+    public interface ITaggable
+    {
+        List<string> Tags { get; }
+    }
+
+    public class CST_Entity : ITaggable
+    {
+        public List<string> Tags { get; set; }
+        public string Label { get; set; }
+
+        public CST_Entity()
+        {
+            Tags = new List<string>();
         }
     }
 }
