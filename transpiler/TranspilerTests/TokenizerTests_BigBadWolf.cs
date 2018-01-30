@@ -70,7 +70,7 @@ namespace Tabula
 
             Assert.That(tokens[15].Text, Does.Match("What we'll call our people in this scenario"));
             Assert.That(tokens[17].Text, Does.Match("#handle"));
-            Assert.That(tokens[18].Text, Does.Match("FullNameLF"));
+            Assert.That(tokens[18].Text, Does.Match("fullnamelf"));
         }
 
         [Test]

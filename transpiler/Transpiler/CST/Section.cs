@@ -25,6 +25,11 @@ namespace Tabula.CST
         public string MethodName { get; set; }
         public List<string> ColumnNames { get; set; }
         public List<TableRow> Rows { get; set; }
+
+        public Table()
+        {
+            Rows = new List<TableRow>();
+        }
     }
 
     public class TableRow : Action

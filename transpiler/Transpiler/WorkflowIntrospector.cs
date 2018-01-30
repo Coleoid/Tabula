@@ -71,7 +71,9 @@ namespace Tabula
                 var method = new MethodDetail
                 {
                     Name = mi.Name,
-                    Args = mi.GetParameters().Select(i => i.Name).ToList()
+                    Args = mi.GetParameters().Select(i =>
+                        new ArgDetail { Name = i.Name, Type = i.ParameterType }
+                    ).ToList()
                 };
 
                 var searchMethod = Formatter.SearchName_from_MethodName(mi.Name);

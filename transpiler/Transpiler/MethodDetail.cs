@@ -42,11 +42,18 @@ namespace Tabula
             get => _searchName;
         }  //  lower case, no underscores
 
-        public List<string> Args { get; set; }
+        //public List<string> Args { get; set; }
+        public List<ArgDetail> Args { get; set; }
 
         public MethodDetail()
         {
-            Args = new List<string>();
+            Args = new List<ArgDetail>();
         }
+    }
+
+    public class ArgDetail
+    {
+        public string Name { get; set; }
+        public Type Type { get; set; }
     }
 }

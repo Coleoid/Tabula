@@ -60,10 +60,13 @@ namespace Tabula
             WriteHeader();
             WriteNamespaceOpen();
             WriteClassOpen();
+
             WriteExecuteScenario();
             WriteSectionMethods();
+
             WriteDeclarations();
             WriteConstructor();
+
             WriteClassClose();
             WriteNamespaceClose();
         }
@@ -110,7 +113,7 @@ namespace Tabula
             sectionsBody.AppendLine("};");
             sectionsBody.Dedent();
 
-            StageTable("tableName");  //TODO
+            StageTable(table.MethodName);
         }
 
         private void PrepareRows(CST.Table table)
@@ -140,9 +143,9 @@ namespace Tabula
 
         public void StageTable(string tableName)
         {
-            if (stagedParagraph == null) throw new Exception("Tables must come after paragraphs.");
+            //if (stagedParagraph == null) throw new Exception("Tables must come after paragraphs.");
 
-            executeMethodBody.AppendLine($"RunParaOverTable( {stagedParagraph}, {tableName} );");
+            executeMethodBody.AppendLine($"Run_para_over_table( {stagedParagraph}, {tableName} );");
             paragraphPending = false;
         }
 
@@ -243,6 +246,7 @@ namespace Tabula
 
         public void WriteSectionMethods()
         {
+            Builder.Append(sectionsBody.Builder);
         }
 
         public void PrepareActions(List<CST.Action> actions)
@@ -321,8 +325,11 @@ namespace Tabula
         {
             string argsString = "";
             string delim = "";
+
+            int argIndex = 0;
             foreach (var sym in step.Symbols.Where(s => s.Type != TokenType.Word))
             {
+                Type argType = method.Args[argIndex].Type;
                 switch (sym.Type)
                 {
                     case TokenType.String:
@@ -338,12 +345,25 @@ namespace Tabula
                         break;
 
                     case TokenType.Variable:
-                        throw new Exception("Not composing variables into calls yet.");
+                        argsString += delim + $"var[\"{sym.Text}\"]";
+                        if (argType == typeof(string))
+                        { }
+                        if (argType == typeof(int))
+                        {
+                            argsString += ".To<int>()";
+                        }
+                        if (argType == typeof(DateTime))
+                        {
+                            argsString += ".To<DateTime>()";
+                        }
+
+                        break;
 
                     default:
                         throw new Exception($"Did not expect to get a token type [{sym.Type}].");
                 }
                 delim = ", ";
+                argIndex++;
             }
 
             var workflowName = workflow.InstanceName;
@@ -369,8 +389,6 @@ namespace Tabula
         /// <returns> List sorted by namespace, then name </returns>
         public List<Type> GetNeededWorkflowTypes()
         {
-            List<string> nws = Scenario.SeenWorkflowRequests.ToList();
-
             var types = new List<Type>();
             foreach (var request in Scenario.SeenWorkflowRequests)
             {

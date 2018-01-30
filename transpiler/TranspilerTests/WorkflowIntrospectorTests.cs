@@ -90,8 +90,8 @@ namespace Tabula
             var method = detail.Methods["verifycommenttextis"];
 
             Assert.That(method.Args.Count(), Is.EqualTo(2));
-            Assert.That(method.Args[0], Is.EqualTo("rowNum"));
-            Assert.That(method.Args[1], Is.EqualTo("text"));
+            Assert.That(method.Args[0].Name, Is.EqualTo("rowNum"));
+            Assert.That(method.Args[1].Name, Is.EqualTo("text"));
         }
 
     }

@@ -176,7 +176,7 @@ namespace Tabula
                 match = rxVariable.Match(remainingText);
                 if (match.Success)
                 {
-                    AddToken(TokenType.Variable, match.Groups[1].Value, match.Length);
+                    AddToken(TokenType.Variable, match.Groups[1].Value.ToLower(), match.Length);
                     continue;
                 }
 

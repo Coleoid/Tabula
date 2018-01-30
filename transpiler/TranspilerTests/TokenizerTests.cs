@@ -84,15 +84,15 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo("serious business"));
         }
 
-        [Test]
-        public void Variable()
+        [TestCase("#BIZ","biz")]
+        public void Variable(string rawText, string varName)
         {
-            var tokens = _tokenizer.Tokenize("#business");
+            var tokens = _tokenizer.Tokenize(rawText);
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
             Assert.That(token.Type, Is.EqualTo(TokenType.Variable));
-            Assert.That(token.Text, Is.EqualTo("business"));
+            Assert.That(token.Text, Is.EqualTo(varName));
         }
 
         [TestCase("...", TokenType.BlockStart)]

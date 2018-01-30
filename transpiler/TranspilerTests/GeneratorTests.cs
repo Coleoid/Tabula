@@ -124,10 +124,10 @@ namespace Tabula
         [Test]
         public void Step_Call_includes_arguments()
         {
-            var args = new List<string> {
-                "name",
-                "age",
-                "birthday"
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "age", Type = typeof(int) },
+                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
             };
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
@@ -161,10 +161,12 @@ namespace Tabula
         [Test]
         public void BuildStep_Unfound_on_arg_count_mismatch()
         {
-            var args = new List<string> {
-                "name",
-                "comment"
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "comment", Type = typeof(string) }
             };
+
+
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
             generator.WorkflowsInScope.Add(detail);
@@ -183,7 +185,73 @@ namespace Tabula
             Assert.That(result, Contains.Substring("@\"user \"\"Bob\"\" made comment\""));
         }
 
-        
+
+        [Test]
+        public void Step_Call_handles_variables()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "age", Type = typeof(int) },
+                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
+            generator.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Variable, "friendname"),
+                (TokenType.Word, "turned"),
+                (TokenType.Number, "21"),
+                (TokenType.Word, "on"),
+                (TokenType.Date, "1/1/2001")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
+
+            var expectedArguments = @"(var[""friendname""], 21, ""1/1/2001"".To<DateTime>())";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
+        [Test]
+        public void Step_Call_variables_get_types()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "age", Type = typeof(int) },
+                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
+            generator.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Variable, "friendname"),
+                (TokenType.Word, "turned"),
+                (TokenType.Variable, "newage"),
+                (TokenType.Word, "on"),
+                (TokenType.Variable, "birthday")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
+
+            //  variables going into an argument of type int need to get a .To<int>()
+            //  variables going into an argument of type DateTime need to get a .To<DateTime>()
+            var expectedArguments = @"(var[""friendname""], var[""newage""].To<int>(), var[""birthday""].To<DateTime>())";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
         //TODO:  Get the ClassName/ObjectName teased apart.  ClassName stays in ImplInfo, ObjectName goes to... Scope?
         //TODO:  Scoping of workflows
 
@@ -200,9 +268,9 @@ namespace Tabula
         [Test]
         public void BuildParagraph_gets_all_the_bits_together()
         {
-            var args = new List<string> {
-                "name",
-                "comment"
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "comment", Type = typeof(string) }
             };
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
@@ -228,6 +296,78 @@ namespace Tabula
             var result = generator.sectionsBody.ToString();
             Assert.That(result, Contains.Substring("public void paragraph_from_021_to_022()"));
             Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
+        }
+
+        [Test]
+        public void WriteSectionMethods_puts_built_sections_into_main_StringBuilder()
+        {
+            generator.sectionsBody.AppendLine("all my sections");
+
+            generator.WriteSectionMethods();
+
+            string built = generator.Builder.ToString();
+            Assert.That(built, Contains.Substring("all my sections"));
+        }
+
+        [Test]
+        public void WriteExecuteScenario_put_built_required_interface_methods_into_main_StringBuilder()
+        {
+            generator.executeMethodBody.AppendLine("my required method");
+
+            generator.WriteExecuteScenario();
+
+            string built = generator.Builder.ToString();
+            Assert.That(built, Contains.Substring("my required method"));
+        }
+
+        [Test]
+        public void Single_paragraph_scenario_gets_one_paragraph_call()
+        {
+            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
+
+            generator.PrepareSections();
+
+            string built = generator.executeMethodBody.ToString();
+            Assert.That(built, Contains.Substring("paragraph_one();"));
+        }
+
+        [Test]
+        public void two_paragraph_scenario_gets_both_calls()
+        {
+            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
+            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_two" });
+
+            generator.PrepareSections();
+
+            string built = generator.executeMethodBody.ToString();
+            Assert.That(built, Contains.Substring("paragraph_one();"));
+            Assert.That(built, Contains.Substring("paragraph_two();"));
+        }
+
+        [Test]
+        public void Single_paragraph_followed_by_table_gets_run_x_over_y_call()
+        {
+            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
+            scenario.Sections.Add(new CST.Table { MethodName = "table_one" });
+
+            generator.PrepareSections();
+
+            string built = generator.executeMethodBody.ToString();
+            Assert.That(built, Contains.Substring("Run_para_over_table( paragraph_one, table_one );"));
+        }
+
+        [Test]
+        public void Single_paragraph_followed_by_two_tables_gets_two_calls()
+        {
+            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
+            scenario.Sections.Add(new CST.Table { MethodName = "table_one" });
+            scenario.Sections.Add(new CST.Table { MethodName = "table_two" });
+
+            generator.PrepareSections();
+
+            string built = generator.executeMethodBody.ToString();
+            Assert.That(built, Contains.Substring("Run_para_over_table( paragraph_one, table_one );"));
+            Assert.That(built, Contains.Substring("Run_para_over_table( paragraph_one, table_two );"));
         }
     }
 }
