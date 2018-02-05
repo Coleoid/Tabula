@@ -10,8 +10,8 @@ namespace Tabula
 
     public class Generator
     {
-        private string CurrentVersion = "0.2";
-        public Dictionary<string, string> Versions = new Dictionary<string, string>
+        public static string CurrentVersion { get => "0.2"; }
+        private Dictionary<string, string> Versions = new Dictionary<string, string>
         {
             { "0.1", "only generates this rudimentary paste" },
             { "0.2", "can barely generate a compilable class" },
@@ -52,7 +52,7 @@ namespace Tabula
             Builder = builder;
             InputFilePath = inputFilePath;
 
-            //  Several parts (e.g., the list of needed worrkflows) are built into
+            //  Several parts (e.g., the list of needed workflows) are built into
             //  different StringBuilders as the CST is walked by PrepareSections(),
             //  then assembled with Write{Xxx}() methods at the end.
             PrepareSections();

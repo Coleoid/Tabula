@@ -22,7 +22,8 @@ namespace Tabula
             generator = new Generator { Builder = builder, Scenario = scenario, InputFilePath = "scenario_source.tab" };
         }
 
-        //TODO:  Report scenario errors in Visual Studio error list
+        //FUTURE:  Report scenario errors in Visual Studio error list
+        //FUTURE:  Levenshtein suggestions for unfound workflows and steps
 
         [TestCase("squangle_widgets_across_timezones.tab")]
         [TestCase("groplet_quality_within_tolerance.tab")]
@@ -252,7 +253,8 @@ namespace Tabula
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
-        //TODO:  Get the ClassName/ObjectName teased apart.  ClassName stays in ImplInfo, ObjectName goes to... Scope?
+        //TODO:  Args which are list or array types
+
         //TODO:  Scoping of workflows
 
         class UnknownAction : CST.Action { }
