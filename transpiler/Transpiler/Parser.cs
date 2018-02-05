@@ -14,6 +14,7 @@ namespace Tabula
             Scenario = new CST.Scenario();
         }
 
+        //  I believe blank lines should still break paragraphs?
         public CST.Action ParseAction(ParserState state)
         {
             state.AdvanceLines();

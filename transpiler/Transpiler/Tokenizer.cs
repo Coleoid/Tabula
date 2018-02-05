@@ -115,8 +115,9 @@ namespace Tabula
 
                 //  Leading (horizontal) whitespace is skipped past
                 var match = rxHWS.Match(remainingText);
-                Advance(match.Length);  //  In the future, comments will also advance without adding a token.
+                Advance(match.Length);
                 remainingText = inputText.Substring(position);
+                //FUTURE:  comments will also advance without adding a token.
 
                 //  Newlines complete commands, so they are recorded as tokens.
                 match = rxNewLine.Match(remainingText);
@@ -131,7 +132,7 @@ namespace Tabula
                 //  Then, a series of patterns try to match at the cursor position.
                 //  On a match, we create the token, advance the cursor, and start again.
                 //  Some parse ambiguities are resolved by the order of the matches,
-                //  providing a kind of poor man's LTM (Longest Token Matching).
+                //  providing a kind of poor man's Longest Token Matching.
                 //  If you want theoretical purity, there are a lot of miserable
                 //  experiences out there waiting for you.  Look up "parser generator".
 

@@ -79,6 +79,33 @@ namespace Tabula
         }
 
         [Test]
+        public void Paragraph_with_extra_blank_lines()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.cmd_Use, "Student Enrollment"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.cmd_Use, "Person Search Criteria Workflow"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "here"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "there"),
+                new Token(TokenType.NewLine, "\n"),
+            };
+            var state = new ParserState(tokens);
+            var cst = _parser.ParseParagraph(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst.Actions, Has.Count.EqualTo(3));
+            Assert.That(cst.Actions[0], Is.TypeOf<CST.CommandUse>());
+            Assert.That(cst.Actions[1], Is.TypeOf<CST.Step>());
+            Assert.That(cst.Actions[2], Is.TypeOf<CST.Step>());
+        }
+
+        [Test]
         public void Paragraph_gets_suitable_name()
         {
             var tokens = new List<Token> {

@@ -41,7 +41,6 @@ namespace Tabula
             WorkflowsInScope = new List<WorkflowDetail>();
             Library = new WorkflowIntrospector();
     
-            //  IndentingStringBuilders factor out indenting each new line.
             executeMethodBody = new IndentingStringBuilder(12);  // 12 = namespace + class + method
             sectionsBody = new IndentingStringBuilder(8);  // 8 = namespace + class
         }
@@ -54,7 +53,7 @@ namespace Tabula
 
             //  Several parts (e.g., the list of needed workflows) are built into
             //  different StringBuilders as the CST is walked by PrepareSections(),
-            //  then assembled with Write{Xxx}() methods at the end.
+            //  then sequenced into the main builder with Write{Xxx} methods.
             PrepareSections();
 
             WriteHeader();
@@ -89,7 +88,6 @@ namespace Tabula
 
         public void PrepareParagraph(CST.Paragraph paragraph)
         {
-            //TODO:  set Paragraph.MethodName (at end of paragraph parse?)
             sectionsBody.AppendLine($"public void {paragraph.MethodName}()");  //TODO: add label as a comment
             sectionsBody.AppendLine("{");
             sectionsBody.Indent();
