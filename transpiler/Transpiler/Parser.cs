@@ -169,6 +169,8 @@ namespace Tabula
             state.AdvanceLines();
             var tags = ParseTags(state);
 
+            //  Is it sensible here that the paragraph and table labels are 
+            //  the same form?  I don't believe so.
             var label = ParseSectionLabel(state);
 
             section = ParseParagraph(state);

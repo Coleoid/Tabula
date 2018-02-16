@@ -390,9 +390,9 @@ namespace Tabula
         public void ParseAlias_correct_case()
         {
             var tokens = new List<Token> {
-                                           new Token(TokenType.cmd_Alias, "Test should Work"),
-                                           new Token(TokenType.cmd_Use, "Employment Action Edit") { Line = 18 }
-                                         };
+                new Token(TokenType.cmd_Alias, "Test should Work"),
+                new Token(TokenType.cmd_Use, "Employment Action Edit") { Line = 18 }
+            };
 
             var state = new ParserState(tokens);
 
@@ -407,9 +407,23 @@ namespace Tabula
 
             Assert.That(useCommand.Workflows, Has.Count.EqualTo(1));
             Assert.That(useCommand.Workflows[0], Is.EqualTo("Employment Action Edit"));
-
         }
 
+        [Test]
+        public void Parse_simplest_table()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.TableCellSeparator, "|"),
+                new Token(TokenType.Word, "January"),
+                new Token(TokenType.TableCellSeparator, "|"),
+                new Token(TokenType.NewLine, "\n"),
+            };
+
+            var state = new ParserState(tokens);
+
+            var table = _parser.ParseTable(state);
+            Assert.That(table, Is.Not.Null);
+        }
 
     }
 }

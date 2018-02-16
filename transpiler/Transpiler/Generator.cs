@@ -116,9 +116,9 @@ namespace Tabula
 
         private void PrepareRows(CST.Table table)
         {
-            //TODO: header row in CST.Table
+            //TODO: write column names into header row
             //sectionsBody.AppendLine("Header = new List<string> {");
-            //string headerText = "{ \"" + string.Join("\", \"", table.Header.Select(c => Formatter.Reescape(c))) + "\" }";
+            //string headerText = "{ \"" + string.Join("\", \"", table.ColumnNames.Select(c => Formatter.Reescape(c))) + "\" }";
 
             sectionsBody.AppendLine("Data = new List<List<string>> {");
             sectionsBody.Indent();
