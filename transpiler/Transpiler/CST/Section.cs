@@ -2,9 +2,7 @@
 
 namespace Tabula.CST
 {
-    /// <summary>
-    /// A chunk of a scenario.  A paragraph or a table.
-    /// </summary>
+    /// <summary> A chunk of a scenario.  A paragraph or a table. </summary>
     public class Section : CST_Entity
     {
     }

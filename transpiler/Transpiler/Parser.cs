@@ -249,14 +249,16 @@ namespace Tabula
             if (topRow == null) return null;
             var columnNames = topRow.Cells.Select(c => c[0]).ToList();
             if (columnNames == null) return null;
-
+            
             var table = new CST.Table {
                 ColumnNames = columnNames,
                 Rows = ParseTableRows(state)
             };
 
-            string start = table.Rows[0].StartLine.ToString("D3");
-            string end = table.Rows.Last().EndLine.ToString("D3");
+            string start = topRow.StartLine.ToString("D3");
+            string end = table.Rows.Any()
+                ? table.Rows.Last().EndLine.ToString("D3")
+                : start;
             table.MethodName = $"paragraph_from_{start}_to_{end}";
 
             return table;

@@ -423,7 +423,34 @@ namespace Tabula
 
             var table = _parser.ParseTable(state);
             Assert.That(table, Is.Not.Null);
+            Assert.That(table.ColumnNames.Count, Is.EqualTo(1));
+            Assert.That(table.ColumnNames[0], Is.EqualTo("January"));
+            Assert.That(table.Rows.Count, Is.EqualTo(0));
         }
 
+        [Test]
+        public void Parse_less_simplest_table()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.TableCellSeparator, "|"),
+                new Token(TokenType.Word, "January"),
+                new Token(TokenType.TableCellSeparator, "|"),
+                new Token(TokenType.NewLine, "\n"),
+                new Token(TokenType.TableCellSeparator, "|"),
+                new Token(TokenType.Number, "31"),
+                new Token(TokenType.TableCellSeparator, "|"),
+                new Token(TokenType.NewLine, "\n"),
+            };
+
+            var state = new ParserState(tokens);
+
+            var table = _parser.ParseTable(state);
+            Assert.That(table, Is.Not.Null);
+            Assert.That(table.Rows.Count, Is.EqualTo(1));
+            var row = table.Rows[0];
+            Assert.That(row.Cells.Count, Is.EqualTo(1));
+            Assert.That(row.Cells[0].Count, Is.EqualTo(1));
+            Assert.That(row.Cells[0][0], Is.EqualTo("31"));
+        }
     }
 }
