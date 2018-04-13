@@ -11,7 +11,7 @@ namespace Tabula.CST
 
     public class Block : Action
     {
-        public List<Action> Actions { get; set; }  //TODO: extend to List<Sectioh>
+        public List<Action> Actions { get; set; }  //TODO: promote to List<Section>
         public Block(List<Action> actions)
         {
             Actions = actions;

@@ -86,7 +86,7 @@ namespace Tabula
 
         #region Reflective sausage-making
 
-        //TODO:  location(s) pulled from config
+        //TODO:  Get location(s) from config and/or command line args
         private Assembly resolveAssembly(object sender, ResolveEventArgs args)
         {
             string libName = args.Name.Substring(0, args.Name.IndexOf(","));
@@ -103,7 +103,7 @@ namespace Tabula
         }
 
 
-        //TODO:  dll(s) containing workflow classes pulled from config
+        //TODO:  Get workflow dll(s) from config and/or command line args
         public List<Type> GetLoadedTypes()
         {
             AppDomain curDomain = AppDomain.CurrentDomain;
