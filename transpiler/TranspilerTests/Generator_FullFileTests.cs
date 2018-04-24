@@ -11,8 +11,10 @@ namespace Tabula
         Generator generator;
 
         [SetUp]
-        public void SetUp()
+        public override void SetUp()
         {
+            base.SetUp();
+
             builder = new StringBuilder();
             generator = new Generator();
         }

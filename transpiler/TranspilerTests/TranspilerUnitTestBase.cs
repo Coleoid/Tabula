@@ -9,7 +9,7 @@ namespace Tabula
         protected Tokenizer _tokenizer;
 
         [SetUp]
-        public void SetUp()
+        public virtual void SetUp()
         {
             _parser = new Parser();
             _tokenizer = new Tokenizer();

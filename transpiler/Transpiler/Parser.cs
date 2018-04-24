@@ -259,7 +259,7 @@ namespace Tabula
             string end = table.Rows.Any()
                 ? table.Rows.Last().EndLine.ToString("D3")
                 : start;
-            table.MethodName = $"paragraph_from_{start}_to_{end}";
+            table.MethodName = $"table_from_{start}_to_{end}";
 
             return table;
         }

@@ -60,7 +60,7 @@ namespace Tabula
             WriteNamespaceOpen();
             WriteClassOpen();
 
-            WriteExecuteScenario();
+            WriteExecuteMethod();
             WriteSectionMethods();
 
             WriteDeclarations();
@@ -80,7 +80,7 @@ namespace Tabula
                 else if (section is CST.Table table)
                     PrepareTable(table);
                 else
-                    throw new Exception($"Tabula needs code to prepare section type [{section.GetType().FullName}].");
+                    throw new Exception($"Extend Tabula to prepare section type [{section.GetType().FullName}].");
             }
 
             ClearStage();
@@ -110,6 +110,8 @@ namespace Tabula
             sectionsBody.Dedent();
             sectionsBody.AppendLine("};");
             sectionsBody.Dedent();
+            sectionsBody.AppendLine("};");
+            sectionsBody.AppendLine();
 
             StageTable(table.MethodName);
         }
@@ -125,7 +127,7 @@ namespace Tabula
             foreach (var row in table.Rows)
             {
                 sectionsBody.Append("new List<string>          {");
-                string cellsText = "{ \"" + string.Join("\", \"", row.Cells.Select(c => Formatter.Reescape(c))) + "\" }";
+                string cellsText = "{ \"" + string.Join("\", \"", row.Cells.Select(lc => lc.Select(c => Formatter.Reescape(c)))) + "\" }";
                 sectionsBody.AppendLine($"new List<string>          {cellsText}");
             }
             sectionsBody.Dedent();
@@ -159,7 +161,7 @@ namespace Tabula
 
         #endregion
 
-        public void WriteExecuteScenario()
+        public void WriteExecuteMethod()
         {
             Builder.AppendLine("        public void ExecuteScenario()");
             Builder.AppendLine("        {");
@@ -212,11 +214,13 @@ namespace Tabula
 
         public void WriteDeclarations()
         {
+            Builder.AppendLine();
             foreach (var type in GetNeededWorkflowTypes())
             {
                 var instance = Formatter.InstanceName_from_TypeName(type.Name);
-                Builder.AppendLine($"public {type.Namespace}.{type.Name} {instance};");
+                Builder.AppendLine($"        public {type.Namespace}.{type.Name} {instance};");
             }
+            Builder.AppendLine();
         }
 
         public void WriteConstructor()
@@ -269,12 +273,12 @@ namespace Tabula
             }
             else if (action is CST.CommandAlias aliasCommand)
             {
-                throw new NotImplementedException("TODO: Prepare Alias Command");
+                BuildAliasCommand(aliasCommand);
             }
             else
             {
                 throw new NotImplementedException(
-                    $"Tabula needs code to prepare action type [{action.GetType().FullName}].");
+                    $"Extend Tabula to prepare action type [{action.GetType().FullName}].");
             }
         }
 
@@ -412,6 +416,12 @@ namespace Tabula
             var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
             sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
         }
+
+        private void BuildAliasCommand(CST.CommandAlias aliasCommand)
+        {
+            sectionsBody.AppendLine($"Alias( {aliasCommand.Name}, {aliasCommand.Action} ); //TODO: Actually implement");
+        }
+
 
         public void WriteClassClose()
         {

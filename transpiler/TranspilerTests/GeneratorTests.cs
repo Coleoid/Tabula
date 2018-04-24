@@ -188,6 +188,28 @@ namespace Tabula
 
 
         [Test]
+        public void BuildStep_complaint_when_TokenType_unrecognized()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "user__thing", Args = args });
+            generator.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "user"),
+                (((TokenType)(-1)), "mystery"),
+                (TokenType.Word, "thing")
+            );
+
+            var ex = Assert.Throws<Exception>(() => generator.BuildStep(step));
+            Assert.That(ex.Message, Contains.Substring("token type [-1]"));
+        }
+
+
+        [Test]
         public void Step_Call_handles_variables()
         {
             var args = new List<ArgDetail>() {
@@ -301,6 +323,18 @@ namespace Tabula
         }
 
         [Test]
+        public void BuildTable_gets_all_the_bits_together()
+        {
+            var table = new CST.Table {  };
+
+            generator.PrepareTable(table);
+
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("public void paragraph_from_021_to_022()"));
+            Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
+        }
+
+        [Test]
         public void WriteSectionMethods_puts_built_sections_into_main_StringBuilder()
         {
             generator.sectionsBody.AppendLine("all my sections");
@@ -312,14 +346,26 @@ namespace Tabula
         }
 
         [Test]
-        public void WriteExecuteScenario_put_built_required_interface_methods_into_main_StringBuilder()
+        public void WriteExecuteMethod_put_built_required_interface_methods_into_main_StringBuilder()
         {
             generator.executeMethodBody.AppendLine("my required method");
 
-            generator.WriteExecuteScenario();
+            generator.WriteExecuteMethod();
 
             string built = generator.Builder.ToString();
             Assert.That(built, Contains.Substring("my required method"));
+        }
+
+        private class UnrecognizedSection : CST.Section
+        { }
+
+        [Test]
+        public void Unrecognized_Section_type_complaint()
+        {
+            scenario.Sections.Add(new UnrecognizedSection { });
+            var ex = Assert.Throws<Exception>(() => generator.PrepareSections());
+            Assert.That(ex.Message, Contains.Substring("Extend Tabula"));
+            Assert.That(ex.Message, Contains.Substring("UnrecognizedSection"));
         }
 
         [Test]

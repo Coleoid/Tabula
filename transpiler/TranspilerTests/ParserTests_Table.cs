@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,26 +7,6 @@ namespace Tabula
     [TestFixture]
     public class ParserTests_Table : TranspilerUnitTestBase
     {
-        ////  Label is optional, data rows are optional.
-        //[Test]
-        //public void Minimal_table_only_has_only_a_row_of_column_names()
-        //{
-        //    var tokens = new List<Token> {
-        //        new Token(TokenType.TableRow, new List<string> {
-        //            "Name",
-        //            "Age",
-        //        }),
-        //    };
-        //    var state = new ParserState(tokens);
-        //    var table = parser.ParseTable(state);
-
-        //    Assert.That(table, Is.Not.Null);
-        //    Assert.That(table.ColumnNames[0], Is.EqualTo("Name"));
-        //    Assert.That(table.ColumnNames[1], Is.EqualTo("Age"));
-        //    Assert.That(table.Label, Is.Null);
-        //    Assert.That(table.Rows.Count, Is.Zero);
-        //}
-
         [Test]
         public void ParseSection_Table()
         {
@@ -42,6 +21,12 @@ namespace Tabula
             Assert.That(table.ColumnNames, Has.Count.EqualTo(1));
             Assert.That(table.ColumnNames[0], Is.EqualTo("Name"));
             Assert.That(table.Rows, Has.Count.EqualTo(2));
+
+            var first = table.Rows.Last();
+            Assert.That(first.StartLine, Is.EqualTo(2));
+
+            var last = table.Rows.Last();
+            Assert.That(last.StartLine, Is.EqualTo(5));
         }
 
         [Test]
