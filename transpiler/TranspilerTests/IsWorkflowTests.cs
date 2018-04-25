@@ -5,8 +5,9 @@ using System.Linq;
 
 namespace Tabula
 {
-    [TestFixture]
-    public class IsWorkflowTests
+    // built to check the Workflow detection heuristics
+    //[TestFixture] //  Not part of the normal test suite
+    public class IsWorkflowAnalysis
     {
         WorkflowIntrospector introspector;
         List<Type> types;

@@ -322,16 +322,46 @@ namespace Tabula
             Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
         }
 
-        [Test]
-        public void BuildTable_gets_all_the_bits_together()
+        [TestCase("public Table table_from_030_to_035()", "method name")]
+        [TestCase("Tags = new List<string> { \"Crucial\", \"AC-22222\" }", "tags")]
+        [TestCase("Label = \"This is my label\",", "label")]
+        [TestCase("Header = new List<string>     { \"First\", \"Second\" },", "header")]
+        [TestCase("\"Blood\", \"Guessing\"", "row one")]
+        public void BuildTable_gets_all_the_bits_together(string substring, string part)
         {
-            var table = new CST.Table {  };
+            var cells = new List<List<string>> { new List<string> { "Blood" }, new List<string> { "Guessing" } };
+            var row1 = new CST.TableRow(cells);
+            cells = new List<List<string>> { new List<string> { "Time" }, new List<string> { "Chance" } };
+            var row2 = new CST.TableRow(cells);
+            cells = new List<List<string>> { new List<string> { "Impressions" }, new List<string> { "Thoughts" } };
+            var row3 = new CST.TableRow(cells);
+
+            var table = new CST.Table {
+                MethodName = "table_from_030_to_035",
+                Tags = new List<string> { "Crucial", "AC-22222" },
+                Label = "This is my label",
+                ColumnNames = new List<string> { "First", "Second" },
+                Rows = new List<CST.TableRow> { row1, row2, row3 }
+            };
 
             generator.PrepareTable(table);
-
             var result = generator.sectionsBody.ToString();
-            Assert.That(result, Contains.Substring("public void paragraph_from_021_to_022()"));
-            Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
+
+            Assert.That(result, Contains.Substring(substring), $"generated table is missing {part}.");
+        }
+
+        [Test]
+        public void Row_ToCodeText_returns_text_for_List_of_string()
+        {
+            var cells = new List<List<string>>();
+            var cell = new List<string> { "Fluffy" };
+            cells.Add(cell);
+            var row = new CST.TableRow(cells);
+
+            var result = generator.Row_ToCodeText(row);
+
+            Assert.That(result, Contains.Substring("new List<string>"));
+            Assert.That(result, Contains.Substring("{ \"Fluffy\" }"));
         }
 
         [Test]

@@ -126,12 +126,29 @@ namespace Tabula
             sectionsBody.Indent();
             foreach (var row in table.Rows)
             {
-                sectionsBody.Append("new List<string>          {");
-                string cellsText = "{ \"" + string.Join("\", \"", row.Cells.Select(lc => lc.Select(c => Formatter.Reescape(c)))) + "\" }";
-                sectionsBody.AppendLine($"new List<string>          {cellsText}");
+                sectionsBody.AppendLine(Row_ToCodeText(row) + ",");
             }
+
             sectionsBody.Dedent();
             sectionsBody.AppendLine("}");
+        }
+
+        //TODO:  Should these go in the CST objects themselves? 
+        public string Row_ToCodeText(CST.TableRow row)
+        {
+            var cellStrings = row.Cells.Select(c => Cell_ToCodeText(c));
+
+            return "new List<string>          { " + string.Join(", ", cellStrings) + " }";
+        }
+
+        public string Cell_ToCodeText(List<string> cell)
+        {
+            return string_ToCSharpString(string.Join(" ", cell));
+        }
+
+        public string string_ToCSharpString(string input)
+        {
+            return "\"" + input.Replace("\\", "\\\\").Replace("\"", "\\") + "\"";
         }
 
         public void StageParagraph(string paragraphName)

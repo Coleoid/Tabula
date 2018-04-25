@@ -21,6 +21,15 @@ namespace Tabula
             Assert.That(table.ColumnNames, Has.Count.EqualTo(1));
             Assert.That(table.ColumnNames[0], Is.EqualTo("Name"));
             Assert.That(table.Rows, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void ParseSection_Table_line_numbers()
+        {
+            var state = StateFromString("[thistag] \n 'stuff':\n| Name | \n | Bob | \n | Ann | \n");
+            CST.Section section = _parser.ParseSection(state);
+
+            var table = section as CST.Table;
 
             var first = table.Rows.Last();
             Assert.That(first.StartLine, Is.EqualTo(2));
