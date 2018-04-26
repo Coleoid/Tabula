@@ -8,17 +8,18 @@ namespace Tabula
     [TestFixture]
     public class WorkflowIntrospectorTests
     {
-        WorkflowIntrospector introspector;
-        List<Type> types;
+        private WorkflowIntrospector _introspector;
+        private List<Type> _types;
 
         [SetUp]
         public void SetUp()
         {
-            introspector = new WorkflowIntrospector();
-            //introspector.Location = "..\\..\\..\\LibraryHoldingTestWorkflows\\bin\\debug";
-            introspector.Location = "d:\\code\\Tabula\\transpiler\\LibraryHoldingTestWorkflows\\bin\\debug";
-            introspector.Library = "LibraryHoldingTestWorkflows.dll";
-            types = introspector.GetLoadedTypes();
+            _introspector = new WorkflowIntrospector {
+                Location = "d:\\code\\Tabula\\transpiler\\LibraryHoldingTestWorkflows\\bin\\debug",
+                Library = "LibraryHoldingTestWorkflows.dll"
+            };
+
+            _types = _introspector.GetLoadedTypes();
         }
 
         //FUTURE:  Stop relying on Acadis types for these tests.
@@ -29,24 +30,20 @@ namespace Tabula
         [TestCase("MvcBaseWorkflow")]
         public void GetWorkflowDetail_gets_workflows_and_workflow_base_classes(string typeName)
         {
-            var type = types.Single(t => t.Name == typeName);
-            bool isWorkflow = introspector.IsWorkflow(type);
-            var detail = introspector.GetWorkflowDetail(type);
+            var type = _types.Single(t => t.Name == typeName);
+            bool isWorkflow = _introspector.IsWorkflow(type);
+            var detail = _introspector.GetWorkflowDetail(type);
 
             Assert.That(isWorkflow);
             Assert.That(detail, Is.Not.Null);
         }
 
-        [TestCase("RuntimeContext")]
         [TestCase("WorkflowProperty")]
-        [TestCase("MvcAction")]
-        [TestCase("TuitionBilling_generated")]
-        [TestCase("TextAttribute")]
         public void GetWorkflowDetail_skips_utility_classes(string typeName)
         {
-            var type = types.Single(t => t.Name == typeName);
-            bool isWorkflow = introspector.IsWorkflow(type);
-            var detail = introspector.GetWorkflowDetail(type);
+            var type = _types.Single(t => t.Name == typeName);
+            bool isWorkflow = _introspector.IsWorkflow(type);
+            var detail = _introspector.GetWorkflowDetail(type);
 
             Assert.That(isWorkflow, Is.False);
             Assert.That(detail, Is.Null);
@@ -57,8 +54,8 @@ namespace Tabula
         [TestCase(null)]
         public void GetWorkflowDetail_skips_outside_classes(Type type)
         {
-            bool isWorkflow = introspector.IsWorkflow(type);
-            var detail = introspector.GetWorkflowDetail(type);
+            bool isWorkflow = _introspector.IsWorkflow(type);
+            var detail = _introspector.GetWorkflowDetail(type);
 
             Assert.That(isWorkflow, Is.False);
             Assert.That(detail, Is.Null);
@@ -68,9 +65,9 @@ namespace Tabula
         [Test]
         public void Parents_of_workflow_are_populated()
         {
-            var myComments = types.Single(t => t.Name == "CommentsModalWorkflow");
+            var myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
 
-            var detail = introspector.GetWorkflowDetail(myComments);
+            var detail = _introspector.GetWorkflowDetail(myComments);
             var method = detail.Methods["addcomment"];
             Assert.That(method.Name == "Add_comment__");
         }
@@ -78,9 +75,9 @@ namespace Tabula
         [Test]
         public void Methods_of_workflow_are_populated()
         {
-            var myComments = types.Single(t => t.Name == "CommentsModalWorkflow");
+            var myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
 
-            var detail = introspector.GetWorkflowDetail(myComments);
+            var detail = _introspector.GetWorkflowDetail(myComments);
             var method = detail.Methods["addcomment"];
             Assert.That(method.Name == "Add_comment__");
         }
@@ -88,9 +85,9 @@ namespace Tabula
         [Test]
         public void Arguments_of_method_are_populated()
         {
-            Type myComments = types.Single(t => t.Name == "CommentsModalWorkflow");
+            Type myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
 
-            var detail = introspector.GetWorkflowDetail(myComments);
+            var detail = _introspector.GetWorkflowDetail(myComments);
             var method = detail.Methods["verifycommenttextis"];
 
             Assert.That(method.Args.Count(), Is.EqualTo(2));
