@@ -15,6 +15,9 @@ namespace Tabula
         public void SetUp()
         {
             introspector = new WorkflowIntrospector();
+            //introspector.Location = "..\\..\\..\\LibraryHoldingTestWorkflows\\bin\\debug";
+            introspector.Location = "d:\\code\\Tabula\\transpiler\\LibraryHoldingTestWorkflows\\bin\\debug";
+            introspector.Library = "LibraryHoldingTestWorkflows.dll";
             types = introspector.GetLoadedTypes();
         }
 
@@ -61,6 +64,7 @@ namespace Tabula
             Assert.That(detail, Is.Null);
         }
 
+        //FIXME:  this isn't checking parent right now, it's pasta of test below
         [Test]
         public void Parents_of_workflow_are_populated()
         {

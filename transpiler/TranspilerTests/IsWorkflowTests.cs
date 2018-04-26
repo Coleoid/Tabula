@@ -144,7 +144,7 @@ namespace Tabula
         }
 
         [Test]
-        public void the_pre_accepted_and_pre_rejected_lists_are_disjoint()
+        private void the_pre_accepted_and_pre_rejected_lists_are_disjoint()
         {
             var intersection = pre_accepted.Where(a => pre_rejected.Contains(a));
             Assert.That(intersection.Count(), Is.EqualTo(0),
@@ -152,21 +152,21 @@ namespace Tabula
         }
 
         [Test]
-        public void the_current_accepts_should_include_no_pre_rejected_types()
+        private void the_current_accepts_should_include_no_pre_rejected_types()
         {
             var accepted_bad_types = accepted.Where(a => pre_rejected.Contains(a.Name));
             Assert.That(accepted_bad_types.Count(), Is.EqualTo(0));
         }
 
         [Test]
-        public void the_current_rejects_should_include_no_pre_accepted_types()
+        private void the_current_rejects_should_include_no_pre_accepted_types()
         {
             var rejected_good_types = rejected.Where(r => pre_accepted.Contains(r.Name));
             Assert.That(rejected_good_types.Count(), Is.EqualTo(0));
         }
 
         [Test]
-        public void the_current_accepts_have_all_been_vetted_correct()
+        private void the_current_accepts_have_all_been_vetted_correct()
         {
             var accepted_unvetted = accepted.Where(a => !pre_accepted.Contains(a.Name));
             var au_names = accepted_unvetted
@@ -177,7 +177,7 @@ namespace Tabula
         }
 
         [Test]
-        public void the_current_rejects_have_all_been_vetted_correct()
+        private void the_current_rejects_have_all_been_vetted_correct()
         {
             var rejected_unvetted = rejected.Where(r => !pre_rejected.Contains(r.Name));
             var ru_names = rejected_unvetted

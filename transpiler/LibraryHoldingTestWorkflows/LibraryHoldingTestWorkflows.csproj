@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C1517A8A-5EC7-4527-B471-6CEC99E486E6}</ProjectGuid>
+    <ProjectGuid>{21CFE6B7-1D6B-489B-8BF3-DFC92EC80E7F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TranspilerTests</RootNamespace>
-    <AssemblyName>TranspilerTests</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RootNamespace>LibraryHoldingTestWorkflows</RootNamespace>
+    <AssemblyName>LibraryHoldingTestWorkflows</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,9 +35,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net47\System.ValueTuple.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,35 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CSTTests.cs" />
-    <Compile Include="GeneratorTests.cs" />
-    <Compile Include="Generator_FullFileTests.cs" />
-    <Compile Include="Generator_WorkflowTests.cs" />
-    <Compile Include="IndentingStringBuilderTests.cs" />
-    <Compile Include="IsWorkflowTests.cs" />
-    <Compile Include="ParserStateTests.cs" />
-    <Compile Include="ParserTests.cs" />
-    <Compile Include="ParserTests_BigBadWolf.cs" />
-    <Compile Include="ParserTests_Table.cs" />
+    <Compile Include="LibraryHoldingTestWorkflows.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TokenizerTests.cs" />
-    <Compile Include="TokenizerTests_BigBadWolf.cs" />
-    <Compile Include="TranspilerTests.cs" />
-    <Compile Include="TranspilerUnitTestBase.cs" />
-    <Compile Include="WorkflowIntrospectorTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LibraryHoldingTestWorkflows\LibraryHoldingTestWorkflows.csproj">
-      <Project>{21cfe6b7-1d6b-489b-8bf3-dfc92ec80e7f}</Project>
-      <Name>LibraryHoldingTestWorkflows</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Transpiler\Transpiler.csproj">
-      <Project>{78237c47-a53b-4754-9ecd-098e717aa930}</Project>
-      <Name>Transpiler</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

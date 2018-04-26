@@ -13,14 +13,16 @@ namespace Tabula
         //FUTURE:  Multiple types per search name
         public Dictionary<string, Type> TypeFromSearchName { get; set; }
 
-        //FUTURE:  Make Location a list, for users with distributed dependencies
+        //FUTURE:  These elements need configurability, for users with distributed dependencies
         public string Location { get; set; }
+        public string Library { get; set; }
 
         public WorkflowIntrospector()
         {
             CachedWorkflows = new Dictionary<Type, WorkflowDetail>();
             TypeFromSearchName = new Dictionary<string, Type>();
             Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
+            Library = "ScenarioContext.dll";
         }
 
         public void DetailLoadedTypes()
@@ -109,7 +111,7 @@ namespace Tabula
             AppDomain curDomain = AppDomain.CurrentDomain;
             curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
 
-            Assembly asm = Assembly.ReflectionOnlyLoadFrom(Location + "ScenarioContext.dll");
+            Assembly asm = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
             var asms = curDomain.GetAssemblies();
 
             return asm.ExportedTypes.ToList();

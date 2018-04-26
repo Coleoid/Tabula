@@ -5,12 +5,12 @@ namespace Tabula.CST
     /// <summary> A chunk of a scenario.  A paragraph or a table. </summary>
     public class Section : CST_Entity
     {
+        public string MethodName { get; set; }
     }
 
     public class Paragraph : Section
     {
         public List<Action> Actions { get; internal set; }
-        public string MethodName { get; set; }
 
         public Paragraph()
         {
@@ -20,7 +20,6 @@ namespace Tabula.CST
 
     public class Table : Section
     {
-        public string MethodName { get; set; }
         public List<string> ColumnNames { get; set; }
         public List<TableRow> Rows { get; set; }
 
