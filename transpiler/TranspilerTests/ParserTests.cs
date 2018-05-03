@@ -82,17 +82,17 @@ namespace Tabula
         public void Paragraph_with_extra_blank_lines()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.cmd_Use, "Student Enrollment"),
+                new Token(TokenType.cmd_Use, "Student Enrollment", 22),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.cmd_Use, "Person Search Criteria Workflow"),
+                new Token(TokenType.cmd_Use, "Person Search Criteria Workflow", 23),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.Word, "Search"),
-                new Token(TokenType.Word, "here"),
+                new Token(TokenType.Word, "Search", 24),
+                new Token(TokenType.Word, "here", 24),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.Word, "Search"),
-                new Token(TokenType.Word, "there"),
+                new Token(TokenType.Word, "Search", 27),
+                new Token(TokenType.Word, "there", 27),
                 new Token(TokenType.NewLine, "\n"),
             };
             var state = new ParserState(tokens);
@@ -103,31 +103,31 @@ namespace Tabula
             Assert.That(cst.Actions[0], Is.TypeOf<CST.CommandUse>());
             Assert.That(cst.Actions[1], Is.TypeOf<CST.Step>());
             Assert.That(cst.Actions[2], Is.TypeOf<CST.Step>());
+            Assert.That(cst.MethodName, Is.EqualTo("paragraph_from_022_to_027"));
         }
 
         [Test]
         public void Paragraph_gets_suitable_name()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.cmd_Use, "Student Enrollment") { Line = 42 },
+                new Token(TokenType.cmd_Use, "Student Enrollment", 42),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.cmd_Set, "#Fred") { Line = 43 },
+                new Token(TokenType.cmd_Set, "#Fred", 43),
                 new Token(TokenType.String, "Boxley, Frederick"),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.Word, "Search") { Line = 44 },
+                new Token(TokenType.Word, "Search", 44),
                 new Token(TokenType.Word, "here"),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.Word, "Search") { Line = 45 },
+                new Token(TokenType.Word, "Search", 45),
                 new Token(TokenType.Word, "there"),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.Word, "Search") { Line = 46 },
+                new Token(TokenType.Word, "Search", 46),
                 new Token(TokenType.Word, "elsewhere"),
                 new Token(TokenType.NewLine, "\n"),
             };
             var state = new ParserState(tokens);
 
             var para = _parser.ParseParagraph(state);
-
 
             Assert.That(para.MethodName, Is.EqualTo("paragraph_from_042_to_046"));
         }
@@ -136,18 +136,18 @@ namespace Tabula
         public void Paragraph_name_correct_with_block_at_end()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.cmd_Use, "Student Enrollment") { Line = 42 },
+                new Token(TokenType.cmd_Use, "Student Enrollment", 42),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.cmd_Set, "#Fred") { Line = 43 },
+                new Token(TokenType.cmd_Set, "#Fred", 43),
                 new Token(TokenType.String, "Boxley, Frederick"),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.cmd_Alias, "Search") { Line = 44 },
-                new Token(TokenType.BlockStart, "...") { Line = 44 },
+                new Token(TokenType.cmd_Alias, "Search", 44),
+                new Token(TokenType.BlockStart, "...", 44),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.Word, "Search") { Line = 45 },
+                new Token(TokenType.Word, "Search", 45),
                 new Token(TokenType.Word, "there"),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.BlockEnd, ".") { Line = 46 },
+                new Token(TokenType.BlockEnd, ".", 46),
             };
             var state = new ParserState(tokens);
 

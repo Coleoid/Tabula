@@ -179,7 +179,7 @@ namespace Tabula
             generator.WriteDeclarations();
             var declarations = builder.ToString();
 
-            Assert.That(declarations, Is.EqualTo(string.Empty));
+            Assert.That(declarations.Trim(), Is.EqualTo(string.Empty));
         }
 
         [Test]
@@ -193,13 +193,12 @@ namespace Tabula
 
             generator.WriteDeclarations();
 
-            var declarations = builder.ToString();
+            var declarations = builder.ToString().Trim();
             var lines = Regex.Split(declarations, Environment.NewLine);
 
-            Assert.That(lines[0], Is.EqualTo("public Tabula.FirstTestWorkflow FirstTest;"));
-            Assert.That(lines[1], Is.EqualTo("public Tabula.extra.AnotherTestWorkflow AnotherTest;"));
-            Assert.That(lines.Count(), Is.EqualTo(3));
-            Assert.That(lines[2], Is.EqualTo(string.Empty));
+            Assert.That(lines[0].Trim(), Is.EqualTo("public Tabula.FirstTestWorkflow FirstTest;"));
+            Assert.That(lines[1].Trim(), Is.EqualTo("public Tabula.extra.AnotherTestWorkflow AnotherTest;"));
+            Assert.That(lines.Count(), Is.EqualTo(2));
         }
     }
 

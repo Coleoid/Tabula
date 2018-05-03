@@ -286,7 +286,7 @@ namespace Tabula
         {
             if (!state.NextIs(TokenType.TableCellSeparator)) return null;
 
-            state.Take(TokenType.TableCellSeparator);
+            var rowStart = state.Take(TokenType.TableCellSeparator);
 
             var cells = new List<List<string>>();
             while (!state.LineComplete)
@@ -297,7 +297,7 @@ namespace Tabula
             }
             state.AdvanceLines();
 
-            var row = new CST.TableRow(cells);
+            var row = new CST.TableRow(cells) { StartLine = rowStart.Line, EndLine = rowStart.Line };
             return row;
         }
 

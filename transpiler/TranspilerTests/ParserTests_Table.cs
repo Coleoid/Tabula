@@ -31,8 +31,8 @@ namespace Tabula
 
             var table = section as CST.Table;
 
-            var first = table.Rows.Last();
-            Assert.That(first.StartLine, Is.EqualTo(2));
+            var first = table.Rows.First();
+            Assert.That(first.StartLine, Is.EqualTo(3));
 
             var last = table.Rows.Last();
             Assert.That(last.StartLine, Is.EqualTo(5));

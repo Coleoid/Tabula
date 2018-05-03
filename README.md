@@ -3,6 +3,8 @@
 An integration testing framework being built as a replacement for an
 in-house testing system which has served faithfully and is showing its age.
 
+### Mechanics
+
 Intended to integrate with Visual Studio 2017,
 so that when a scenario (a Tabula test file)
 is saved with a .tab extension,

@@ -286,7 +286,7 @@ namespace Tabula
         {
             var ex = Assert.Throws<NotImplementedException>(() => generator.PrepareAction(new UnknownAction()));
             Assert.That(ex.Message, Is.EqualTo(
-                "Tabula needs code to prepare action type [Tabula.GeneratorTests+UnknownAction]."));
+                "Extend Tabula to prepare action type [Tabula.GeneratorTests+UnknownAction]."));
         }
 
         [Test]
@@ -386,8 +386,7 @@ namespace Tabula
             Assert.That(built, Contains.Substring("my required method"));
         }
 
-        private class UnrecognizedSection : CST.Section
-        { }
+        private class UnrecognizedSection : CST.Section { }
 
         [Test]
         public void Unrecognized_Section_type_complaint()

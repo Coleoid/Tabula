@@ -36,10 +36,11 @@ namespace Tabula
         public int StartPosition;
         public List<string> Parts;
 
-        public Token(TokenType type, string text)
+        public Token(TokenType type, string text, int line = 0)
         {
             this.Type = type;
             this.Text = text;
+            this.Line = line;
         }
     }
 
