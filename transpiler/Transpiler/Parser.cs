@@ -96,6 +96,8 @@ namespace Tabula
                 throw new Exception("The target of a Set command must be a term--a variable, string, date, or number.");
 
             var set = new CST.CommandSet(setToken.Text, term);
+            set.StartLine = term.LineNumber;
+            set.EndLine = term.LineNumber;
             return set;
         }
 

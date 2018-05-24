@@ -410,6 +410,24 @@ namespace Tabula
         }
 
         [Test]
+        public void ParseSet_gets_proper_start_and_end_line_numbers()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.cmd_Set, "foo", 18),
+                new Token(TokenType.String, "Blargh", 18)
+            };
+
+            var state = new ParserState(tokens);
+
+            var cmdSet = _parser.ParseCommand_Set(state);
+            Assert.That(cmdSet, Is.Not.Null);
+            Assert.That(cmdSet.Name, Is.EqualTo("foo"));
+            Assert.That(cmdSet.Term.Text, Is.EqualTo("Blargh"));
+            Assert.That(cmdSet.StartLine, Is.EqualTo(18));
+            Assert.That(cmdSet.EndLine, Is.EqualTo(18));
+        }
+
+        [Test]
         public void Parse_simplest_table()
         {
             var tokens = new List<Token> {

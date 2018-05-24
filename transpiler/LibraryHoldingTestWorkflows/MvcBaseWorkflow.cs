@@ -6,8 +6,7 @@ namespace LibraryHoldingTestWorkflows
     {
         public void This_step_is_in_MvcBaseWorkflow()
         {
-            int x = 0;
-            Assert.True(x == x);
+            Assert.True(true);  //  True.
         }
     }
 }

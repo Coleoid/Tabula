@@ -25,6 +25,7 @@ namespace Tabula.CST
 
         public Table()
         {
+            ColumnNames = new List<string>();
             Rows = new List<TableRow>();
         }
     }

@@ -186,10 +186,12 @@ namespace Tabula
             Token token = tokens[0];
             Assert.That(token.Type, Is.EqualTo(TokenType.cmd_Set));
             Assert.That(token.Text, Is.EqualTo(from));
+            Assert.That(token.Line, Is.EqualTo(1));
 
             token = tokens[1];
             Assert.That(token.Type, Is.EqualTo(TokenType.Variable));
             Assert.That(token.Text, Is.EqualTo(to));
+            Assert.That(token.Line, Is.EqualTo(1));
         }
 
         [TestCase("alias: this => #that", "this", "that")]

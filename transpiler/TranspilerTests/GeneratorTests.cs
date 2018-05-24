@@ -158,6 +158,17 @@ namespace Tabula
             Assert.That(result, Contains.Substring(requotedArguments));
         }
 
+        [Test]
+        public void BuildStep_sets_a_variable_on_CommandSet()
+        {
+            var term = new CST.Symbol(TokenType.String, "bar", 1);
+            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+
+            generator.BuildSetCommand(command);
+
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("Var[\"foo\"] = \"bar\","));
+        }
 
         [Test]
         public void BuildStep_Unfound_on_arg_count_mismatch()
@@ -329,6 +340,31 @@ namespace Tabula
         [TestCase("\"Blood\", \"Guessing\"", "row one")]
         public void BuildTable_gets_all_the_bits_together(string substring, string part)
         {
+            /*
+            Source:
+            [Crucial] [AC-22222]
+            == This is my label ==
+            | First       | Second   |
+            | Blood       | Guessing |
+            | Time        | Chance   |
+            | Impressions | Thoughts |
+
+        Target:
+        public Table table_from_030_to_035()
+        {
+            return new Table {
+                Tags = new List<string> { "Crucial", "AC-22222" },
+                Label = "This is my label",
+                Header = new List<string>     { "First", "Second" },
+                Data = new List<List<string>> {
+                    new List<string>          { "Blood", "Guessing" },
+                    new List<string>          { "Time", "Chance" },
+                    new List<string>          { "Impressions", "Thoughts" },
+                }
+            };
+        };
+ */
+
             var cells = new List<List<string>> { new List<string> { "Blood" }, new List<string> { "Guessing" } };
             var row1 = new CST.TableRow(cells);
             cells = new List<List<string>> { new List<string> { "Time" }, new List<string> { "Chance" } };
@@ -349,6 +385,7 @@ namespace Tabula
 
             Assert.That(result, Contains.Substring(substring), $"generated table is missing {part}.");
         }
+
 
         [Test]
         public void Row_ToCodeText_returns_text_for_List_of_string()

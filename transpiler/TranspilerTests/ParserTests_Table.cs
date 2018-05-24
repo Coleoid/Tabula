@@ -32,7 +32,7 @@ namespace Tabula
             var table = section as CST.Table;
 
             var first = table.Rows.First();
-            Assert.That(first.StartLine, Is.EqualTo(3));
+            Assert.That(first.StartLine, Is.EqualTo(4));
 
             var last = table.Rows.Last();
             Assert.That(last.StartLine, Is.EqualTo(5));

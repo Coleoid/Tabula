@@ -15,7 +15,7 @@ namespace Tabula
         public void SetUp()
         {
             _introspector = new WorkflowIntrospector {
-                Location = "d:\\code\\Tabula\\transpiler\\LibraryHoldingTestWorkflows\\bin\\debug",
+                Location = "k:\\code\\Tabula\\transpiler\\LibraryHoldingTestWorkflows\\bin\\debug",
                 Library = "LibraryHoldingTestWorkflows.dll"
             };
 

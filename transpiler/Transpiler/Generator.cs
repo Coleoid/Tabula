@@ -10,7 +10,7 @@ namespace Tabula
 
     public class Generator
     {
-        public static string CurrentVersion { get => "0.2"; }
+        public static string CurrentVersion { get => "0.3"; }
         private Dictionary<string, string> Versions = new Dictionary<string, string>
         {
             { "0.1", "only generates this rudimentary paste" },
@@ -106,6 +106,7 @@ namespace Tabula
             sectionsBody.Indent();
             sectionsBody.AppendLine("return new Table {");
             sectionsBody.Indent();
+            PrepareMetadata(table);
             PrepareRows(table);
             sectionsBody.Dedent();
             sectionsBody.AppendLine("};");
@@ -116,11 +117,22 @@ namespace Tabula
             StageTable(table.MethodName);
         }
 
+        public void PrepareMetadata(CST.Table table)
+        {
+            sectionsBody.Append("Tags = new List<string> { ");
+            sectionsBody.Append(string.Join(", ", table.Tags.Select(t => "\"" + Formatter.Reescape(t) + "\"" )));
+            sectionsBody.AppendLine(" },");
+            
+            sectionsBody.Append("Label = \"");
+            sectionsBody.Append(table.Label);
+            sectionsBody.AppendLine("\",");
+        }
+
         private void PrepareRows(CST.Table table)
         {
-            //TODO: write column names into header row
-            //sectionsBody.AppendLine("Header = new List<string> {");
-            //string headerText = "{ \"" + string.Join("\", \"", table.ColumnNames.Select(c => Formatter.Reescape(c))) + "\" }";
+            sectionsBody.Append("Header = new List<string>     { ");
+            sectionsBody.Append(string.Join(", ", table.ColumnNames.Select(c => "\"" + Formatter.Reescape(c) + "\"" )));
+            sectionsBody.AppendLine(" },");
 
             sectionsBody.AppendLine("Data = new List<List<string>> {");
             sectionsBody.Indent();
@@ -184,6 +196,7 @@ namespace Tabula
             Builder.AppendLine("        {");
             Builder.Append(executeMethodBody.Builder);
             Builder.AppendLine("        }");
+            Builder.AppendLine();
         }
 
         public void WriteHeader()
@@ -429,7 +442,8 @@ namespace Tabula
             var lineNumber = commandSet.StartLine;
             var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
 
-            var call = $"Var[\"{commandSet.Name}\"] = {commandSet.Term};";
+            var call = $"Var[\"{commandSet.Name}\"] = \"{commandSet.Term.Text}\"";
+
             var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
             sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
         }
