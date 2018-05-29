@@ -131,7 +131,7 @@ namespace Tabula
 
             string start = paragraph.Actions[0].StartLine.ToString("D3");
             string end = paragraph.Actions.Last().EndLine.ToString("D3");
-            paragraph.MethodName = $"paragraph_from_{start}_to_{end}";
+            paragraph.MethodName = $"paragraph__{start}_to_{end}";
 
             return paragraph;
         }
@@ -261,7 +261,7 @@ namespace Tabula
             string end = table.Rows.Any()
                 ? table.Rows.Last().EndLine.ToString("D3")
                 : start;
-            table.MethodName = $"table_from_{start}_to_{end}";
+            table.MethodName = $"table__{start}_to_{end}";
 
             return table;
         }

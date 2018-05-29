@@ -47,6 +47,10 @@ namespace Tabula.CST
                 {
                     stepText += delim + "\"" + sym.Text + "\"";
                 }
+                else if (sym.Type == TokenType.Variable)
+                {
+                    stepText += delim + "#" + sym.Text;
+                }
                 else
                 {
                     stepText += delim + sym.Text;

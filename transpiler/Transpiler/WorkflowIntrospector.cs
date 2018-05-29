@@ -21,7 +21,7 @@ namespace Tabula
         {
             CachedWorkflows = new Dictionary<Type, WorkflowDetail>();
             TypeFromSearchName = new Dictionary<string, Type>();
-            Location = @"d:\code\acadis\ScenarioTests\ScenarioContext\bin\Debug\";
+            Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
             Library = "ScenarioContext.dll";
         }
 

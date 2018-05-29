@@ -44,8 +44,8 @@ namespace Tabula
 
             var table = (CST.Table)_parser.ParseSection(state);
 
-            Assert.That(table.MethodName, Is.EqualTo("table_from_002_to_005"));
-       }
+            Assert.That(table.MethodName, Is.EqualTo("table__003_to_005"));
+        }
 
         [Test]
         public void Row_then_EOF()

@@ -103,7 +103,7 @@ namespace Tabula
             Assert.That(cst.Actions[0], Is.TypeOf<CST.CommandUse>());
             Assert.That(cst.Actions[1], Is.TypeOf<CST.Step>());
             Assert.That(cst.Actions[2], Is.TypeOf<CST.Step>());
-            Assert.That(cst.MethodName, Is.EqualTo("paragraph_from_022_to_027"));
+            Assert.That(cst.MethodName, Is.EqualTo("paragraph__022_to_027"));
         }
 
         [Test]
@@ -129,7 +129,7 @@ namespace Tabula
 
             var para = _parser.ParseParagraph(state);
 
-            Assert.That(para.MethodName, Is.EqualTo("paragraph_from_042_to_046"));
+            Assert.That(para.MethodName, Is.EqualTo("paragraph__042_to_046"));
         }
 
         [Test]
@@ -159,7 +159,7 @@ namespace Tabula
             Assert.That(block.StartLine, Is.EqualTo(44));
             Assert.That(block.EndLine, Is.EqualTo(46));
 
-            Assert.That(para.MethodName, Is.EqualTo("paragraph_from_042_to_046"));
+            Assert.That(para.MethodName, Is.EqualTo("paragraph__042_to_046"));
         }
 
         //TODO:  block_gets_proper_start_and_end_line_numbers()

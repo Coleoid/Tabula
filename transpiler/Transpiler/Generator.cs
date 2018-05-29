@@ -17,6 +17,7 @@ namespace Tabula
             { "0.2", "can barely generate a compilable class" },
             { "0.3", "doesn't always generate a compilable class" },
             { "0.4", "is not yet alpha (known missing 1.0 features)" },
+            { "0.5", "is a very lean 1.0 alpha, for initial attempts to use" },
             //  feels unproductive to project further at this time (29 jan '18)
         };
 

@@ -80,7 +80,7 @@ Create Organization named #orgName of type ""organization"" under base parent gr
 ""Create list items"":
 use: List Management
 
-  ""Testopia #item"" with description ""Testopia #item description"" with usage ""Available for new records""
+Create ""#itemType"" list item ""Testopia #item"" with description ""Testopia #item description"" with usage ""Available for new records""
 | itemType         | item       |
 | EmploymentAction | Update     |
 | EmploymentType   | Civilian   |
