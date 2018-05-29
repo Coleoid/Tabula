@@ -72,7 +72,7 @@ namespace Tabula
             generator.WriteClassOpen();
 
             var classText = builder.ToString();
-            Assert.That(classText, Does.Contain($"  //  {label}"));
+            Assert.That(classText, Does.Contain($"  //  \"{label}\""));
         }
 
         [TestCase("ScenarioContext.Implementations.Administration.TaskRunnerWorkflow", "TaskRunner")]
@@ -333,14 +333,14 @@ namespace Tabula
             Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
         }
 
-        [TestCase("public Table table_from_030_to_035()", "method name")]
-        [TestCase("Tags = new List<string> { \"Crucial\", \"AC-22222\" }", "tags")]
-        [TestCase("Label = \"This is my label\",", "label")]
-        [TestCase("Header = new List<string>     { \"First\", \"Second\" },", "header")]
-        [TestCase("\"Blood\", \"Guessing\"", "row one")]
-        public void BuildTable_gets_all_the_bits_together(string substring, string part)
+        [TestCase("method name", "public Table table_from_030_to_035()")]
+        [TestCase("tags", "Tags = new List<string> { \"Crucial\", \"AC-22222\" }")]
+        [TestCase("label", "Label = \"This is my label\",")]
+        [TestCase("header", "Header = new List<string>     { \"First\", \"Second\" },")]
+        [TestCase("row one", "\"Blood\", \"Guessing\"")]
+        public void BuildTable_gets_all_the_bits_together(string part, string substring)
         {
-            /*
+/*
             Source:
             [Crucial] [AC-22222]
             == This is my label ==
@@ -365,12 +365,9 @@ namespace Tabula
         };
  */
 
-            var cells = new List<List<string>> { new List<string> { "Blood" }, new List<string> { "Guessing" } };
-            var row1 = new CST.TableRow(cells);
-            cells = new List<List<string>> { new List<string> { "Time" }, new List<string> { "Chance" } };
-            var row2 = new CST.TableRow(cells);
-            cells = new List<List<string>> { new List<string> { "Impressions" }, new List<string> { "Thoughts" } };
-            var row3 = new CST.TableRow(cells);
+            var row1 = new CST.TableRow("Blood", "Guessing");
+            var row2 = new CST.TableRow("Time", "Chance");
+            var row3 = new CST.TableRow("Impressions", "Thoughts");
 
             var table = new CST.Table {
                 MethodName = "table_from_030_to_035",
@@ -467,7 +464,7 @@ namespace Tabula
             generator.PrepareSections();
 
             string built = generator.executeMethodBody.ToString();
-            Assert.That(built, Contains.Substring("Run_para_over_table( paragraph_one, table_one );"));
+            Assert.That(built, Contains.Substring("Foreach_Row_in( table_one, paragraph_one );"));
         }
 
         [Test]
@@ -480,8 +477,8 @@ namespace Tabula
             generator.PrepareSections();
 
             string built = generator.executeMethodBody.ToString();
-            Assert.That(built, Contains.Substring("Run_para_over_table( paragraph_one, table_one );"));
-            Assert.That(built, Contains.Substring("Run_para_over_table( paragraph_one, table_two );"));
+            Assert.That(built, Contains.Substring("Foreach_Row_in( table_one, paragraph_one );"));
+            Assert.That(built, Contains.Substring("Foreach_Row_in( table_two, paragraph_one );"));
         }
     }
 }

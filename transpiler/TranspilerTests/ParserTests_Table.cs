@@ -24,12 +24,11 @@ namespace Tabula
         }
 
         [Test]
-        public void ParseSection_Table_line_numbers()
+        public void ParseSection_TableRow_line_numbers()
         {
-            var state = StateFromString("[thistag] \n 'stuff':\n| Name | \n | Bob | \n | Ann | \n");
-            CST.Section section = _parser.ParseSection(state);
+            var state = StateFromString("[thistag] \n 'Friends':\n| Name | \n | Bob | \n | Ann | \n");
 
-            var table = section as CST.Table;
+            var table = (CST.Table)_parser.ParseSection(state);
 
             var first = table.Rows.First();
             Assert.That(first.StartLine, Is.EqualTo(4));
@@ -37,6 +36,16 @@ namespace Tabula
             var last = table.Rows.Last();
             Assert.That(last.StartLine, Is.EqualTo(5));
         }
+
+        [Test]
+        public void ParseTable_MethodName_with_Tag_and_Label()
+        {
+            var state = StateFromString("[thistag] \n 'Friends':\n| Name | \n | Bob | \n | Ann | \n");
+
+            var table = (CST.Table)_parser.ParseSection(state);
+
+            Assert.That(table.MethodName, Is.EqualTo("table_from_002_to_005"));
+       }
 
         [Test]
         public void Row_then_EOF()

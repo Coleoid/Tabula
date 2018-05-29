@@ -38,6 +38,16 @@ namespace Tabula.CST
         {
             Cells = cells;
         }
+
+        public TableRow(params string[] cellWords)
+        {
+            Cells = new List<List<string>>();
+
+            foreach (var word in cellWords)
+            {
+                Cells.Add(new List<string> { word });
+            }
+        }
     }
 
 }

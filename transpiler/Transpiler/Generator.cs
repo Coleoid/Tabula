@@ -88,9 +88,13 @@ namespace Tabula
 
         public void PrepareParagraph(CST.Paragraph paragraph)
         {
-            sectionsBody.AppendLine($"public void {paragraph.MethodName}()");  //TODO: add label as a comment
+            sectionsBody.AppendLine($"//  \"{paragraph.Label}\"");
+            sectionsBody.AppendLine($"public void {paragraph.MethodName}()");
             sectionsBody.AppendLine("{");
             sectionsBody.Indent();
+            var tagsArg = string.Join(", ", paragraph.Tags);
+            if (string.IsNullOrEmpty(tagsArg)) sectionsBody.AppendLine($"Tags(\"{tagsArg}\");");
+            sectionsBody.AppendLine($"Label(\"{paragraph.Label}\");");
             PrepareActions(paragraph.Actions);
             sectionsBody.Dedent();
             sectionsBody.AppendLine("}");
@@ -174,7 +178,7 @@ namespace Tabula
         {
             //if (stagedParagraph == null) throw new Exception("Tables must come after paragraphs.");
 
-            executeMethodBody.AppendLine($"Run_para_over_table( {stagedParagraph}, {tableName} );");
+            executeMethodBody.AppendLine($"Foreach_Row_in( {tableName}, {stagedParagraph} );");
             paragraphPending = false;
         }
 
@@ -222,7 +226,8 @@ namespace Tabula
         public void WriteClassOpen()
         {
             GeneratedClassName = GetGeneratedClassName();
-            Builder.AppendLine($"    public class {GeneratedClassName}  //  {Scenario.Label}");
+            Builder.AppendLine($"    //  \"{Scenario.Label}\"");
+            Builder.AppendLine($"    public class {GeneratedClassName}");
             Builder.AppendLine("        : GeneratedScenarioBase, IGeneratedScenario");
             Builder.AppendLine("    {");
         }
@@ -448,6 +453,7 @@ namespace Tabula
             sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
         }
 
+        //TODO: Alias POI
         private void BuildAliasCommand(CST.CommandAlias aliasCommand)
         {
             sectionsBody.AppendLine($"Alias( {aliasCommand.Name}, {aliasCommand.Action} ); //TODO: Actually implement");
