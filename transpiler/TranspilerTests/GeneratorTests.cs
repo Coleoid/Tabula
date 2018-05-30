@@ -152,9 +152,10 @@ namespace Tabula
 
             //  string arguments are quoted, ints aren't, dates go through conversion
             var expectedArguments = @"($""Bob"", 28, ""07/15/2017"".To<DateTime>())";
-            //  to aid debugging, the Do() call includes a string copy of the args
-            var requotedArguments = expectedArguments.Replace("\"", "\"\"");
             Assert.That(result, Contains.Substring(expectedArguments));
+            
+            //  to aid test developers, the Do() call includes a string copy of the args
+            var requotedArguments = expectedArguments.Replace("\"", "\"\"");
             Assert.That(result, Contains.Substring(requotedArguments));
         }
 
@@ -363,6 +364,7 @@ namespace Tabula
             generator.PrepareParagraph(paragraph);
 
             var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("[Label(\"short paragraph\")]"));
             Assert.That(result, Contains.Substring("public void paragraph__021_to_022()"));
             Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__($\"Bob\", $\"where am I?\")"));
         }
@@ -437,6 +439,26 @@ namespace Tabula
             var result = generator.sectionsBody.ToString();
 
             Assert.That(result.IndexOf(substring) == -1, $"generated table should not contain {part}.");
+        }
+
+        [Test]
+        public void BuildParagraph_skips_tags_if_empty()
+        {
+
+            var row1 = new CST.TableRow("Blood", "Guessing");
+            var row2 = new CST.TableRow("Time", "Chance");
+            var row3 = new CST.TableRow("Impressions", "Thoughts");
+
+            var paragraph = new CST.Paragraph
+            {
+                Label = "How to Rebombulate",
+                MethodName = "paragraph__030_to_035",
+            };
+
+            generator.PrepareParagraph(paragraph);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result.IndexOf("Tags("), Is.LessThan(0), $"generated paragraph should not contain empty Tags() call.");
         }
 
         [Test]

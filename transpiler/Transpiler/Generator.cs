@@ -90,13 +90,12 @@ namespace Tabula
 
         public void PrepareParagraph(CST.Paragraph paragraph)
         {
-            sectionsBody.AppendLine($"//  \"{paragraph.Label}\"");
+            sectionsBody.AppendLine($"[Label(\"{paragraph.Label}\")]");
             sectionsBody.AppendLine($"public void {paragraph.MethodName}()");
             sectionsBody.AppendLine("{");
             sectionsBody.Indent();
             var tagsArg = string.Join(", ", paragraph.Tags);
-            if (string.IsNullOrEmpty(tagsArg)) sectionsBody.AppendLine($"Tags(\"{tagsArg}\");");
-            sectionsBody.AppendLine($"Label(\"{paragraph.Label}\");");
+            if (!string.IsNullOrEmpty(tagsArg)) sectionsBody.AppendLine($"Tags(\"{tagsArg}\");");
             PrepareActions(paragraph.Actions);
             sectionsBody.Dedent();
             sectionsBody.AppendLine("}");
