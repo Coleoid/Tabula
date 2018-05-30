@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Tabula
 {
@@ -124,13 +125,19 @@ namespace Tabula
 
         public void PrepareMetadata(CST.Table table)
         {
-            sectionsBody.Append("Tags = new List<string> { ");
-            sectionsBody.Append(string.Join(", ", table.Tags.Select(t => "\"" + Formatter.Reescape(t) + "\"" )));
-            sectionsBody.AppendLine(" },");
-            
-            sectionsBody.Append("Label = \"");
-            sectionsBody.Append(table.Label);
-            sectionsBody.AppendLine("\",");
+            if (table.Tags.Any())
+            {
+                sectionsBody.Append("Tags = new List<string> { ");
+                sectionsBody.Append(string.Join(", ", table.Tags.Select(t => "\"" + Formatter.Reescape(t) + "\"")));
+                sectionsBody.AppendLine(" },");
+            }
+
+            if (!string.IsNullOrEmpty(table.Label))
+            {
+                sectionsBody.Append("Label = \"");
+                sectionsBody.Append(table.Label);
+                sectionsBody.AppendLine("\",");
+            }
         }
 
         private void PrepareRows(CST.Table table)
@@ -371,7 +378,8 @@ namespace Tabula
                 switch (sym.Type)
                 {
                     case TokenType.String:
-                        argsString += delim + $"\"{sym.Text}\"";
+                        string interpolated = Regex.Replace(sym.Text, "#(\\w+)", "{var[\"$1\"]}");
+                        argsString += delim + $"$\"{interpolated}\"";
                         break;
 
                     case TokenType.Date:

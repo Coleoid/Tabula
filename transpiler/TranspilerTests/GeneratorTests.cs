@@ -151,7 +151,7 @@ namespace Tabula
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
 
             //  string arguments are quoted, ints aren't, dates go through conversion
-            var expectedArguments = @"(""Bob"", 28, ""07/15/2017"".To<DateTime>())";
+            var expectedArguments = @"($""Bob"", 28, ""07/15/2017"".To<DateTime>())";
             //  to aid debugging, the Do() call includes a string copy of the args
             var requotedArguments = expectedArguments.Replace("\"", "\"\"");
             Assert.That(result, Contains.Substring(expectedArguments));
@@ -253,6 +253,40 @@ namespace Tabula
         }
 
         [Test]
+        public void Step_Call_interpolates_variables_in_strings()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "greeting", Type = typeof(string) },
+                new ArgDetail { Name = "sequence", Type = typeof(string) },
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "To__I_say__and__", Args = args });
+            generator.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "to"),
+                (TokenType.Variable, "friendname"),
+                (TokenType.Word, "I"),
+                (TokenType.Word, "say"),
+                (TokenType.String, "Hi, #friendname!"),
+                (TokenType.Word, "and"),
+                (TokenType.String, "#one, #two, #three")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.To__I_say__and__"));
+
+            var singleInterpolation = @", $""Hi, {var[""friendname""]}!"", ";
+            var tripleInterpolation = @", $""{var[""one""]}, {var[""two""]}, {var[""three""]}"")";
+            Assert.That(result, Contains.Substring(singleInterpolation));
+            Assert.That(result, Contains.Substring(tripleInterpolation));
+        }
+
+        [Test]
         public void Step_Call_variables_get_types()
         {
             var args = new List<ArgDetail>() {
@@ -322,18 +356,18 @@ namespace Tabula
             var paragraph = new CST.Paragraph
             {
                 Label = "short paragraph",
-                MethodName = "paragraph_from_021_to_022"
+                MethodName = "paragraph__021_to_022"
             };
             paragraph.Actions.Add(step);
 
             generator.PrepareParagraph(paragraph);
 
             var result = generator.sectionsBody.ToString();
-            Assert.That(result, Contains.Substring("public void paragraph_from_021_to_022()"));
-            Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
+            Assert.That(result, Contains.Substring("public void paragraph__021_to_022()"));
+            Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__($\"Bob\", $\"where am I?\")"));
         }
 
-        [TestCase("method name", "public Table table_from_030_to_035()")]
+        [TestCase("method name", "public Table table__030_to_035()")]
         [TestCase("tags", "Tags = new List<string> { \"Crucial\", \"AC-22222\" }")]
         [TestCase("label", "Label = \"This is my label\",")]
         [TestCase("header", "Header = new List<string>     { \"First\", \"Second\" },")]
@@ -350,7 +384,7 @@ namespace Tabula
             | Impressions | Thoughts |
 
         Target:
-        public Table table_from_030_to_035()
+        public Table table__030_to_035()
         {
             return new Table {
                 Tags = new List<string> { "Crucial", "AC-22222" },
@@ -370,7 +404,7 @@ namespace Tabula
             var row3 = new CST.TableRow("Impressions", "Thoughts");
 
             var table = new CST.Table {
-                MethodName = "table_from_030_to_035",
+                MethodName = "table__030_to_035",
                 Tags = new List<string> { "Crucial", "AC-22222" },
                 Label = "This is my label",
                 ColumnNames = new List<string> { "First", "Second" },
@@ -383,6 +417,27 @@ namespace Tabula
             Assert.That(result, Contains.Substring(substring), $"generated table is missing {part}.");
         }
 
+        [TestCase("empty tags", "Tags =")]
+        [TestCase("empty Label", "Label =")]
+        public void BuildTable_skips_label_and_tags_if_empty(string part, string substring)
+        {
+
+            var row1 = new CST.TableRow("Blood", "Guessing");
+            var row2 = new CST.TableRow("Time", "Chance");
+            var row3 = new CST.TableRow("Impressions", "Thoughts");
+
+            var table = new CST.Table
+            {
+                MethodName = "table__030_to_035",
+                ColumnNames = new List<string> { "First", "Second" },
+                Rows = new List<CST.TableRow> { row1, row2, row3 }
+            };
+
+            generator.PrepareTable(table);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result.IndexOf(substring) == -1, $"generated table should not contain {part}.");
+        }
 
         [Test]
         public void Row_ToCodeText_returns_text_for_List_of_string()
