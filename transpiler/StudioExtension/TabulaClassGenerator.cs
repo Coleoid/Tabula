@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.Shell;
 using VSLangProj80;
-using System.Text.RegularExpressions;
 
 namespace Tabula
 {
@@ -18,11 +17,9 @@ namespace Tabula
     [Guid("7D7984C8-7744-48B1-9FDF-A90B2C4159F5")]
     [CodeGeneratorRegistration(typeof(TabulaClassGenerator), "Generate C# of Tabula scenarios", vsContextGuids.vsContextGuidVCSProject, GeneratesDesignTimeSource = true)]
     [ProvideObject(typeof(TabulaClassGenerator))]
-    public class TabulaClassGenerator : BaseCodeGeneratorWithSite
+    public class TabulaClassGenerator : BaseCodeGenerator_WithOLESite
     {
-#pragma warning disable 0414
         internal static string name = "TabulaClassGenerator";  //  for 'Custom Tool' property of project item
-#pragma warning restore 0414
 
         /// <summary>
         /// Connector between VS Custom Tool extensibility point and the Tabula transpiler
@@ -33,6 +30,7 @@ namespace Tabula
         {
             try
             {
+                ThreadHelper.ThrowIfNotOnUIThread();  //  Really, Microsoft?
                 CodeGeneratorProgress?.Progress(50, 100);
 
                 Encoding enc;

@@ -2,6 +2,7 @@
 
 namespace Tabula.CST
 {
+    /// <summary> An executable 'unit' of the scenario </summary>
     public class Action : ITaggable
     {
         public List<string> Tags { get; set; }

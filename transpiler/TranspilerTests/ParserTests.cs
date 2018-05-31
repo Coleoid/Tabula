@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Tabula.Parse;
+using Tabula.CST;
 
 namespace Tabula
 {

@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
+using Tabula.Parse;
 
 namespace Tabula
 {
@@ -49,7 +50,7 @@ namespace Tabula
             Assert.That(cst.Sections[19].Label, Is.Null);
             Assert.That(cst.Sections[20].Label, Is.EqualTo("Add a comment and duty assignment"));
             Assert.That(cst.Sections[21].Label, Is.Null);
-            Assert.That(cst.Sections[22].Label, Is.Null);
+            Assert.That(cst.Sections[22].Label, Is.EqualTo("Add temporary duty assignments"));
             Assert.That(cst.Sections[23].Label, Is.EqualTo("Search people with many different duty assignment criteria"));
             Assert.That(cst.Sections[24].Label, Is.EqualTo("Search Assignment regular/temporary, location, and org"));
             Assert.That(cst.Sections[25].Label, Is.EqualTo("Assignment status, before, and after"));

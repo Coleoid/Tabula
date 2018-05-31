@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System.Linq;
 using System.Text;
+using Tabula.Parse;
 
 namespace Tabula
 {

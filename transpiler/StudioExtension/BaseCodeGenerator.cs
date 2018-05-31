@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 
 namespace Tabula
 {
@@ -125,6 +126,7 @@ namespace Tabula
         /// <param name="column">Column number of error</param>
         protected virtual void GeneratorError(uint level, string message, uint line, uint column)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();  //  Really, Microsoft?
             CodeGeneratorProgress?.GeneratorError(0, level, message, line, column);
         }
 
@@ -135,6 +137,7 @@ namespace Tabula
         /// <param name="column">Column number of warning</param>
         protected virtual void GeneratorWarning(uint level, string message, uint line, uint column)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();  //  Really, Microsoft?
             CodeGeneratorProgress?.GeneratorError(1, level, message, line, column);
         }
     }

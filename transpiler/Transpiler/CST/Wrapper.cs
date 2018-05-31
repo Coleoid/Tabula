@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace Tabula.CST
 {
-    /// <summary>
-    /// Wrapper is for domain objects which are barely more than the token.
-    /// </summary>
+    /// <summary> Wrapper is for domain objects which are barely more than the token. </summary>
     public class Wrapper
     {
         private Token token;
@@ -18,7 +14,6 @@ namespace Tabula.CST
         public TokenType Type { get => token.Type; }
         public string Text { get => token.Text; }
         public int LineNumber { get => token.Line; }
-
     }
 
     public class Label : Wrapper

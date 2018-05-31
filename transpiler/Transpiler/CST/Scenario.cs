@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Tabula.CST
 {
-
-    /// <summary>
-    /// An entire test file.
-    /// </summary>
+    /// <summary> An entire test file. </summary>
     public class Scenario : CST_Entity
     {
         public List<Section> Sections { get; set; }

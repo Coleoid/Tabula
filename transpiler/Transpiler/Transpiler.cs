@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using Tabula.Parse;
+using Tabula.CST;
 
 namespace Tabula
 {

@@ -2,6 +2,7 @@
 
 namespace Tabula.CST
 {
+    /// <summary> A call across to a glue 'implementation' class (or an invocation of an alias?) </summary>
     public class Step : Action, ITaggable
     {
         public List<Symbol> Symbols { get; set; }
