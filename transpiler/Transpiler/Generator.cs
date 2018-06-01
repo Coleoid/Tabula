@@ -6,12 +6,14 @@ using System.Text.RegularExpressions;
 
 namespace Tabula
 {
-    //  In Tabula, the generated code is a first-class result.
-    //  Effort is spent to keep it readable.
+    //  Tabula HAS two major goals:
+    //  1:  It works.
+    //  2:  The developer-user experience is smooth.
+    //  Keeping the generated code clean and readable goes directly to #2.
 
     public class Generator
     {
-        public static string CurrentVersion { get => "0.3"; }
+        public static string CurrentVersion { get => "0.4"; }
         private Dictionary<string, string> Versions = new Dictionary<string, string>
         {
             { "0.1", "only generates this rudimentary paste" },
@@ -353,15 +355,15 @@ namespace Tabula
 
             if (method == null || stepArgCount != method.Args.Count())
             {
-                var stepText = "\"" + step.GetReadableString() + "\"";
-                var unfound = $"Unfound(      {stepText}, {sourceLocation});";
+                var stepText = step.GetReadableString();
+                var unfound = $"Unfound(      {stepText}, @{sourceLocation});";
                 sectionsBody.AppendLine(unfound);
             }
             else
             {
                 var call = ComposeCall(step, workflow, method);
                 var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
-                sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
+                sectionsBody.AppendLine($"Do(() =>       {call}, @{sourceLocation}, {quotedCall});");
             }
         }
 
