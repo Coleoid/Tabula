@@ -379,7 +379,7 @@ namespace Tabula
                 switch (sym.Type)
                 {
                     case TokenType.String:
-                        string interpolated = Regex.Replace(sym.Text, "#(\\w+)", "{var[\"$1\"]}");
+                        string interpolated = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
                         argsString += delim + $"$\"{interpolated}\"";
                         break;
 
@@ -392,7 +392,7 @@ namespace Tabula
                         break;
 
                     case TokenType.Variable:
-                        argsString += delim + $"var[\"{sym.Text}\"]";
+                        argsString += delim + $"Var[\"{sym.Text}\"]";
                         if (argType == typeof(string))
                         { }
                         if (argType == typeof(int))

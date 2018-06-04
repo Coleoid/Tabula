@@ -249,7 +249,7 @@ namespace Tabula
 
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
 
-            var expectedArguments = @"(var[""friendname""], 21, ""1/1/2001"".To<DateTime>())";
+            var expectedArguments = @"(Var[""friendname""], 21, ""1/1/2001"".To<DateTime>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
@@ -281,8 +281,8 @@ namespace Tabula
 
             Assert.That(result, Contains.Substring("myWorkflow.To__I_say__and__"));
 
-            var singleInterpolation = @", $""Hi, {var[""friendname""]}!"", ";
-            var tripleInterpolation = @", $""{var[""one""]}, {var[""two""]}, {var[""three""]}"")";
+            var singleInterpolation = @", $""Hi, {Var[""friendname""]}!"", ";
+            var tripleInterpolation = @", $""{Var[""one""]}, {Var[""two""]}, {Var[""three""]}"")";
             Assert.That(result, Contains.Substring(singleInterpolation));
             Assert.That(result, Contains.Substring(tripleInterpolation));
         }
@@ -317,7 +317,7 @@ namespace Tabula
 
             //  variables going into an argument of type int need to get a .To<int>()
             //  variables going into an argument of type DateTime need to get a .To<DateTime>()
-            var expectedArguments = @"(var[""friendname""], var[""newage""].To<int>(), var[""birthday""].To<DateTime>())";
+            var expectedArguments = @"(Var[""friendname""], Var[""newage""].To<int>(), Var[""birthday""].To<DateTime>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
@@ -374,6 +374,7 @@ namespace Tabula
         [TestCase("label", "Label = \"This is my label\",")]
         [TestCase("header", "Header = new List<string>     { \"First\", \"Second\" },")]
         [TestCase("row one", "\"Blood\", \"Guessing\"")]
+        [TestCase("var in cell", "\"Impressions\", \"#Level\"")]
         public void BuildTable_gets_all_the_bits_together(string part, string substring)
         {
 /*
@@ -382,8 +383,8 @@ namespace Tabula
             == This is my label ==
             | First       | Second   |
             | Blood       | Guessing |
-            | Time        | Chance   |
-            | Impressions | Thoughts |
+            | Step        | Chance   |
+            | Impressions | #Level   |
 
         Target:
         public Table table__030_to_035()
@@ -394,16 +395,16 @@ namespace Tabula
                 Header = new List<string>     { "First", "Second" },
                 Data = new List<List<string>> {
                     new List<string>          { "Blood", "Guessing" },
-                    new List<string>          { "Time", "Chance" },
-                    new List<string>          { "Impressions", "Thoughts" },
+                    new List<string>          { "Step", "Chance" },
+                    new List<string>          { "Impressions", "#Level" },
                 }
             };
         };
  */
 
             var row1 = new CST.TableRow("Blood", "Guessing");
-            var row2 = new CST.TableRow("Time", "Chance");
-            var row3 = new CST.TableRow("Impressions", "Thoughts");
+            var row2 = new CST.TableRow("Step", "Chance");
+            var row3 = new CST.TableRow("Impressions", "#Level");
 
             var table = new CST.Table {
                 MethodName = "table__030_to_035",
