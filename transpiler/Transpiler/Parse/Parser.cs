@@ -272,7 +272,7 @@ namespace Tabula.Parse
             while (!state.NextIs(TokenType.TableCellSeparator))
             {
                 var syms = ParseSymbols(state);
-                var text = string.Join(" ", syms.Select(s => s.Text).ToArray());
+                var text = string.Join(" ", syms.Select(s => s.Type == TokenType.Variable? "#" + s.Text : s.Text).ToArray());
 
                 if (!state.NextIsIn(TokenType.TableCellSeparator, TokenType.Comma))
                     throw new Exception("Can only handle symbols and commas inside a table cell.");

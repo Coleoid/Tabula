@@ -374,7 +374,7 @@ namespace Tabula
         [TestCase("label", "Label = \"This is my label\",")]
         [TestCase("header", "Header = new List<string>     { \"First\", \"Second\" },")]
         [TestCase("row one", "\"Blood\", \"Guessing\"")]
-        [TestCase("var in cell", "\"Impressions\", \"#Level\"")]
+        [TestCase("var in cell", "\"Impressions\", \"#level\"")]
         public void BuildTable_gets_all_the_bits_together(string part, string substring)
         {
 /*
@@ -396,7 +396,7 @@ namespace Tabula
                 Data = new List<List<string>> {
                     new List<string>          { "Blood", "Guessing" },
                     new List<string>          { "Step", "Chance" },
-                    new List<string>          { "Impressions", "#Level" },
+                    new List<string>          { "Impressions", "#level" },
                 }
             };
         };
@@ -404,7 +404,7 @@ namespace Tabula
 
             var row1 = new CST.TableRow("Blood", "Guessing");
             var row2 = new CST.TableRow("Step", "Chance");
-            var row3 = new CST.TableRow("Impressions", "#Level");
+            var row3 = new CST.TableRow("Impressions", "#level");
 
             var table = new CST.Table {
                 MethodName = "table__030_to_035",

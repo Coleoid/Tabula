@@ -457,7 +457,7 @@ namespace Tabula
                 new Token(TokenType.TableCellSeparator, "|"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.TableCellSeparator, "|"),
-                new Token(TokenType.Number, "31"),
+                new Token(TokenType.Variable, "another_month"),
                 new Token(TokenType.TableCellSeparator, "|"),
                 new Token(TokenType.NewLine, "\n"),
             };
@@ -470,7 +470,7 @@ namespace Tabula
             var row = table.Rows[0];
             Assert.That(row.Cells.Count, Is.EqualTo(1));
             Assert.That(row.Cells[0].Count, Is.EqualTo(1));
-            Assert.That(row.Cells[0][0], Is.EqualTo("31"));
+            Assert.That(row.Cells[0][0], Is.EqualTo("#another_month"));
         }
     }
 }
