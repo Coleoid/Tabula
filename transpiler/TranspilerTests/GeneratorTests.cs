@@ -364,7 +364,7 @@ namespace Tabula
             generator.PrepareParagraph(paragraph);
 
             var result = generator.sectionsBody.ToString();
-            Assert.That(result, Contains.Substring("[Label(\"short paragraph\")]"));
+            Assert.That(result, Contains.Substring("Label(     \"short paragraph\");"));
             Assert.That(result, Contains.Substring("public void paragraph__021_to_022()"));
             Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__($\"Bob\", $\"where am I?\")"));
         }

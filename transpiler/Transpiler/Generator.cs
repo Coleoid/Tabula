@@ -6,8 +6,8 @@ using System.Text.RegularExpressions;
 
 namespace Tabula
 {
-    //  Tabula HAS two major goals:
-    //  1:  It works.
+    //  Tabula has two major goals:
+    //  1:  It replaces Testopia with minimal fuss.
     //  2:  The developer-user experience is smooth.
     //  Keeping the generated code clean and readable goes directly to #2.
 
@@ -92,12 +92,12 @@ namespace Tabula
 
         public void PrepareParagraph(CST.Paragraph paragraph)
         {
-            sectionsBody.AppendLine($"[Label(\"{paragraph.Label}\")]");
             sectionsBody.AppendLine($"public void {paragraph.MethodName}()");
             sectionsBody.AppendLine("{");
             sectionsBody.Indent();
             var tagsArg = string.Join(", ", paragraph.Tags);
-            if (!string.IsNullOrEmpty(tagsArg)) sectionsBody.AppendLine($"Tags(\"{tagsArg}\");");
+            if (!string.IsNullOrEmpty(tagsArg)) sectionsBody.AppendLine($"Tags(     \"{tagsArg}\");");
+            sectionsBody.AppendLine($"Label(     \"{paragraph.Label}\");");
             PrepareActions(paragraph.Actions);
             sectionsBody.Dedent();
             sectionsBody.AppendLine("}");
@@ -222,6 +222,7 @@ namespace Tabula
             Builder.AppendLine("using Acadis.Constants.Accounting;");
             Builder.AppendLine("using Acadis.Constants.Admin;");
             Builder.AppendLine("using Acadis.SystemUtilities;");
+            Builder.AppendLine("using Tabula.API;");
             Builder.AppendLine();
         }
 
@@ -356,14 +357,14 @@ namespace Tabula
             if (method == null || stepArgCount != method.Args.Count())
             {
                 var stepText = step.GetReadableString();
-                var unfound = $"Unfound(      {stepText}, @{sourceLocation});";
+                var unfound = $"Unfound(  {stepText}, @{sourceLocation});";
                 sectionsBody.AppendLine(unfound);
             }
             else
             {
                 var call = ComposeCall(step, workflow, method);
                 var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
-                sectionsBody.AppendLine($"Do(() =>       {call}, @{sourceLocation}, {quotedCall});");
+                sectionsBody.AppendLine($"Do(() =>    {call}, @{sourceLocation}, {quotedCall});");
             }
         }
 
@@ -460,15 +461,16 @@ namespace Tabula
             var call = $"Var[\"{commandSet.Name}\"] = \"{commandSet.Term.Text}\"";
 
             var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
-            sectionsBody.AppendLine($"Do(() =>       {call}, {sourceLocation}, {quotedCall});");
+            sectionsBody.AppendLine($"Do(() =>    {call}, {sourceLocation}, {quotedCall});");
         }
 
         //TODO: Alias POI
         private void BuildAliasCommand(CST.CommandAlias aliasCommand)
         {
-            sectionsBody.AppendLine($"Alias( {aliasCommand.Name}, {aliasCommand.Action} ); //TODO: Actually implement");
+            sectionsBody.AppendLine($"Alias(     {aliasCommand.Name}, {aliasCommand.Action} ); //TODO: Actually implement");
         }
 
+        //TODO:  block__XXX_to_YYY()
 
         public void WriteClassClose()
         {

@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranspilerTests", "Transpil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryHoldingTestWorkflows", "LibraryHoldingTestWorkflows\LibraryHoldingTestWorkflows.csproj", "{21CFE6B7-1D6B-489B-8BF3-DFC92EC80E7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TabulaAPI", "TabulaAPI\TabulaAPI.csproj", "{7D0FBDBC-238F-42EE-A6C7-82A5F077752F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{21CFE6B7-1D6B-489B-8BF3-DFC92EC80E7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21CFE6B7-1D6B-489B-8BF3-DFC92EC80E7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21CFE6B7-1D6B-489B-8BF3-DFC92EC80E7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D0FBDBC-238F-42EE-A6C7-82A5F077752F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D0FBDBC-238F-42EE-A6C7-82A5F077752F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D0FBDBC-238F-42EE-A6C7-82A5F077752F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D0FBDBC-238F-42EE-A6C7-82A5F077752F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
