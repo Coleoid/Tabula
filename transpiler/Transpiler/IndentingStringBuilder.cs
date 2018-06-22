@@ -29,6 +29,7 @@ namespace Tabula
             { "0.2", "an idea whose time has come--but not here, and not to you." },
             { "0.3", "not gonna happen on my watch, buddy." },
             { "0.4", "too tricky for a plain-spoken StringBuilder from humble beginnings." },
+            { "0.5", "more reasonable than negative inertia, yet still unreasonable." },
         };
 
         private string _indentationString = string.Empty;
@@ -54,13 +55,15 @@ namespace Tabula
             _builder = new StringBuilder();
         }
 
-        public void Indent()
+        public IndentingStringBuilder Indent()
         {
             IndentSpaceCount += _indentWidth;
+            return this;
         }
-        public void Dedent()
+        public IndentingStringBuilder Dedent()
         {
             IndentSpaceCount -= _indentWidth;
+            return this;
         }
 
         private void IndentAtStartOfLine()
@@ -71,28 +74,37 @@ namespace Tabula
             StartOfLine = false;
         }
 
-        public void Append(string input)
+        public IndentingStringBuilder Append(string input)
         {
             IndentAtStartOfLine();
             Builder.Append(input);
+            return this;
         }
 
-        public void AppendLine(string input)
+        public IndentingStringBuilder AppendLine(string input)
         {
             IndentAtStartOfLine();
             Builder.AppendLine(input);
             StartOfLine = true;
+            return this;
         }
 
-        public void AppendLine()
+        public IndentingStringBuilder AppendLine()
         {
             Builder.AppendLine();
             StartOfLine = true;
+            return this;
         }
 
         public override string ToString()
         {
             return Builder.ToString();
+        }
+
+        /// <summary> This is another joke. </summary>
+        internal IndentingStringBuilder If(bool condition)
+        {
+            return condition ? this : new IndentingStringBuilder();
         }
     }
 }

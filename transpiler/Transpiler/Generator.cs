@@ -92,70 +92,78 @@ namespace Tabula
 
         public void PrepareParagraph(CST.Paragraph paragraph)
         {
-            sectionsBody.AppendLine($"public void {paragraph.MethodName}()");
-            sectionsBody.AppendLine("{");
-            sectionsBody.Indent();
+            sectionsBody
+                .AppendLine($"public void {paragraph.MethodName}()")
+                .AppendLine("{")
+                .Indent();
             var tagsArg = string.Join(", ", paragraph.Tags);
             if (!string.IsNullOrEmpty(tagsArg)) sectionsBody.AppendLine($"Tags(     \"{tagsArg}\");");
             sectionsBody.AppendLine($"Label(     \"{paragraph.Label}\");");
             PrepareActions(paragraph.Actions);
-            sectionsBody.Dedent();
-            sectionsBody.AppendLine("}");
-            sectionsBody.AppendLine();
+            sectionsBody
+                .Dedent()
+                .AppendLine("}")
+                .AppendLine();
 
             StageParagraph(paragraph.MethodName);
         }
 
         public void PrepareTable(CST.Table table)
         {
-            sectionsBody.AppendLine($"public Table {table.MethodName}()");  //TODO: if label exists, add it as a comment
-            sectionsBody.AppendLine("{");
-            sectionsBody.Indent();
-            sectionsBody.AppendLine("return new Table {");
-            sectionsBody.Indent();
+            sectionsBody
+                .AppendLine($"public Table {table.MethodName}()")  //TODO: if label exists, add it as a comment
+                .AppendLine("{")
+                .Indent()
+                .AppendLine("return new Table {")
+                .Indent();
+
             PrepareMetadata(table);
             PrepareRows(table);
-            sectionsBody.Dedent();
-            sectionsBody.AppendLine("};");
-            sectionsBody.Dedent();
-            sectionsBody.AppendLine("};");
-            sectionsBody.AppendLine();
+
+            sectionsBody
+                .Dedent()
+                .AppendLine("};")
+                .Dedent()
+                .AppendLine("};")
+                .AppendLine();
 
             StageTable(table.MethodName);
         }
 
         public void PrepareMetadata(CST.Table table)
         {
-            if (table.Tags.Any())
-            {
-                sectionsBody.Append("Tags = new List<string> { ");
-                sectionsBody.Append(string.Join(", ", table.Tags.Select(t => "\"" + Formatter.Reescape(t) + "\"")));
-                sectionsBody.AppendLine(" },");
-            }
+            sectionsBody
+                .If(table.Tags.Any())  //  Does this make me a bad person?
+                .Append("Tags = new List<string> { ")
+                .Append(string.Join(", ", table.Tags.Select(t => "\"" + Formatter.Reescape(t) + "\"")))
+                .AppendLine(" },");
 
-            if (!string.IsNullOrEmpty(table.Label))
-            {
-                sectionsBody.Append("Label = \"");
-                sectionsBody.Append(table.Label);
-                sectionsBody.AppendLine("\",");
-            }
+            sectionsBody
+                .If(!string.IsNullOrEmpty(table.Label))  //  Perhaps it's a cry for help.
+                .Append("Label = \"")
+                .Append(table.Label)
+                .AppendLine("\",");
         }
 
         private void PrepareRows(CST.Table table)
         {
-            sectionsBody.Append("Header = new List<string>     { ");
-            sectionsBody.Append(string.Join(", ", table.ColumnNames.Select(c => "\"" + Formatter.Reescape(c) + "\"" )));
-            sectionsBody.AppendLine(" },");
+            sectionsBody
+                .Append("Header = new List<string>     { ")
+                .Append(string.Join(", ", table.ColumnNames.Select(c => "\"" + Formatter.Reescape(c) + "\"" )))
+                .AppendLine(" },");
 
-            sectionsBody.AppendLine("Data = new List<List<string>> {");
-            sectionsBody.Indent();
+            sectionsBody
+                .AppendLine("Data = new List<List<string>> {")
+                .Indent();
+
             foreach (var row in table.Rows)
             {
                 sectionsBody.AppendLine(Row_ToCodeText(row) + ",");
             }
 
-            sectionsBody.Dedent();
-            sectionsBody.AppendLine("}");
+            sectionsBody
+                .Dedent()
+                .AppendLine("}");
         }
 
         //TODO:  Should these go in the CST objects themselves? 
@@ -205,25 +213,27 @@ namespace Tabula
 
         public void WriteExecuteMethod()
         {
-            Builder.AppendLine("        public void ExecuteScenario()");
-            Builder.AppendLine("        {");
-            Builder.Append(executeMethodBody.Builder);
-            Builder.AppendLine("        }");
-            Builder.AppendLine();
+            Builder
+                .AppendLine("        public void ExecuteScenario()")
+                .AppendLine("        {")
+                .Append(executeMethodBody.Builder)
+                .AppendLine("        }")
+                .AppendLine();
         }
 
         public void WriteHeader()
         {
-            Builder.AppendLine($"//  This file was generated by TabulaClassGenerator version {CurrentVersion}.");
-            Builder.AppendLine($"//  To change this file, change the Tabula scenario at {InputFilePath}.");
-            Builder.AppendLine($"//  Version {CurrentVersion} {Versions[CurrentVersion]}.  You have been warned.");
-            Builder.AppendLine("using System;");
-            Builder.AppendLine("using System.Collections.Generic;");
-            Builder.AppendLine("using Acadis.Constants.Accounting;");
-            Builder.AppendLine("using Acadis.Constants.Admin;");
-            Builder.AppendLine("using Acadis.SystemUtilities;");
-            Builder.AppendLine("using Tabula.API;");
-            Builder.AppendLine();
+            Builder
+                .AppendLine($"//  This file was generated by TabulaClassGenerator version {CurrentVersion}.")
+                .AppendLine($"//  To change this file, change the Tabula scenario at {InputFilePath}.")
+                .AppendLine($"//  Version {CurrentVersion} {Versions[CurrentVersion]}.  You have been warned.")
+                .AppendLine("using System;")
+                .AppendLine("using System.Collections.Generic;")
+                .AppendLine("using Acadis.Constants.Accounting;")
+                .AppendLine("using Acadis.Constants.Admin;")
+                .AppendLine("using Acadis.SystemUtilities;")
+                .AppendLine("using Tabula.API;")
+                .AppendLine();
         }
 
         public void WriteNamespaceOpen()
@@ -236,10 +246,11 @@ namespace Tabula
         public void WriteClassOpen()
         {
             GeneratedClassName = GetGeneratedClassName();
-            Builder.AppendLine($"    //  \"{Scenario.Label}\"");
-            Builder.AppendLine($"    public class {GeneratedClassName}");
-            Builder.AppendLine("        : GeneratedScenarioBase, IGeneratedScenario");
-            Builder.AppendLine("    {");
+            Builder
+                .AppendLine($"    //  \"{Scenario.Label}\"")
+                .AppendLine($"    public class {GeneratedClassName}")
+                .AppendLine("        : GeneratedScenarioBase, IGeneratedScenario")
+                .AppendLine("    {");
         }
 
         public string GetGeneratedClassName()
@@ -270,11 +281,12 @@ namespace Tabula
 
         public void WriteConstructor()
         {
-            Builder.Append("        public ");
-            Builder.Append(GeneratedClassName);
-            Builder.AppendLine("()");
-            Builder.AppendLine("            : base()");
-            Builder.AppendLine("        {");
+            Builder
+                .Append("        public ")
+                .Append(GeneratedClassName)
+                .AppendLine("()")
+                .AppendLine("            : base()")
+                .AppendLine("        {");
 
             WriteInstantiations();
 

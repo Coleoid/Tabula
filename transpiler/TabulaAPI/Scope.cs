@@ -15,7 +15,7 @@ namespace Tabula.API
                 var lowKey = key.ToLower().Replace(" ", "");
                 if (lowKey.StartsWith("#"))
                 {
-                    lowKey = this[lowKey.Substring(1)].ToLower().Replace(" ", "")];
+                    lowKey = this[lowKey.Substring(1)].ToLower().Replace(" ", "");
                 }
                 if (_values.ContainsKey(lowKey))
                     return _values[lowKey];
@@ -29,5 +29,20 @@ namespace Tabula.API
             set { _values[key.ToLower().Replace(" ", "")] = value; }
         }
 
+        //speculation:
+        public string NearHits(string unfoundName)
+        {
+            List<string> near = Levenshtein(unfoundName);
+
+            var message = $"Did not find {unfoundName}.  Did you mean {near[0]}, {near[1]}, or {near[2]}?";
+            return message;
+        }
+
+        public List<string> Levenshtein(string unfoundName)
+        {
+            var result = new List<string>();
+
+            return result;
+        }
     }
 }
