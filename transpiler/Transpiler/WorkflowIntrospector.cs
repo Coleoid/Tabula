@@ -21,8 +21,11 @@ namespace Tabula
         {
             CachedWorkflows = new Dictionary<Type, WorkflowDetail>();
             TypeFromSearchName = new Dictionary<string, Type>();
-            Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
-            Library = "ScenarioContext.dll";
+            //Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
+            //Library = "ScenarioContext.dll";
+            Location = @"K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug";
+            Library = "LibContainingScenarios.dll";
+            DetailLoadedTypes();
         }
 
         public void DetailLoadedTypes()
@@ -88,6 +91,41 @@ namespace Tabula
 
         #region Reflective sausage-making
 
+        //TODO:  Get workflow dll(s) from config and/or command line args
+        public List<Type> GetLoadedTypes()
+        {
+            AppDomain curDomain = AppDomain.CurrentDomain;
+            curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
+
+            Location = @"K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug";
+            Library = "LibContainingScenarios.dll";
+            Assembly asm2 = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
+
+            Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
+            Library = "ScenarioContext.dll";
+            Assembly asm1 = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
+
+            var asms = curDomain.GetAssemblies();
+
+            var myTypes = new List<Type>();
+            myTypes.AddRange(asm1.ExportedTypes);
+            myTypes.AddRange(asm2.ExportedTypes);
+
+            return myTypes;
+        }
+
+        ////TODO:  Get workflow dll(s) from config and/or command line args
+        //public List<Type> GetLoadedTypes()
+        //{
+        //    AppDomain curDomain = AppDomain.CurrentDomain;
+        //    curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
+
+        //    Assembly asm = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
+        //    var asms = curDomain.GetAssemblies();
+
+        //    return asm.ExportedTypes.ToList();
+        //}
+
         //TODO:  Get location(s) from config and/or command line args
         private Assembly resolveAssembly(object sender, ResolveEventArgs args)
         {
@@ -104,18 +142,6 @@ namespace Tabula
             return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
-
-        //TODO:  Get workflow dll(s) from config and/or command line args
-        public List<Type> GetLoadedTypes()
-        {
-            AppDomain curDomain = AppDomain.CurrentDomain;
-            curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
-
-            Assembly asm = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
-            var asms = curDomain.GetAssemblies();
-
-            return asm.ExportedTypes.ToList();
-        }
         #endregion
     }
 }

@@ -1,0 +1,12 @@
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug\LibContainingScenarios.dll
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug\LibContainingScenarios.pdb
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug\nunit.framework.dll
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug\TabulaAPI.dll
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug\TestopiaAPI.dll
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug\TabulaAPI.pdb
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug\TestopiaAPI.pdb
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\obj\Debug\LibContainingScenarios.csprojAssemblyReference.cache
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\obj\Debug\LibContainingScenarios.csproj.CoreCompileInputs.cache
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\obj\Debug\LibContainingScenarios.csproj.CopyComplete
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\obj\Debug\LibContainingScenarios.dll
+K:\code\Tabula\studio_plugin_tester\ClassLibrary1\obj\Debug\LibContainingScenarios.pdb

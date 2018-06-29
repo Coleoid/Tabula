@@ -124,7 +124,7 @@ namespace Tabula
                 .Dedent()
                 .AppendLine("};")
                 .Dedent()
-                .AppendLine("};")
+                .AppendLine("}")
                 .AppendLine();
 
             StageTable(table.MethodName);

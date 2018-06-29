@@ -1,0 +1,18 @@
+﻿[AC-98765, Conferences]
+Scenario:  "We are arranging a Serious Conference"
+
+"Several serious topics are recommended":
+use: SeriousWorkflow
+Register "Saving for your retirement" as serious
+Register "Maintaining and improving your health" as serious
+Register "Bobcat Goldthwait" as serious
+
+"On later review, some of these don't meet our standards":
+use: SeriousWorkflow
+Remove "Bobcat Goldthwait" from our topics
+
+"Check that our topics are shaping up extremely seriously": 
+use: SeriousWorkflow
+Verify that #topic is serious
+| topic |
+|"Saving for your retirement"|

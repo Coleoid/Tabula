@@ -14,9 +14,15 @@ namespace Tabula
     /// and returning byte[] of the text of the generated class to the VS project system.
     /// </summary>
     [ComVisible(true)]
-    [Guid("7D7984C8-7744-48B1-9FDF-A90B2C4159F5")]
-    [CodeGeneratorRegistration(typeof(TabulaClassGenerator), "Generate C# of Tabula scenarios", vsContextGuids.vsContextGuidVCSProject, GeneratesDesignTimeSource = true)]
-    [ProvideObject(typeof(TabulaClassGenerator))]
+    [Guid("19401343-E3BA-4EF5-8C14-E6F3D6AD1441")]
+    [CodeGeneratorRegistration(
+        typeof(TabulaClassGenerator),
+        "Generate C# of Tabula scenarios",
+        vsContextGuids.vsContextGuidVCSProject,
+        GeneratesDesignTimeSource = true,
+        GeneratorRegKeyName = "TabulaClassGenerator"
+    )]
+    [ProvideObject(typeof(TabulaClassGenerator), RegisterUsing = RegistrationMethod.CodeBase)]
     public class TabulaClassGenerator : BaseCodeGenerator_WithOLESite
     {
         internal static string name = "TabulaClassGenerator";  //  for 'Custom Tool' property of project item
@@ -33,7 +39,7 @@ namespace Tabula
                 ThreadHelper.ThrowIfNotOnUIThread();  //  Really, Microsoft?
                 CodeGeneratorProgress?.Progress(50, 100);
 
-                Encoding enc;
+                //Encoding enc;
                 string bodyText;
                 var builder = new StringBuilder();
                 using (StringWriter writer = new StringWriter(builder))
@@ -42,19 +48,22 @@ namespace Tabula
                     writer.Flush();
                     CodeGeneratorProgress?.Progress(90, 100);
 
-                    enc = Encoding.GetEncoding(writer.Encoding.WindowsCodePage);
+                    //enc = Encoding.GetEncoding(writer.Encoding.WindowsCodePage);
                     bodyText = writer.ToString();
                 }
 
-                //  The preamble provides the byte order mark.  'Round here, we use little-endian UTF16, stranger.
-                byte[] preamble = enc.GetPreamble();
-                byte[] body = enc.GetBytes(bodyText);
+                return Encoding.UTF8.GetBytes(bodyText);
 
-                byte[] whole = new byte[preamble.Length + body.Length];
-                Array.Copy(preamble, 0, whole, 0, preamble.Length);
-                Array.Copy(body, 0, whole, preamble.Length, body.Length);
+                //  Older version, I hope we don't need?
+                ////  The preamble provides the byte order mark.  'Round here, we use little-endian UTF16, stranger.
+                //byte[] preamble = enc.GetPreamble();
+                //byte[] body = enc.GetBytes(bodyText);
 
-                return whole;
+                //byte[] whole = new byte[preamble.Length + body.Length];
+                //Array.Copy(preamble, 0, whole, 0, preamble.Length);
+                //Array.Copy(body, 0, whole, preamble.Length, body.Length);
+
+                //return whole;
             }
             catch (Exception e)
             {
