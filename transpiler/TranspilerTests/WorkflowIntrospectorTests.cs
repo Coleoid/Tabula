@@ -26,7 +26,7 @@ namespace Tabula
         [TestCase("CommentsModalWorkflow")]
         [TestCase("ListManagement")]
         [TestCase("DivisionManagement")]
-        [TestCase("Workflow")]
+        //[TestCase("Workflow")]
         [TestCase("MvcBaseWorkflow")]
         public void GetWorkflowDetail_gets_workflows_and_workflow_base_classes(string typeName)
         {
@@ -37,6 +37,20 @@ namespace Tabula
             Assert.That(isWorkflow);
             Assert.That(detail, Is.Not.Null);
         }
+
+        [TestCase("Workflow")]
+        public void multiple_workflow_classes(string typeName)
+        {
+            var wfs = _types.Where(t => t.Name == typeName);
+            foreach (var type in wfs)
+            {
+                bool isWorkflow = _introspector.IsWorkflow(type);
+                var detail = _introspector.GetWorkflowDetail(type);
+                Assert.That(isWorkflow);
+                Assert.That(detail, Is.Not.Null);
+            }
+        }
+
 
         [TestCase("WorkflowProperty")]
         public void GetWorkflowDetail_skips_utility_classes(string typeName)

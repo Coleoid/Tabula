@@ -133,7 +133,7 @@ namespace Tabula
         public void PrepareMetadata(CST.Table table)
         {
             sectionsBody
-                .If(table.Tags.Any())  //  Does this make me a bad person?
+                .If(table.Tags.Any())  //  Does .If() make me a bad person?
                 .Append("Tags = new List<string> { ")
                 .Append(string.Join(", ", table.Tags.Select(t => "\"" + Formatter.Reescape(t) + "\"")))
                 .AppendLine(" },");
