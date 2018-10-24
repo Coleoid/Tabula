@@ -11,10 +11,12 @@ namespace Tabula.CST
     public class Paragraph : Section
     {
         public List<Action> Actions { get; internal set; }
+        public List<WorkflowDetail> WorkflowsInScope { get; internal set; }
 
         public Paragraph()
         {
             Actions = new List<Action>();
+            WorkflowsInScope = new List<WorkflowDetail>();
         }
     }
 

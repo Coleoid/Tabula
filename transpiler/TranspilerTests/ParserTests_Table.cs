@@ -125,7 +125,7 @@ namespace Tabula
         }
 
 
-        //TODO:  work out desired behaviors when column counts don't match.  Several cases.
+        //TODO:  spec behaviors when column counts don't match across rows.  Several cases.
 
     }
 }

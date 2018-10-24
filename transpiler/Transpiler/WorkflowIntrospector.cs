@@ -67,7 +67,8 @@ namespace Tabula
             {
                 Name = type.Name,
                 InstanceName = Formatter.InstanceName_from_TypeName(type.Name),
-                Parent = GetWorkflowDetail(type.BaseType)
+                Parent = GetWorkflowDetail(type.BaseType),
+                Namespace = type.Namespace
             };
 
             var myMethods = type.GetMethods().Where(mi => mi.DeclaringType == type);

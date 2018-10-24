@@ -92,6 +92,7 @@ namespace Tabula
                 (TokenType.Word, "world")
             );
 
+            generator.CurrentParagraph = new CST.Paragraph();
             generator.BuildStep(step);
 
             var result = generator.sectionsBody.ToString();
@@ -107,7 +108,8 @@ namespace Tabula
         {
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "MyMethod_correctly_spelled" });
-            generator.WorkflowsInScope.Add(detail);
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(34,
                 (TokenType.Word, "my"),
@@ -133,7 +135,8 @@ namespace Tabula
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
-            generator.WorkflowsInScope.Add(detail);
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "my"),
@@ -182,7 +185,9 @@ namespace Tabula
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
-            generator.WorkflowsInScope.Add(detail);
+
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "user"),
@@ -208,7 +213,9 @@ namespace Tabula
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "user__thing", Args = args });
-            generator.WorkflowsInScope.Add(detail);
+            var paragraph = new CST.Paragraph();
+            generator.CurrentParagraph = paragraph;
+            paragraph.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "user"),
@@ -232,7 +239,8 @@ namespace Tabula
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
-            generator.WorkflowsInScope.Add(detail);
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "my"),
@@ -264,7 +272,8 @@ namespace Tabula
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "To__I_say__and__", Args = args });
-            generator.WorkflowsInScope.Add(detail);
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "to"),
@@ -298,7 +307,9 @@ namespace Tabula
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
-            generator.WorkflowsInScope.Add(detail);
+            
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(222,
                 (TokenType.Word, "my"),
@@ -342,9 +353,6 @@ namespace Tabula
                 new ArgDetail { Name = "name", Type = typeof(string) },
                 new ArgDetail { Name = "comment", Type = typeof(string) }
             };
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
-            generator.WorkflowsInScope.Add(detail);
 
             var step = new CST.Step(22,
                 (TokenType.Word, "user"),
@@ -360,13 +368,57 @@ namespace Tabula
                 MethodName = "paragraph__021_to_022"
             };
             paragraph.Actions.Add(step);
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow", Namespace = "App" };
+            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
+            paragraph.WorkflowsInScope.Add(detail);
 
             generator.PrepareParagraph(paragraph);
 
             var result = generator.sectionsBody.ToString();
             Assert.That(result, Contains.Substring("Label(     \"short paragraph\");"));
             Assert.That(result, Contains.Substring("public void paragraph__021_to_022()"));
+            Assert.That(result, Contains.Substring("myWorkflow = new App.GreetingWorkflow();"));
             Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__($\"Bob\", $\"where am I?\")"));
+        }
+
+        [Test]
+        public void BuildParagraph_will_reinstantiate_all_workflows_in_scope()
+        {
+            var paragraph = new CST.Paragraph
+            {
+                Label = "short paragraph",
+                MethodName = "paragraph__021_to_022"
+            };
+
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "comment", Type = typeof(string) }
+            };
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow", Namespace = "App" };
+            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
+            paragraph.WorkflowsInScope.Add(detail);
+
+            detail = new WorkflowDetail { Name = "ExtraWorkflow", InstanceName = "otherWorkflow", Namespace = "App" };
+            paragraph.WorkflowsInScope.Add(detail);
+            detail = new WorkflowDetail { Name = "ThirdWorkflow", InstanceName = "thirdWorkflow", Namespace = "App.FancyNamespace" };
+            paragraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(22,
+                (TokenType.Word, "user"),
+                (TokenType.String, "Bob"),
+                (TokenType.Word, "made"),
+                (TokenType.Word, "comment"),
+                (TokenType.String, "where am I?")
+            );
+
+            paragraph.Actions.Add(step);
+
+            generator.PrepareParagraph(paragraph);
+
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("myWorkflow = new App.GreetingWorkflow();"));
+            Assert.That(result, Contains.Substring("otherWorkflow = new App.ExtraWorkflow();"));
+            Assert.That(result, Contains.Substring("thirdWorkflow = new App.FancyNamespace.ThirdWorkflow();"));
         }
 
         [TestCase("method name", "public Table table__030_to_035()")]
@@ -470,7 +522,7 @@ namespace Tabula
             cells.Add(cell);
             var row = new CST.TableRow(cells);
 
-            var result = generator.Row_ToCodeText(row);
+            var result = generator.CodeTextFrom(row);
 
             Assert.That(result, Contains.Substring("new List<string>"));
             Assert.That(result, Contains.Substring("{ \"Fluffy\" }"));

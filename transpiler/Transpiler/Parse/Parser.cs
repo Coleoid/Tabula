@@ -87,8 +87,8 @@ namespace Tabula.Parse
 
         public CST.CommandSet ParseCommand_Set(ParserState state)
         {
-            state.AdvanceLines();
-            if (!state.NextIs(TokenType.cmd_Set)) return null;
+            if (!state.NextIs(TokenType.cmd_Set))
+                throw new Exception($"Needed a Set command, got a [{state.Peek()?.Type}].");
 
             var setToken = state.Take();
             var term = ParseTerm(state);
@@ -194,7 +194,7 @@ namespace Tabula.Parse
 
         public CST.Label ParseSectionLabel(ParserState state)
         {
-            CST.Label label = CST.Label.Wrap(state.Take(TokenType.SectionLabel));
+            CST.Label label = CST.Label.NewOrNull(state.Take(TokenType.SectionLabel));
             state.AdvanceLines();
             return label;
         }
@@ -343,7 +343,7 @@ namespace Tabula.Parse
                 TokenType.Variable
             );
 
-            return CST.Symbol.Wrap(token);
+            return CST.Symbol.NewOrNull(token);
         }
 
         public List<CST.Symbol> ParseTerms(ParserState state)
@@ -357,7 +357,7 @@ namespace Tabula.Parse
 
         public CST.Symbol ParseWord(ParserState state)
         {
-            return CST.Symbol.Wrap(state.Take(TokenType.Word));
+            return CST.Symbol.NewOrNull(state.Take(TokenType.Word));
         }
 
     }

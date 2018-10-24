@@ -14,13 +14,13 @@ namespace Tabula
     public class Generator
     {
         public static string CurrentVersion { get => "0.4"; }
-        private Dictionary<string, string> Versions = new Dictionary<string, string>
+        private readonly Dictionary<string, string> Versions = new Dictionary<string, string>
         {
             { "0.1", "only generates this rudimentary paste" },
             { "0.2", "can barely generate a compilable class" },
             { "0.3", "doesn't always generate a compilable class" },
             { "0.4", "is not yet alpha (known missing 1.0 features)" },
-            { "0.5", "is a very lean 1.0 alpha, for initial attempts to use" },
+            { "0.5", "is a very lean initial alpha, start trying to use it!" },
             //  feels unproductive to project further at this time (29 jan '18)
         };
 
@@ -35,14 +35,13 @@ namespace Tabula
         public string InputFilePath { get; set; }
 
         public Dictionary<string, WorkflowDetail> Workflows { get; private set; }
-        public List<WorkflowDetail> WorkflowsInScope { get; set; }
-        public WorkflowIntrospector Library { get; private set; }
 
+        public WorkflowIntrospector Library { get; private set; }
+        public CST.Paragraph CurrentParagraph { get; set; }
 
         public Generator()
         {
             Workflows = new Dictionary<string, WorkflowDetail>();
-            WorkflowsInScope = new List<WorkflowDetail>();
             Library = new WorkflowIntrospector();
     
             executeMethodBody = new IndentingStringBuilder(12);  // 12 = namespace + class + method
@@ -92,14 +91,31 @@ namespace Tabula
 
         public void PrepareParagraph(CST.Paragraph paragraph)
         {
+            CurrentParagraph = paragraph;
+
             sectionsBody
                 .AppendLine($"public void {paragraph.MethodName}()")
                 .AppendLine("{")
                 .Indent();
+
             var tagsArg = string.Join(", ", paragraph.Tags);
-            if (!string.IsNullOrEmpty(tagsArg)) sectionsBody.AppendLine($"Tags(     \"{tagsArg}\");");
+            if (!string.IsNullOrEmpty(tagsArg))
+                sectionsBody.AppendLine($"Tags(     \"{tagsArg}\");");  //TODO:  Add test for tags on paragraph
+
+            var useCommands = paragraph.Actions.Where(a => a is CST.CommandUse).Select(a => (CST.CommandUse) a);
+            PrepareUses(useCommands);
+            foreach (WorkflowDetail workflow in paragraph.WorkflowsInScope)
+            {
+                sectionsBody
+                    .AppendLine($"var {workflow.InstanceName} = new {workflow.Namespace}.{workflow.Name}();");
+            }
+            if (paragraph.WorkflowsInScope.Count() > 0)
+                sectionsBody.AppendLine();
+
             sectionsBody.AppendLine($"Label(     \"{paragraph.Label}\");");
+            
             PrepareActions(paragraph.Actions);
+            
             sectionsBody
                 .Dedent()
                 .AppendLine("}")
@@ -158,7 +174,7 @@ namespace Tabula
 
             foreach (var row in table.Rows)
             {
-                sectionsBody.AppendLine(Row_ToCodeText(row) + ",");
+                sectionsBody.AppendLine(CodeTextFrom(row) + ",");
             }
 
             sectionsBody
@@ -167,19 +183,19 @@ namespace Tabula
         }
 
         //TODO:  Should these go in the CST objects themselves? 
-        public string Row_ToCodeText(CST.TableRow row)
+        public string CodeTextFrom(CST.TableRow row)
         {
-            var cellStrings = row.Cells.Select(c => Cell_ToCodeText(c));
+            var cellStrings = row.Cells.Select(c => CodeTextFrom(c));
 
             return "new List<string>          { " + string.Join(", ", cellStrings) + " }";
         }
 
-        public string Cell_ToCodeText(List<string> cell)
+        public string CodeTextFrom(List<string> cell)
         {
-            return string_ToCSharpString(string.Join(" ", cell));
+            return StringFrom(string.Join(" ", cell));
         }
 
-        public string string_ToCSharpString(string input)
+        public string StringFrom(string input)
         {
             return "\"" + input.Replace("\\", "\\\\").Replace("\"", "\\") + "\"";
         }
@@ -288,24 +304,19 @@ namespace Tabula
                 .AppendLine("            : base()")
                 .AppendLine("        {");
 
-            WriteInstantiations();
-
             Builder.AppendLine("        }");
-        }
-
-        public void WriteInstantiations()
-        {
-            foreach (var type in GetNeededWorkflowTypes())
-            {
-                var instance = Formatter.InstanceName_from_TypeName(type.Name);
-                Builder.AppendLine($"            {instance} = new {type.Namespace}.{type.Name}();");
-            }
         }
 
 
         public void WriteSectionMethods()
         {
             Builder.Append(sectionsBody.Builder);
+        }
+
+        public void PrepareUses(IEnumerable<CST.CommandUse> useCommands)
+        {
+            foreach (var useCommand in useCommands)
+                UseWorkflow(useCommand);
         }
 
         public void PrepareActions(List<CST.Action> actions)
@@ -347,10 +358,10 @@ namespace Tabula
                 if (!Library.TypeFromSearchName.ContainsKey(searchName))
                     throw new Exception($"Tabula found no workflow matching [{label}].");
 
-                var type = Library.TypeFromSearchName[searchName];
+                Type type = Library.TypeFromSearchName[searchName];
                 var workflow = Library.CachedWorkflows[type];
-                WorkflowsInScope.Remove(workflow);
-                WorkflowsInScope.Add(workflow);
+                CurrentParagraph.WorkflowsInScope.Remove(workflow);
+                CurrentParagraph.WorkflowsInScope.Add(workflow);
             }
         }
 
@@ -436,7 +447,7 @@ namespace Tabula
 
         public (WorkflowDetail workflow, MethodDetail method) FindWorkflowMethod(string searchName)
         {
-            foreach(var workflow in (WorkflowsInScope as IEnumerable<WorkflowDetail>).Reverse())
+            foreach(var workflow in (CurrentParagraph.WorkflowsInScope as IEnumerable<WorkflowDetail>).Reverse())
             {
                 if (workflow.Methods.ContainsKey(searchName))
                     return (workflow, workflow.Methods[searchName]);

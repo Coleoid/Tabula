@@ -34,9 +34,9 @@ namespace Tabula
             return text.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
 
-        internal static List<string> Reescape(List<string> text)
-        {
-            return text.Select(t => Reescape(t)).ToList();
-        }
+        //internal static List<string> Reescape(List<string> text)
+        //{
+        //    return text.Select(t => Reescape(t)).ToList();
+        //}
     }
 }

@@ -31,19 +31,21 @@ namespace Tabula
 
 
         [Test]
-        public void DispatchAction_sends_Use_commands_to_UseWorkflow()
+        public void PrepareAction_puts_workflows_in_paragraph_scope()
         {
+            var paragraph = new CST.Paragraph();
+            generator.CurrentParagraph = paragraph;
             var action = new CST.CommandUse(new List<string> { "FirstTestWorkflow" });
             generator.PrepareAction(action);
 
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
-            Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
+            Assert.That(paragraph.WorkflowsInScope[0], Is.SameAs(first));
 
-            generator.WorkflowsInScope.Clear();
+            paragraph.WorkflowsInScope.Clear();
             generator.UseWorkflow(action);
 
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
-            Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
+            Assert.That(paragraph.WorkflowsInScope[0], Is.SameAs(first));
         }
 
         [TestCase("FirstTestWorkflow")]
@@ -51,13 +53,15 @@ namespace Tabula
         [TestCase("FIRST test")]
         public void Use_command_finds_workflows_under_several_spellings(string requestedWorkflow)
         {
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(0));
+            var paragraph = new CST.Paragraph();
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(0));
+            generator.CurrentParagraph = paragraph;
 
             var action = new CST.CommandUse(new List<string> { requestedWorkflow });
             generator.UseWorkflow(action);
 
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
-            var scopedWorkflow = generator.WorkflowsInScope[0];
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
+            var scopedWorkflow = paragraph.WorkflowsInScope[0];
 
             Assert.That(scopedWorkflow.Name, Is.EqualTo("FirstTestWorkflow"));
         }
@@ -65,32 +69,42 @@ namespace Tabula
         [Test]
         public void Use_command_Adds_workflows_to_scope()
         {
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(0));
+            var paragraph = new CST.Paragraph();
+            generator.CurrentParagraph = paragraph;
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(0));
 
             var action = new CST.CommandUse(new List<string> { "FirstTestWorkflow" });
             generator.UseWorkflow(action);
 
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
-            Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
+            Assert.That(paragraph.WorkflowsInScope[0], Is.SameAs(first));
 
             action = new CST.CommandUse(new List<string> { "SecondTestWorkflow", "AnotherTestWorkflow" });
             generator.UseWorkflow(action);
 
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(3));
-            Assert.That(generator.WorkflowsInScope[2], Is.SameAs(another));
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(3));
+            Assert.That(paragraph.WorkflowsInScope[2], Is.SameAs(another));
         }
+
+        //TODO: make sure that in-paragraph workflow instance names clip off 'workflow'
+
+        //TODO: second and subsequent workflow usages don't cause a new 'var myfixture = ...' line
+
+        //TODO: in-paragraph instantiations are of 'var xx' locals, and no declarations block at bottom of class.
 
         [Test]
         public void UseWorkflow_will_not_add_duplicate_workflows()
         {
+            var paragraph = new CST.Paragraph();
+            generator.CurrentParagraph = paragraph;
             var action = new CST.CommandUse(new List<string> { "FirstTestWorkflow" });
             generator.UseWorkflow(action);
 
             action = new CST.CommandUse(new List<string> { "First Test Workflow" });
             generator.UseWorkflow(action);
 
-            Assert.That(generator.WorkflowsInScope, Has.Count.EqualTo(1));
-            Assert.That(generator.WorkflowsInScope[0], Is.SameAs(first));
+            Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
+            Assert.That(paragraph.WorkflowsInScope[0], Is.SameAs(first));
         }
 
         [Test]
@@ -106,6 +120,7 @@ namespace Tabula
         [Test]
         public void Use_command_complains_sensibly_when_workflow_unfound()
         {
+            var paragraph = new CST.Paragraph();
             var action = new CST.CommandUse(new List<string> { "P equals NP workflow" });
             var ex = Assert.Throws<Exception>(() => generator.UseWorkflow(action));
 
@@ -118,8 +133,9 @@ namespace Tabula
             var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
             detail.AddMethod(new MethodDetail { Name = "Hello_Everybody" });
-
-            generator.WorkflowsInScope.Add(detail);
+            var paragraph = new CST.Paragraph();
+            generator.CurrentParagraph = paragraph;
+            paragraph.WorkflowsInScope.Add(detail);
 
             (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
 
@@ -130,11 +146,12 @@ namespace Tabula
         [Test]
         public void FindWorkflowMethod_only_searches_impls_in_scope()
         {
+            generator.CurrentParagraph = new CST.Paragraph();
             (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
             Assert.That(workflow, Is.Null);
             Assert.That(method, Is.Null);
 
-            generator.WorkflowsInScope.Add(first);
+            generator.CurrentParagraph.WorkflowsInScope.Add(first);
 
             (workflow, method) = generator.FindWorkflowMethod("helloworld");
             Assert.That(workflow, Is.Not.Null);
@@ -147,7 +164,8 @@ namespace Tabula
             var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "HelloWorld" });
 
-            generator.WorkflowsInScope.Add(detail);
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             (var workflow, var method) = generator.FindWorkflowMethod("helloworld");
 
@@ -160,11 +178,12 @@ namespace Tabula
         {
             var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
-            generator.WorkflowsInScope.Add(detail);
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             detail = new WorkflowDetail { Name = "SheriffWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
-            generator.WorkflowsInScope.Add(detail);
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             (var workflow, var method) = generator.FindWorkflowMethod("howdystranger");
 

@@ -429,6 +429,37 @@ namespace Tabula
             Assert.That(cmdSet.EndLine, Is.EqualTo(18));
         }
 
+
+        [Test]
+        public void ParseSet_returns_null_when_not_()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.String, "foo", 18),
+                new Token(TokenType.cmd_Set, "bar", 19),
+            };
+
+            var state = new ParserState(tokens);
+
+            var ex = Assert.Throws<Exception>(() => _parser.ParseCommand_Set(state));
+            Assert.That(ex, Has.Message.EqualTo("Needed a Set command, got a [String]."));
+        }
+
+        [Test]
+        public void ParseSet_throws_descriptively_when_not_followed_by_Action()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.cmd_Set, "foo", 18),
+                new Token(TokenType.cmd_Set, "bar", 19),
+            };
+
+            var state = new ParserState(tokens);
+
+            var ex = Assert.Throws<Exception>(() => _parser.ParseCommand_Set(state));
+            Assert.That(ex, Has.Message.StartWith("The target of a Set command must be a term"));
+        }
+
+
+
         [Test]
         public void Parse_simplest_table()
         {

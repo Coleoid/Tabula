@@ -11,7 +11,7 @@ namespace Tabula
         public WorkflowDetail Parent { get; set; }
         public string Name { get; set; }
         public string InstanceName { get; set; }
-
+        public string Namespace { get; set; }
         public WorkflowDetail()
         {
             Methods = new Dictionary<string, MethodDetail>();

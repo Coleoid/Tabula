@@ -22,7 +22,7 @@ namespace Tabula.CST
             : base(token)
         { }
 
-        internal static Label Wrap(Token token)
+        internal static Label NewOrNull(Token token)
         {
             return token == null ? null : new Label(token);
         }
@@ -42,7 +42,7 @@ namespace Tabula.CST
             : base(new Token(type, text) { Line = line })
         { }
 
-        internal static Symbol Wrap(Token token)
+        internal static Symbol NewOrNull(Token token)
         {
             return token == null ? null : new Symbol(token);
         }
