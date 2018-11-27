@@ -1,9 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Tabula
 {
@@ -23,7 +21,7 @@ namespace Tabula
         {
             builder = new StringBuilder();
             scenario = new CST.Scenario();
-            generator = new Generator { Builder = builder, Scenario = scenario, InputFilePath = "scenario_source.tab" };
+            generator = new Generator {Builder = builder, Scenario = scenario, InputFilePath = "scenario_source.tab"};
             first = generator.Library.GetWorkflowDetail(typeof(FirstTestWorkflow));
             second = generator.Library.GetWorkflowDetail(typeof(SecondTestWorkflow));
             another = generator.Library.GetWorkflowDetail(typeof(extra.AnotherTestWorkflow));
@@ -35,7 +33,7 @@ namespace Tabula
         {
             var paragraph = new CST.Paragraph();
             generator.CurrentParagraph = paragraph;
-            var action = new CST.CommandUse(new List<string> { "FirstTestWorkflow" });
+            var action = new CST.CommandUse(new List<string> {"FirstTestWorkflow"});
             generator.PrepareAction(action);
 
             Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
@@ -57,7 +55,7 @@ namespace Tabula
             Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(0));
             generator.CurrentParagraph = paragraph;
 
-            var action = new CST.CommandUse(new List<string> { requestedWorkflow });
+            var action = new CST.CommandUse(new List<string> {requestedWorkflow});
             generator.UseWorkflow(action);
 
             Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
@@ -73,13 +71,13 @@ namespace Tabula
             generator.CurrentParagraph = paragraph;
             Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(0));
 
-            var action = new CST.CommandUse(new List<string> { "FirstTestWorkflow" });
+            var action = new CST.CommandUse(new List<string> {"FirstTestWorkflow"});
             generator.UseWorkflow(action);
 
             Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
             Assert.That(paragraph.WorkflowsInScope[0], Is.SameAs(first));
 
-            action = new CST.CommandUse(new List<string> { "SecondTestWorkflow", "AnotherTestWorkflow" });
+            action = new CST.CommandUse(new List<string> {"SecondTestWorkflow", "AnotherTestWorkflow"});
             generator.UseWorkflow(action);
 
             Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(3));
@@ -97,10 +95,10 @@ namespace Tabula
         {
             var paragraph = new CST.Paragraph();
             generator.CurrentParagraph = paragraph;
-            var action = new CST.CommandUse(new List<string> { "FirstTestWorkflow" });
+            var action = new CST.CommandUse(new List<string> {"FirstTestWorkflow"});
             generator.UseWorkflow(action);
 
-            action = new CST.CommandUse(new List<string> { "First Test Workflow" });
+            action = new CST.CommandUse(new List<string> {"First Test Workflow"});
             generator.UseWorkflow(action);
 
             Assert.That(paragraph.WorkflowsInScope, Has.Count.EqualTo(1));
@@ -108,20 +106,10 @@ namespace Tabula
         }
 
         [Test]
-        public void BuildDeclarations_complains_sensibly_when_workflow_unfound()
-        {
-            scenario.SeenWorkflowRequests = new List<string> { "P equals NP workflow" };
-            var ex = Assert.Throws<Exception>(() => generator.WriteDeclarations());
-
-            Assert.That(ex.Message, Is.EqualTo("Tabula found no workflow matching [P equals NP workflow]."));
-        }
-
-        //  In normal use, we'll stop before we hit this exception, at BuildDeclarations()
-        [Test]
         public void Use_command_complains_sensibly_when_workflow_unfound()
         {
             var paragraph = new CST.Paragraph();
-            var action = new CST.CommandUse(new List<string> { "P equals NP workflow" });
+            var action = new CST.CommandUse(new List<string> {"P equals NP workflow"});
             var ex = Assert.Throws<Exception>(() => generator.UseWorkflow(action));
 
             Assert.That(ex.Message, Is.EqualTo("Tabula found no workflow matching [P equals NP workflow]."));
@@ -130,9 +118,9 @@ namespace Tabula
         [Test]
         public void FindWorkflowMethod_returns_nulls_if_no_workflow_has_method_matching_step()
         {
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
-            detail.AddMethod(new MethodDetail { Name = "Hello_Everybody" });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "Howdy_stranger"});
+            detail.AddMethod(new MethodDetail {Name = "Hello_Everybody"});
             var paragraph = new CST.Paragraph();
             generator.CurrentParagraph = paragraph;
             paragraph.WorkflowsInScope.Add(detail);
@@ -161,8 +149,8 @@ namespace Tabula
         [Test]
         public void FindWorkflowMethod_returns_implementation_when_lookup_matches()
         {
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "HelloWorld" });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "HelloWorld"});
 
             generator.CurrentParagraph = new CST.Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
@@ -176,13 +164,13 @@ namespace Tabula
         [Test]
         public void FindWorkflowMethod_returns_last_match_if_several_workflows_implement()
         {
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "Howdy_stranger"});
             generator.CurrentParagraph = new CST.Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            detail = new WorkflowDetail { Name = "SheriffWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
+            detail = new WorkflowDetail {Name = "SheriffWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "Howdy_stranger"});
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
             (var workflow, var method) = generator.FindWorkflowMethod("howdystranger");
@@ -190,36 +178,8 @@ namespace Tabula
             //  tie breaking on last added allows for overriding, sounds sensible at the moment
             Assert.That(workflow.Name, Is.EqualTo("SheriffWorkflow"));
         }
-
-
-        [Test]
-        public void declarations_empty_to_start()
-        {
-            generator.WriteDeclarations();
-            var declarations = builder.ToString();
-
-            Assert.That(declarations.Trim(), Is.EqualTo(string.Empty));
-        }
-
-        [Test]
-        public void one_declaration_per_needed_workflow()
-        {
-            scenario.SeenWorkflowRequests = new List<string> {
-                "first test",
-                "anothertestWorkflow",
-                "FirstTest WORKFLOW"
-            };
-
-            generator.WriteDeclarations();
-
-            var declarations = builder.ToString().Trim();
-            var lines = Regex.Split(declarations, Environment.NewLine);
-
-            Assert.That(lines[0].Trim(), Is.EqualTo("public Tabula.FirstTestWorkflow FirstTest;"));
-            Assert.That(lines[1].Trim(), Is.EqualTo("public Tabula.extra.AnotherTestWorkflow AnotherTest;"));
-            Assert.That(lines.Count(), Is.EqualTo(2));
-        }
     }
+
 
     public class TestWorkflowBase
     { }

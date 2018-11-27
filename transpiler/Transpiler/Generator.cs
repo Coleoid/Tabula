@@ -66,7 +66,6 @@ namespace Tabula
             WriteExecuteMethod();
             WriteSectionMethods();
 
-            WriteDeclarations();
             WriteConstructor();
 
             WriteClassClose();
@@ -284,17 +283,6 @@ namespace Tabula
             return InputFilePath.Replace(' ', '_').Replace('.', '_') + "_generated";
         }
 
-        public void WriteDeclarations()
-        {
-            Builder.AppendLine();
-            foreach (var type in GetNeededWorkflowTypes())
-            {
-                var instance = Formatter.InstanceName_from_TypeName(type.Name);
-                Builder.AppendLine($"        public {type.Namespace}.{type.Name} {instance};");
-            }
-            Builder.AppendLine();
-        }
-
         public void WriteConstructor()
         {
             Builder
@@ -454,26 +442,6 @@ namespace Tabula
             }
 
             return (null, null);
-        }
-
-        /// <summary> All the workflow types requested by the scenario </summary>
-        /// <returns> List sorted by namespace, then name </returns>
-        public List<Type> GetNeededWorkflowTypes()
-        {
-            var types = new List<Type>();
-            foreach (var request in Scenario.SeenWorkflowRequests)
-            {
-                var searchName = Formatter.SearchName_from_Use_label(request);
-
-                if (!Library.TypeFromSearchName.ContainsKey(searchName))
-                    throw new Exception($"Tabula found no workflow matching [{request}].");
-
-                var type = Library.TypeFromSearchName[searchName];
-                if (!types.Contains(type))
-                    types.Add(type);
-            }
-
-            return types.OrderBy(t => t.Namespace).ThenBy(t => t.Name).ToList();
         }
 
         public void BuildSetCommand(CST.CommandSet commandSet)

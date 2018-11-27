@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Tabula
 {
@@ -33,10 +31,5 @@ namespace Tabula
         {
             return text.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
-
-        //internal static List<string> Reescape(List<string> text)
-        //{
-        //    return text.Select(t => Reescape(t)).ToList();
-        //}
     }
 }
