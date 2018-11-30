@@ -449,7 +449,25 @@ namespace Tabula
             var lineNumber = commandSet.StartLine;
             var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
 
-            var call = $"Var[\"{commandSet.Name}\"] = \"{commandSet.Term.Text}\"";
+            string varStart = "Var[";
+            string varEnd = "]";
+            string call = varStart + "\"" + commandSet.Name.Replace("#", "") + "\"" + varEnd;
+            
+            if (commandSet.Name.Contains('#'))
+            {
+                call = varStart + call + varEnd;
+            }
+
+            call += " = ";
+
+            if (commandSet.Term.Type == TokenType.Variable)
+            {
+                call += $"Var[\"{commandSet.Term.Text}\"]";
+            }
+            else
+            {
+                call += $"\"{commandSet.Term.Text}\"";
+            }
 
             var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
             sectionsBody.AppendLine($"Do(() =>    {call}, {sourceLocation}, {quotedCall});");

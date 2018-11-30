@@ -175,6 +175,42 @@ namespace Tabula
         }
 
         [Test]
+        public void BuildStep_can_set_a_variable_to_a_variable_on_CommandSet()
+        {
+            var term = new CST.Symbol(TokenType.Variable, "bar", 1);
+            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+
+            generator.BuildSetCommand(command);
+
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("Var[\"foo\"] = Var[\"bar\"],"));
+        }
+
+        [Test]
+        public void BuildStep_can_set_a_referenced_value_as_a_variable_to_a_variable_on_CommandSet()
+        {
+            var term = new CST.Symbol(TokenType.Variable, "bar", 1);
+            var command = new CST.CommandSet("#foo", term) { StartLine = 12 };
+
+            generator.BuildSetCommand(command);
+
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("Var[Var[\"foo\"]] = Var[\"bar\"],"));
+        }
+
+        [Test]
+        public void BuildStep_can_set_a_variable_to_a_date_on_CommandSet()
+        {
+            var term = new CST.Symbol(TokenType.Date, "1/1/2323", 1);
+            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+
+            generator.BuildSetCommand(command);
+
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring("Var[\"foo\"] = \"1/1/2323\","));
+        }
+
+        [Test]
         public void BuildStep_Unfound_on_arg_count_mismatch()
         {
             var args = new List<ArgDetail>() {
