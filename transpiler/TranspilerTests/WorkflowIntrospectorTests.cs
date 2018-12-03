@@ -25,12 +25,11 @@ namespace Tabula
         //FUTURE:  Stop relying on Acadis types for these tests.
         [TestCase("CommentsModalWorkflow")]
         [TestCase("ListManagement")]
-        [TestCase("DivisionManagement")]
-        //[TestCase("Workflow")]
         [TestCase("MvcBaseWorkflow")]
         public void GetWorkflowDetail_gets_workflows_and_workflow_base_classes(string typeName)
         {
-            var type = _types.Single(t => t.Name == typeName);
+            var type = _types.SingleOrDefault(t => t.Name == typeName);
+            Assert.That(type, Is.Not.Null, $"No type matching {typeName}");
             bool isWorkflow = _introspector.IsWorkflow(type);
             var detail = _introspector.GetWorkflowDetail(type);
 

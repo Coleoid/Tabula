@@ -98,41 +98,29 @@ namespace Tabula
             AppDomain curDomain = AppDomain.CurrentDomain;
             curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
 
-            Location = @"K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug";
-            Library = "LibContainingScenarios.dll";
+            Location = @"K:\code\Tabula\transpiler\LibraryHoldingTestWorkflows\bin\Debug";
+            Library = "LibraryHoldingTestWorkflows.dll";
             Assembly asm2 = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
 
-            Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
-            Library = "ScenarioContext.dll";
-            Assembly asm1 = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
+            //Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
+            //Library = "ScenarioContext.dll";
+            //Assembly asm1 = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
 
             var asms = curDomain.GetAssemblies();
 
             var myTypes = new List<Type>();
-            myTypes.AddRange(asm1.ExportedTypes);
+            //myTypes.AddRange(asm1.ExportedTypes);
             myTypes.AddRange(asm2.ExportedTypes);
 
             return myTypes;
         }
-
-        ////TODO:  Get workflow dll(s) from config and/or command line args
-        //public List<Type> GetLoadedTypes()
-        //{
-        //    AppDomain curDomain = AppDomain.CurrentDomain;
-        //    curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
-
-        //    Assembly asm = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
-        //    var asms = curDomain.GetAssemblies();
-
-        //    return asm.ExportedTypes.ToList();
-        //}
 
         //TODO:  Get location(s) from config and/or command line args
         private Assembly resolveAssembly(object sender, ResolveEventArgs args)
         {
             string libName = args.Name.Substring(0, args.Name.IndexOf(","));
 
-            string libPath = Location + libName + ".dll";
+            string libPath = Path.Combine(Location, libName + ".dll");
             if (File.Exists(libPath))
                 return Assembly.ReflectionOnlyLoadFrom(libPath);
 
