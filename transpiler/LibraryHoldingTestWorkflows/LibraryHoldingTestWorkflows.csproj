@@ -47,10 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BBW_workflows.cs" />
     <Compile Include="CommentsModalWorkflow.cs" />
     <Compile Include="DivisionManagement.cs" />
     <Compile Include="SomeWorkflow.cs" />
-    <Compile Include="ListManagement.cs" />
     <Compile Include="MvcBaseWorkflow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Workflow.cs" />

@@ -38,6 +38,7 @@ namespace Tabula
 
         public WorkflowIntrospector Library { get; private set; }
         public CST.Paragraph CurrentParagraph { get; set; }
+        public List<string> UsingNamespaces { get; set; }
 
         public Generator()
         {
@@ -393,6 +394,12 @@ namespace Tabula
                     case TokenType.String:
                         string interpolated = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
                         argsString += delim + $"$\"{interpolated}\"";
+                        if (argType == typeof(string))
+                        { }
+                        else
+                        {
+                            argsString += $".To<{argType.Name}>()";
+                        }
                         break;
 
                     case TokenType.Date:
@@ -407,13 +414,17 @@ namespace Tabula
                         argsString += delim + $"Var[\"{sym.Text}\"]";
                         if (argType == typeof(string))
                         { }
-                        if (argType == typeof(int))
+                        else if (argType == typeof(int))
                         {
                             argsString += ".To<int>()";
                         }
-                        if (argType == typeof(DateTime))
+                        else if (argType == typeof(DateTime))
                         {
                             argsString += ".To<DateTime>()";
+                        }
+                        else
+                        {
+                            argsString += $".To<{argType.Name}>()";
                         }
 
                         break;
@@ -447,7 +458,7 @@ namespace Tabula
         public void BuildSetCommand(CST.CommandSet commandSet)
         {
             var lineNumber = commandSet.StartLine;
-            var sourceLocation = $"\"{InputFilePath}:{lineNumber}\"";
+            var sourceLocation = $"@\"{InputFilePath}:{lineNumber}\"";
 
             string varStart = "Var[";
             string varEnd = "]";

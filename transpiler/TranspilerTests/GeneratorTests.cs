@@ -163,6 +163,18 @@ namespace Tabula
         }
 
         [Test]
+        public void CommandSet_generates_proper_string_for_source_location()
+        {
+            var term = new CST.Symbol(TokenType.String, "bar", 1);
+            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+
+            generator.BuildSetCommand(command);
+
+            var result = generator.sectionsBody.ToString();
+            Assert.That(result, Contains.Substring(@"@""scenario_source.tab:12"""));
+        }
+
+        [Test]
         public void BuildStep_sets_a_variable_on_CommandSet()
         {
             var term = new CST.Symbol(TokenType.String, "bar", 1);
@@ -333,7 +345,7 @@ namespace Tabula
         }
 
         [Test]
-        public void Step_Call_variables_get_types()
+        public void Step_Call_variables_get_standard_types()
         {
             var args = new List<ArgDetail>() {
                 new ArgDetail { Name = "name", Type = typeof(string) },
@@ -343,7 +355,7 @@ namespace Tabula
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
             detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
-            
+
             generator.CurrentParagraph = new CST.Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
@@ -365,6 +377,43 @@ namespace Tabula
             //  variables going into an argument of type int need to get a .To<int>()
             //  variables going into an argument of type DateTime need to get a .To<DateTime>()
             var expectedArguments = @"(Var[""friendname""], Var[""newage""].To<int>(), Var[""birthday""].To<DateTime>())";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
+        enum Assignment { HR, Ops }
+
+
+        [Test]
+        public void Step_Call_variables_get_enum_types()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "assignment", Type = typeof(Assignment) }
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friend__now_works_at__", Args = args });
+
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Variable, "friendname"),
+                (TokenType.Word, "now"),
+                (TokenType.Word, "works"),
+                (TokenType.Word, "at"),
+                (TokenType.String, "HR")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.My_friend__now_works_at__"));
+
+            //  variables going into an argument of an enum type get a .To<enumType>()
+            var expectedArguments = @"(Var[""friendname""], $""HR"".To<Assignment>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
@@ -645,6 +694,16 @@ namespace Tabula
             string built = generator.executeMethodBody.ToString();
             Assert.That(built, Contains.Substring("Foreach_Row_in( table_one, paragraph_one );"));
             Assert.That(built, Contains.Substring("Foreach_Row_in( table_two, paragraph_one );"));
+        }
+
+
+        [Test]
+        public void UsingNamespaces()
+        {
+            Assert.That(generator.UsingNamespaces, Is.Not.Null);
+            Assert.That(generator.UsingNamespaces.Count, Is.GreaterThan(0));
+
+            generator.UsingNamespaces = new List<string>();
         }
     }
 }

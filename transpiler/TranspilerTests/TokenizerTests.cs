@@ -64,6 +64,8 @@ namespace Tabula
 
         [TestCase("'Hello, World!'", "Hello, World!")]
         [TestCase("\"Hello, World!\"", "Hello, World!")]
+        [TestCase("\"Hello, #location!\"", "Hello, #location!")]
+        [TestCase("\"#itemType\"", "#itemType")]
         public void String(string text, string expected)
         {
             var tokens = _tokenizer.Tokenize(text);
@@ -241,6 +243,44 @@ namespace Tabula
         }
 
 
+        [TestCase(@"Create ""#itemType"" list item ""Testopia #item"" with description ""Testopia #item description"" with usage ""Available for new records""")]
+        public void Full_Step(string step)
+        {
+            var tokens = _tokenizer.Tokenize(step);
+            Assert.That(tokens, Has.Count.EqualTo(11));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Word));
+            Assert.That(token.Text, Is.EqualTo("Create"));
+
+            token = tokens[1];
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo("#itemType"));
+        }
+
+        [Test]
+        public void multiple_strings()
+        {
+            string step = @"one ""string one"" two ""string two"" three";
+            var tokens = _tokenizer.Tokenize(step);
+            //Assert.That(tokens, Has.Count.EqualTo(5));
+
+            Token token = tokens[0];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Word));
+            Assert.That(token.Text, Is.EqualTo("one"));
+
+            token = tokens[1];
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo("string one"));
+
+            token = tokens[2];
+            Assert.That(token.Type, Is.EqualTo(TokenType.Word));
+            Assert.That(token.Text, Is.EqualTo("two"));
+
+            token = tokens[3];
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo("string two"));
+        }
 
         //TODO: require a boundary after some tokens, and not after others.
         //  specifically, this case currently finds two tokens, and it should complain instead.

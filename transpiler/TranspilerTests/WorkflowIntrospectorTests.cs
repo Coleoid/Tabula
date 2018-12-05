@@ -22,7 +22,6 @@ namespace Tabula
             _types = _introspector.GetLoadedTypes();
         }
 
-        //FUTURE:  Stop relying on Acadis types for these tests.
         [TestCase("CommentsModalWorkflow")]
         [TestCase("ListManagement")]
         [TestCase("MvcBaseWorkflow")]
