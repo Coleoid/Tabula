@@ -38,7 +38,6 @@ namespace Tabula
 
         public WorkflowIntrospector Library { get; private set; }
         public CST.Paragraph CurrentParagraph { get; set; }
-        public List<string> UsingNamespaces { get; set; }
 
         public Generator()
         {
@@ -380,6 +379,7 @@ namespace Tabula
             }
         }
 
+        
         public string ComposeCall(CST.Step step, WorkflowDetail workflow, MethodDetail method)
         {
             string argsString = "";
@@ -392,14 +392,22 @@ namespace Tabula
                 switch (sym.Type)
                 {
                     case TokenType.String:
-                        string interpolated = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
-                        argsString += delim + $"$\"{interpolated}\"";
-                        if (argType == typeof(string))
-                        { }
+                        string text = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
+                        int result;
+                        if (argType == typeof(int) && int.TryParse(text, out result))
+                        {
+                            text = sym.Text;
+                        }
                         else
                         {
-                            argsString += $".To<{argType.Name}>()";
+                            text = $"$\"{text}\"";
+                            if (argType != typeof(string))
+                            {
+                                text += CastToType(argType);
+                            }
                         }
+
+                        argsString += delim + text;
                         break;
 
                     case TokenType.Date:
@@ -407,26 +415,20 @@ namespace Tabula
                         break;
 
                     case TokenType.Number:
-                        argsString += delim + sym.Text;
+                        var suffix = argType == typeof(decimal) ? "m" : "";
+                        argsString += delim + sym.Text + suffix;
                         break;
 
                     case TokenType.Variable:
-                        argsString += delim + $"Var[\"{sym.Text}\"]";
+                        text = $"Var[\"{sym.Text}\"]";
                         if (argType == typeof(string))
                         { }
-                        else if (argType == typeof(int))
-                        {
-                            argsString += ".To<int>()";
-                        }
-                        else if (argType == typeof(DateTime))
-                        {
-                            argsString += ".To<DateTime>()";
-                        }
                         else
                         {
-                            argsString += $".To<{argType.Name}>()";
+                            text += CastToType(argType);
                         }
 
+                        argsString += delim + text;
                         break;
 
                     default:
@@ -441,6 +443,12 @@ namespace Tabula
             var call = $"{workflowName}.{methodName}({argsString})";
 
             return call;
+        }
+
+        private string CastToType(Type argType)
+        {
+            var ns = argType.Namespace == "System" ? "" : argType.Namespace + ".";
+            return $".To<{ns}{argType.Name}>()";
         }
 
 

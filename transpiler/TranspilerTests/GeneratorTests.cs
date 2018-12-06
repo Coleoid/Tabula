@@ -376,9 +376,111 @@ namespace Tabula
 
             //  variables going into an argument of type int need to get a .To<int>()
             //  variables going into an argument of type DateTime need to get a .To<DateTime>()
-            var expectedArguments = @"(Var[""friendname""], Var[""newage""].To<int>(), Var[""birthday""].To<DateTime>())";
+            var expectedArguments = @"(Var[""friendname""], Var[""newage""].To<Int32>(), Var[""birthday""].To<DateTime>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
+
+
+        [Test]
+        public void Step_Call_constant_int_arguments_are_inlined()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "age", Type = typeof(int) },
+                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
+
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Variable, "friendname"),
+                (TokenType.Word, "turned"),
+                (TokenType.String, "23"),
+                (TokenType.Word, "on"),
+                (TokenType.Variable, "birthday")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
+
+            var expectedArguments = @"(Var[""friendname""], 23, Var[""birthday""].To<DateTime>())";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
+
+
+        [Test]
+        public void Step_Call_constant_numeric_arguments_get_m_when_going_to_decimal_parameter()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "percentage", Type = typeof(decimal) }
+            };
+
+            var detail = new WorkflowDetail { Name = "SomeWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "I_feel__percent_awake", Args = args });
+
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "I"),
+                (TokenType.Word, "feel"),
+                (TokenType.Number, "23.02"),
+                (TokenType.Word, "percent"),
+                (TokenType.Word, "AWAKE")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.I_feel__percent_awake"));
+
+            var expectedArguments = @"(23.02m)";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
+        [Test]
+        public void Step_Call_int_inlining_does_not_happen_when_string_value_does_not_parse_as_int()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "name", Type = typeof(string) },
+                new ArgDetail { Name = "age", Type = typeof(int) },
+                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
+
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Variable, "friendname"),
+                (TokenType.Word, "turned"),
+                (TokenType.String, "THE BIG 23"),
+                (TokenType.Word, "on"),
+                (TokenType.Variable, "birthday")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
+
+            var expectedArguments = @"(Var[""friendname""], $""THE BIG 23"".To<Int32>(), Var[""birthday""].To<DateTime>())";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
 
         enum Assignment { HR, Ops }
 
@@ -413,7 +515,7 @@ namespace Tabula
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__now_works_at__"));
 
             //  variables going into an argument of an enum type get a .To<enumType>()
-            var expectedArguments = @"(Var[""friendname""], $""HR"".To<Assignment>())";
+            var expectedArguments = @"(Var[""friendname""], $""HR"".To<Tabula.Assignment>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
@@ -694,16 +796,6 @@ namespace Tabula
             string built = generator.executeMethodBody.ToString();
             Assert.That(built, Contains.Substring("Foreach_Row_in( table_one, paragraph_one );"));
             Assert.That(built, Contains.Substring("Foreach_Row_in( table_two, paragraph_one );"));
-        }
-
-
-        [Test]
-        public void UsingNamespaces()
-        {
-            Assert.That(generator.UsingNamespaces, Is.Not.Null);
-            Assert.That(generator.UsingNamespaces.Count, Is.GreaterThan(0));
-
-            generator.UsingNamespaces = new List<string>();
         }
     }
 }
