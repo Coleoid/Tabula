@@ -213,6 +213,7 @@ namespace Tabula
         [Test]
         public void Step_with_number_and_date()
         {
+            // this number 22 this date ..
             var tokens = new List<Token> {
                 new Token(TokenType.Word, "this"),
                 new Token(TokenType.Word, "number"),
@@ -226,6 +227,75 @@ namespace Tabula
 
             Assert.That(cst, Is.Not.Null);
             Assert.That(cst.Symbols, Has.Count.EqualTo(6));
+        }
+
+        [Test]
+        public void Step_with_numbers_in_a_list()
+        {
+            // my lucky numbers 22, 28, 42
+            var tokens = new List<Token> {
+                new Token(TokenType.Word, "my"),
+                new Token(TokenType.Word, "lucky"),
+                new Token(TokenType.Word, "numbers"),
+                new Token(TokenType.Number, "22"),
+                new Token(TokenType.Comma, ","),
+                new Token(TokenType.Number, "28"),
+                new Token(TokenType.Comma, ","),
+                new Token(TokenType.Number, "42"),
+            };
+            var state = new ParserState(tokens);
+            var cst = _parser.ParseStep(state);
+
+            Assert.That(cst, Is.Not.Null);
+            Assert.That(cst.Symbols, Has.Count.EqualTo(4));
+            var list = cst.Symbols[3];
+            Assert.That(list is SymbolCollection);
+        }
+
+        [Test]
+        public void Collection_with_numbers_in_a_list()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Number, "22"),
+                new Token(TokenType.Comma, ","),
+                new Token(TokenType.Number, "28"),
+            };
+            var state = new ParserState(tokens);
+            var cst = _parser.ParseCollection(state);
+
+            Assert.That(cst, Is.Not.Null);
+            var collection = cst as SymbolCollection;
+            Assert.That(collection, Is.Not.Null);
+
+            Assert.That(collection.Values, Has.Count.EqualTo(2));
+            Assert.That(collection.Values[0].Type, Is.EqualTo(TokenType.Number));
+        }
+
+        //FUTURE: Consider treatment of collections of unlike types
+
+        [Test]
+        public void Collection_trailing_comma_error()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Number, "22"),
+                new Token(TokenType.Comma, ","),
+                new Token(TokenType.Word, "balloons"),
+            };
+            var state = new ParserState(tokens);
+            var ex = Assert.Throws<Exception>(() => _parser.ParseCollection(state));
+            Assert.That(ex.Message, Is.EqualTo("Can only collect terms"));
+        }
+
+        [Test]
+        public void Collection_trailing_comma_atEnd_error()
+        {
+            var tokens = new List<Token> {
+                new Token(TokenType.Number, "22"),
+                new Token(TokenType.Comma, ","),
+            };
+            var state = new ParserState(tokens);
+            var ex = Assert.Throws<Exception>(() => _parser.ParseCollection(state));
+            Assert.That(ex.Message, Is.EqualTo("Can only collect terms"));
         }
 
         [Test]

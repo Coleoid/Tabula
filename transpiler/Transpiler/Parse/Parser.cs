@@ -227,10 +227,39 @@ namespace Tabula.Parse
         public CST.Symbol ParseSymbol(ParserState state)
         {
             CST.Symbol symbol = ParseWord(state);
-            if (symbol == null) symbol = ParseTerm(state);
+            if (symbol != null) return symbol;
 
+            symbol = ParseCollection(state);
+            if (symbol != null) return symbol;
+            
+            symbol = ParseTerm(state);
             return symbol;
         }
+
+        public CST.SymbolCollection ParseCollection(ParserState state)
+        {
+            bool tooFar = state.AtEnd || state.Tokens.Count - 1 == state.Position;
+            if (tooFar || state.Tokens[state.Position + 1].Type != TokenType.Comma)
+                return null;
+
+            var collection = new CST.SymbolCollection();
+            
+            var symbol = ParseTerm(state);
+            if (symbol == null) throw new Exception("Can only collect terms");
+            collection.Values.Add(symbol);
+
+            while (!state.AtEnd && state.Peek().Type == TokenType.Comma)
+            {
+                state.Take();
+            
+                symbol = ParseTerm(state);
+                if (symbol == null) throw new Exception("Can only collect terms");
+                collection.Values.Add(symbol);
+            }
+
+            return collection;
+        }
+
 
         public List<CST.Symbol> ParseSymbols(ParserState state)
         {

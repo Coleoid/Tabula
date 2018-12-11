@@ -1,4 +1,7 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Tabula.CST
 {
     /// <summary> Wrapper is for domain objects which are barely more than the token. </summary>
@@ -45,6 +48,17 @@ namespace Tabula.CST
         internal static Symbol NewOrNull(Token token)
         {
             return token == null ? null : new Symbol(token);
+        }
+    }
+
+    public class SymbolCollection : Symbol
+    {
+        public List<Symbol> Values { get; set; }
+
+        public SymbolCollection()
+            : base(new Token(TokenType.String, "Collection"))
+        {
+            Values = new List<Symbol>();
         }
     }
 }

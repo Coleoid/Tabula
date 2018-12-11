@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Tabula.CST;
 
 namespace Tabula
 {
@@ -377,6 +378,52 @@ namespace Tabula
             //  variables going into an argument of type int need to get a .To<int>()
             //  variables going into an argument of type DateTime need to get a .To<DateTime>()
             var expectedArguments = @"(Var[""friendname""], Var[""newage""].To<Int32>(), Var[""birthday""].To<DateTime>())";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
+        [Test]
+        public void Step_Call_variables_get_collection_types()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "names", Type = typeof(List<string>) },
+                new ArgDetail { Name = "ages", Type = typeof(List<int>) },
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friends__turned__", Args = args });
+
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friends")
+            );
+            var friends = new SymbolCollection();
+            friends.Values.Add(new Symbol(TokenType.String, "Ann"));
+            friends.Values.Add(new Symbol(TokenType.String, "Bob"));
+
+            var ages = new SymbolCollection();
+            ages.Values.Add(new Symbol(TokenType.Number, "33"));
+            ages.Values.Add(new Symbol(TokenType.Number, "31"));
+
+            step.Symbols.Add(friends);
+            step.Symbols.Add(new Symbol(TokenType.Word, "turned"));
+            step.Symbols.Add(ages);
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.My_friends__turned__"));
+
+            var expectedNamesConstruction = @"var arg_222_0 = new List<string> { ""Ann"", ""Bob"" };";
+            Assert.That(result, Contains.Substring(expectedNamesConstruction));
+
+            var expectedAgesConstruction = @"var arg_222_1 = new List<int> { 33, 31 };";
+            Assert.That(result, Contains.Substring(expectedAgesConstruction));
+
+            //var expectedArguments = @"()";
+            var expectedArguments = @"(arg_222_0, arg_222_1)";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
