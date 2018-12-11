@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System.Linq;
-using Tabula.Parse;
 using Tabula.CST;
 
 namespace Tabula

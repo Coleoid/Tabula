@@ -19,7 +19,7 @@ namespace Tabula.Parse
         Regex rxNewLine         = new Regex(@"^\r?\n");
         Regex rxScenarioLabel   = new Regex(@"^Scenario: *([""']?)(.*)\1", RegexOptions.IgnoreCase);
         Regex rxWord            = new Regex(@"^([a-zA-Z_]\w*)");  //  first character = letter or underscore, then any word characters
-        Regex rxString          = new Regex(@"^([""'])(.*?)\1");   //  single or double quotes  (full implementation may take a while)
+        Regex rxString          = new Regex(@"^([""'])(.*?)\1");  //  single or double quotes  (full implementation may take a while)
         Regex rxCommandUse      = new Regex(@"^use: *([^\n]*)");  //  use: Global Setting Management
         Regex rxCommandSet      = new Regex(@"^set: (.+) =>");    //  set: bob => "Nordberg, Robert" (run time)
         Regex rxCommandAlias    = new Regex(@"^alias: (.+) =>");  //  alias: "prep #name" => prepare user #name for class (build time)
@@ -213,8 +213,8 @@ namespace Tabula.Parse
                 }
 
 
-                //  At this point, none of the token patterns matched the next text.
-                //  To escape, we advance to the end of our text and complain.
+                //  Fail:  At this point, the next input matches no token.
+                //  To quit, we advance to the end of our text and complain.
                 int snippetLength = Math.Min(20, remainingText.Length);
                 Warnings.Add($"Text not tokenizable on line {line} column {column}, at:\n{remainingText.Substring(0,snippetLength)}\n");
 
