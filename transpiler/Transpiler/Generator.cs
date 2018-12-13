@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Tabula.CST;
 
 namespace Tabula
 {
@@ -373,17 +374,23 @@ namespace Tabula
             }
             else
             {
-                var call = ComposeCall(step, workflow, method);
+                (var call, var declarations) = ComposeCall(step, workflow, method);
                 var quotedCall = "@\"" + call.Replace("\"", "\"\"") + "\"";
+                foreach (var declaration in declarations)
+                {
+                    sectionsBody.AppendLine(declaration);
+                }
                 sectionsBody.AppendLine($"Do(() =>    {call}, @{sourceLocation}, {quotedCall});");
             }
         }
 
         
-        public string ComposeCall(CST.Step step, WorkflowDetail workflow, MethodDetail method)
+        public (string, List<string>) ComposeCall(CST.Step step, WorkflowDetail workflow, MethodDetail method)
         {
+            List<string> declarations = new List<string>( );
             string argsString = "";
             string delim = "";
+            string text = "";
 
             int argIndex = 0;
             foreach (var sym in step.Symbols.Where(s => s.Type != TokenType.Word))
@@ -391,8 +398,37 @@ namespace Tabula
                 Type argType = method.Args[argIndex].Type;
                 switch (sym.Type)
                 {
+                    case TokenType.Collection:
+                        string arg_name = $"arg_{step.StartLine}_{argIndex}";
+
+                        string qq = "\"";
+                        string comma = "";
+                        string elements = string.Empty;
+                        foreach (var value in (sym as SymbolCollection).Values)
+                        {
+                            switch (value.Type)
+                            {
+                                case TokenType.String:
+                                    elements += comma + qq + value.Text + qq;
+                                    break;
+                                case TokenType.Variable:
+                                    elements += comma + "Var[" + qq + value.Text + qq + "]";
+                                    break;
+                            }
+
+                            comma = ", ";
+                        }
+
+                        var declaration = $"var {arg_name} = new List<string> {{ {elements} }};";
+                        declarations.Add(declaration);
+
+                        text = arg_name;
+
+                        argsString += delim + text;
+                        break;
+
                     case TokenType.String:
-                        string text = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
+                        text = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
                         int result;
                         if (argType == typeof(int) && int.TryParse(text, out result))
                         {
@@ -401,6 +437,10 @@ namespace Tabula
                         else
                         {
                             text = $"$\"{text}\"";
+//                            if (argType == typeof(List<string>))
+//                            {
+
+//                            }
                             if (argType != typeof(string))
                             {
                                 text += CastToType(argType);
@@ -442,7 +482,7 @@ namespace Tabula
             var methodName = method.Name;
             var call = $"{workflowName}.{methodName}({argsString})";
 
-            return call;
+            return (call, declarations);
         }
 
         private string CastToType(Type argType)

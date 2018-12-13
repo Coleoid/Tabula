@@ -21,5 +21,11 @@ Scenario: really rather silly
             var output = builder.ToString();
             Assert.That(output, Contains.Substring("public class silly_file_name_generated"));
         }
+
+        [Test]
+        public void explore()
+        {
+            //var a = $"{Var["itemType"]}";
+        }
     }
 }

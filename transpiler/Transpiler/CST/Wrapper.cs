@@ -56,7 +56,7 @@ namespace Tabula.CST
         public List<Symbol> Values { get; set; }
 
         public SymbolCollection()
-            : base(new Token(TokenType.String, "Collection"))
+            : base(new Token(TokenType.Collection, "Collection"))
         {
             Values = new List<Symbol>();
         }

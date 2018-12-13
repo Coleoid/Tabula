@@ -40,6 +40,7 @@ public enum TokenType
     TableCellSeparator,
     BlockStart,
     BlockEnd,
+    Collection,
 }
 
 

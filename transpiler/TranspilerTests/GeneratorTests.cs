@@ -568,6 +568,69 @@ namespace Tabula
 
         //TODO:  Args which are list or array types
 
+        [TestCase(143)]
+        [TestCase(202)]
+        public void List_arguments_create_declaration_line(int lineNumber)
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "names", Type = typeof(List<string>) },
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friends_are__", Args = args });
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(lineNumber,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friends"),
+                (TokenType.Word, "are")
+            );
+
+            var list = new SymbolCollection();
+            list.Values.Add(new Symbol(TokenType.String, "Left"));
+            list.Values.Add(new Symbol(TokenType.Variable, "Right"));
+            step.Symbols.Add(list);
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            var expected = $"var arg_{lineNumber}_0 = new List<string> {{ \"Left\", Var[\"Right\"] }};";
+            Assert.That(result, Contains.Substring(expected));
+            Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_{lineNumber}_0)"));
+        }
+
+
+        [Test]
+        public void List_arguments_are_indexed_by_arg_position()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "group", Type = typeof(string) },
+                new ArgDetail { Name = "names", Type = typeof(List<string>) },
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My__are__", Args = args });
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(321,
+                (TokenType.Word, "my"),
+                (TokenType.String, "friends"),
+                (TokenType.Word, "are")
+            );
+
+            var list = new SymbolCollection();
+            list.Values.Add(new Symbol(TokenType.String, "Left"));
+            step.Symbols.Add(list);
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring($"myWorkflow.My__are__($\"friends\", arg_321_1)"));
+        }
+
+
         //TODO:  Scoping of workflows
 
         class UnknownAction : CST.Action { }
