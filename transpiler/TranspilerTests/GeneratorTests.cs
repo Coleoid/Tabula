@@ -382,15 +382,15 @@ namespace Tabula
         }
 
         [Test]
-        public void Step_Call_variables_get_collection_types()
+        public void Step_Calls_can_pass_multiple_collections()
         {
             var args = new List<ArgDetail>() {
                 new ArgDetail { Name = "names", Type = typeof(List<string>) },
-                new ArgDetail { Name = "ages", Type = typeof(List<int>) },
+                new ArgDetail { Name = "greets", Type = typeof(List<string>) },
             };
 
             var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friends__turned__", Args = args });
+            detail.AddMethod(new MethodDetail { Name = "My_friends__say__", Args = args });
 
             generator.CurrentParagraph = new CST.Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
@@ -404,29 +404,85 @@ namespace Tabula
             friends.Values.Add(new Symbol(TokenType.String, "Bob"));
 
             var ages = new SymbolCollection();
-            ages.Values.Add(new Symbol(TokenType.Number, "33"));
-            ages.Values.Add(new Symbol(TokenType.Number, "31"));
+            ages.Values.Add(new Symbol(TokenType.String, "hello"));
+            ages.Values.Add(new Symbol(TokenType.String, "howdy"));
 
             step.Symbols.Add(friends);
-            step.Symbols.Add(new Symbol(TokenType.Word, "turned"));
+            step.Symbols.Add(new Symbol(TokenType.Word, "say"));
             step.Symbols.Add(ages);
 
             generator.BuildStep(step);
             var result = generator.sectionsBody.ToString();
 
-            Assert.That(result, Contains.Substring("myWorkflow.My_friends__turned__"));
+            Assert.That(result, Contains.Substring("myWorkflow.My_friends__say__"));
 
             var expectedNamesConstruction = @"var arg_222_0 = new List<string> { ""Ann"", ""Bob"" };";
             Assert.That(result, Contains.Substring(expectedNamesConstruction));
 
-            var expectedAgesConstruction = @"var arg_222_1 = new List<int> { 33, 31 };";
+            var expectedAgesConstruction = @"var arg_222_1 = new List<string> { ""hello"", ""howdy"" };";
             Assert.That(result, Contains.Substring(expectedAgesConstruction));
 
-            //var expectedArguments = @"()";
             var expectedArguments = @"(arg_222_0, arg_222_1)";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
+        [Test, Ignore("Tackling at lower level first")]
+        public void Step_Call_can_send_list_of_int()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "numbers", Type = typeof( List<int>) },
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "Lucky_numbers__", Args = args });
+
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(222,
+                (TokenType.Word, "lucky"),
+                (TokenType.Word, "numbers")
+            );
+
+            var nums = new SymbolCollection();
+            nums.Values.Add(new Symbol(TokenType.Number, "33"));
+            nums.Values.Add(new Symbol(TokenType.Number, "31"));
+
+            step.Symbols.Add(nums);
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            Assert.That(result, Contains.Substring("myWorkflow.Lucky_numbers__"));
+
+            var expectedAgesConstruction = @"var arg_222_0 = new List<int> { 33, 31 };";
+            Assert.That(result, Contains.Substring(expectedAgesConstruction));
+
+            var expectedArguments = @"(arg_222_0)";
+            Assert.That(result, Contains.Substring(expectedArguments));
+        }
+
+
+        // generation time:
+        //decl for List<int>:
+        // var arg_387_0 = new List<int> { 13, Var["offset"].To<int>() };
+
+        //Convert_step_arg_to_param_type(sym, paramType, step.StartLine, argIndex);
+        [Test]
+        public void Convert_Step_Arg_To_Param_Type_can_create_collection_of_int__()
+        {
+            var argSymbol = new SymbolCollection();
+            argSymbol.Values.Add(new Symbol(TokenType.Number, "10"));
+            argSymbol.Values.Add(new Symbol(TokenType.String, "11"));
+            argSymbol.Values.Add(new Symbol(TokenType.Variable, "dozen"));
+            var paramType = typeof(List<int>);
+            var startLine = 125;
+            var argIndex = 3;
+
+            (string text, string declaration) = generator.Convert_step_arg_to_param_type(argSymbol, paramType, startLine, argIndex);
+
+            Assert.That(declaration, Contains.Substring(@"var arg_125_3 = new List<Int32> { 10, ""11"".To<int>(), Var[""dozen""].To<int>() }"));
+        }
 
         [Test]
         public void Step_Call_constant_int_arguments_are_inlined()
@@ -600,6 +656,34 @@ namespace Tabula
             Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_{lineNumber}_0)"));
         }
 
+        [Test]
+        public void Single_values_going_to_a_list_parameter_get_wrapped_in_lists()
+        {
+            var args = new List<ArgDetail>() {
+                new ArgDetail { Name = "names", Type = typeof(List<string>) },
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
+            detail.AddMethod(new MethodDetail { Name = "My_friends_are__", Args = args });
+            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new CST.Step(202,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friends"),
+                (TokenType.Word, "are"),
+                (TokenType.String, "Frank")
+            );
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            var expected = $"var arg_202_0 = new List<string> {{ $\"Frank\" }};";
+            Assert.That(result, Contains.Substring(expected));
+            Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_202_0)"));
+        }
+
+
 
         [Test]
         public void List_arguments_are_indexed_by_arg_position()
@@ -631,7 +715,7 @@ namespace Tabula
         }
 
 
-        //TODO:  Scoping of workflows
+        //TODO:  Scoping of workflows in aliases and blocks
 
         class UnknownAction : CST.Action { }
 

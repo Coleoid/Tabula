@@ -384,7 +384,7 @@ namespace Tabula
             }
         }
 
-        
+
         public (string, List<string>) ComposeCall(CST.Step step, WorkflowDetail workflow, MethodDetail method)
         {
             List<string> declarations = new List<string>( );
@@ -395,85 +395,11 @@ namespace Tabula
             int argIndex = 0;
             foreach (var sym in step.Symbols.Where(s => s.Type != TokenType.Word))
             {
-                Type argType = method.Args[argIndex].Type;
-                switch (sym.Type)
-                {
-                    case TokenType.Collection:
-                        string arg_name = $"arg_{step.StartLine}_{argIndex}";
-
-                        string qq = "\"";
-                        string comma = "";
-                        string elements = string.Empty;
-                        foreach (var value in (sym as SymbolCollection).Values)
-                        {
-                            switch (value.Type)
-                            {
-                                case TokenType.String:
-                                    elements += comma + qq + value.Text + qq;
-                                    break;
-                                case TokenType.Variable:
-                                    elements += comma + "Var[" + qq + value.Text + qq + "]";
-                                    break;
-                            }
-
-                            comma = ", ";
-                        }
-
-                        var declaration = $"var {arg_name} = new List<string> {{ {elements} }};";
-                        declarations.Add(declaration);
-
-                        text = arg_name;
-
-                        argsString += delim + text;
-                        break;
-
-                    case TokenType.String:
-                        text = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
-                        int result;
-                        if (argType == typeof(int) && int.TryParse(text, out result))
-                        {
-                            text = sym.Text;
-                        }
-                        else
-                        {
-                            text = $"$\"{text}\"";
-//                            if (argType == typeof(List<string>))
-//                            {
-
-//                            }
-                            if (argType != typeof(string))
-                            {
-                                text += CastToType(argType);
-                            }
-                        }
-
-                        argsString += delim + text;
-                        break;
-
-                    case TokenType.Date:
-                        argsString += delim + $"\"{sym.Text}\".To<DateTime>()";
-                        break;
-
-                    case TokenType.Number:
-                        var suffix = argType == typeof(decimal) ? "m" : "";
-                        argsString += delim + sym.Text + suffix;
-                        break;
-
-                    case TokenType.Variable:
-                        text = $"Var[\"{sym.Text}\"]";
-                        if (argType == typeof(string))
-                        { }
-                        else
-                        {
-                            text += CastToType(argType);
-                        }
-
-                        argsString += delim + text;
-                        break;
-
-                    default:
-                        throw new Exception($"Did not expect to get a token type [{sym.Type}].");
-                }
+                Type paramType = method.Args[argIndex].Type;
+                (string newArg, string newDeclaration) = Convert_step_arg_to_param_type(sym, paramType, step.StartLine, argIndex);
+                if (newDeclaration != null)
+                    declarations.Add(newDeclaration);
+                argsString += delim + newArg;
                 delim = ", ";
                 argIndex++;
             }
@@ -489,6 +415,107 @@ namespace Tabula
         {
             var ns = argType.Namespace == "System" ? "" : argType.Namespace + ".";
             return $".To<{ns}{argType.Name}>()";
+        }
+
+        public string appropriate_cast(TokenType tokenType, Type collectedType, string text)
+        {
+            return text + CastToType(collectedType);
+        }
+
+        public (string, string) Convert_step_arg_to_param_type(Symbol sym, Type paramType, int lineNumber, int argIndex)
+        {
+            string text = string.Empty;
+            string declaration = null;
+
+            switch (sym.Type)
+            {
+                case TokenType.Collection:
+                    string arg_name = $"arg_{lineNumber}_{argIndex}";
+                    var collectedType = paramType.GenericTypeArguments[0];
+
+                    string qq = "\"";
+                    string comma = "";
+                    string elements = string.Empty;
+                    foreach (var value in (sym as SymbolCollection).Values)
+                    {
+                        string element = string.Empty;
+                        switch (value.Type)
+                        {
+                            case TokenType.String:
+                                element = qq + value.Text + qq;
+                                break;
+                            case TokenType.Number:
+                                element = value.Text;
+                                break;
+                            case TokenType.Variable:
+                                element = "Var[" + qq + value.Text + qq + "]";
+                                break;
+                        }
+
+                        elements += comma + appropriate_cast(value.Type, collectedType, element);
+
+
+
+                        comma = ", ";
+                    }
+
+                    declaration = $"var {arg_name} = new List<{collectedType.Name}> {{ {elements} }};";
+
+                    text = arg_name;
+                    break;
+
+                case TokenType.String:
+                    text = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
+                    int result;
+                    if (paramType == typeof(int) && int.TryParse(text, out result))
+                    {
+                        text = sym.Text;
+                    }
+                    else
+                    {
+                        text = $"$\"{text}\"";
+
+                        if (paramType == typeof(List<string>))
+                        {
+                            arg_name = $"arg_{lineNumber}_{argIndex}";
+
+                            declaration = $"var {arg_name} = new List<string> {{ {text} }};";
+
+                            text = arg_name;
+                        }
+                        else if (paramType != typeof(string))
+                        {
+                            text += CastToType(paramType);
+                        }
+                    }
+
+                    break;
+
+                case TokenType.Date:
+                    text = $"\"{sym.Text}\".To<DateTime>()";
+                    break;
+
+                case TokenType.Number:
+                    var suffix = paramType == typeof(decimal) ? "m" : "";
+                    text = sym.Text + suffix;
+                    break;
+
+                case TokenType.Variable:
+                    text = $"Var[\"{sym.Text}\"]";
+                    if (paramType == typeof(string))
+                    { }
+                    else
+                    {
+                        text += CastToType(paramType);
+                    }
+
+                    break;
+
+                default:
+                    throw new Exception($"Did not expect to get a token type [{sym.Type}].");
+            }
+
+            return (text, declaration);
         }
 
 

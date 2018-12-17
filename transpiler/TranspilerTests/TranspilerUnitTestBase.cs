@@ -82,7 +82,7 @@ Create Organization named #orgName of type ""organization"" under base parent gr
 ""Create list items"":
 use: List Management
 
-Create ""#itemType"" list item ""Testopia #item"" with description ""Testopia #item description"" with usage ""Available for new records""
+Create ""#itemType"" list item ""Tabula #item"" with description ""Tabula #item description"" with usage ""Available for new records""
 | itemType         | item       |
 | EmploymentAction | Update     |
 | EmploymentType   | Civilian   |
@@ -98,7 +98,7 @@ Create ""#itemType"" list item ""Testopia #item"" with description ""Testopia #i
 use: Employment Action Edit
 
 Browse to Add Person Employment for #empName
-Add primary employment at #orgName with title ""Testopia #empTitle"" employment type ""Testopia #empType"" and appointment type ""Testopia #apptType"" starting on #startDate
+Add primary employment at #orgName with title ""Tabula #empTitle"" employment type ""Tabula #empType"" and appointment type ""Tabula #apptType"" starting on #startDate
 | empName  | orgName  | empTitle   | empType  | apptType  | startDate  |
 | #Lina    | #HPD     | Lackey     | Civilian | Contract  | 8/15/2008  |
 | #Gio     | #HPD     | Lackey     | Civilian | Contract  | 8/15/2008  |
@@ -110,9 +110,9 @@ alias: ""Add employment actions for #employeeName at #orgName"" => ...
 
     Browse to Add Employment Action for #employeeName at #orgName
     Set action to #actionName
-    Set employment type to ""Testopia #empType""
-    Set appointment type to ""Testopia #apptType""
-    Set title to ""Testopia #empTitle""
+    Set employment type to ""Tabula #empType""
+    Set appointment type to ""Tabula #apptType""
+    Set title to ""Tabula #empTitle""
     Set status to #newStatus
     Set effective date to #effectiveDate
     Set comments to #comment
@@ -122,24 +122,24 @@ alias: ""Add employment actions for #employeeName at #orgName"" => ...
 ""Add employment actions"":
 Add employment actions for #Lina at #HPD
 | actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate |
-| Testopia Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    |
+| Tabula Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    |
 | Separation      | Reserve  | Full Time | Chief      | ""Separated (Inactive)"" | 12/15/2008    |
 
 Add employment actions for #Gio at #HPD
 | actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate |
-| Testopia Update | Reserve  | Full Time | Chief      | ""Active (Active)""      | 10/15/2008    |
-| Testopia Update | Reserve  | Full Time | Chief      | ""On Leave (Active)""    | 12/15/2008    |
+| Tabula Update | Reserve  | Full Time | Chief      | ""Active (Active)""      | 10/15/2008    |
+| Tabula Update | Reserve  | Full Time | Chief      | ""On Leave (Active)""    | 12/15/2008    |
 
 Add employment actions for #Sterky at #OPD
 | actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate | comment          |
-| Testopia Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    | Testopia Comment |
+| Tabula Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    | Tabula Comment |
 | Separation      | Civiilan | Contract  | Lackey     | ""Separated (Inactive)"" | 12/15/2008    |                  |
 
 
 ""Add a comment and duty assignment"":
 use: Person Employment FNH Management
 
-Add employment comment ""Testopia comment"" for #empName at #orgName
+Add employment comment ""Tabula comment"" for #empName at #orgName
 Using employment of #empName at #orgName
 Add duty assignment at #orgName starting #startDate with status ""Current""
 | empName | orgName | startDate  |
@@ -173,14 +173,14 @@ Add new employment criterion to expression
     With undated assignments #Undated
     With employment criteria effective on a specific date #EffectiveDate
     With employment effective date #EffectiveDate
-    With employment types ""Testopia #EmpType""
+    With employment types ""Tabula #EmpType""
     With organizations #Organization
     Click Done in employment criteria popover
 Click Search
 Verify that page navigated to search results
 Search with criteria
 Verify that there are #Num results
-Verify that results are #Found
+Verify that results are ""Bob""
 
 ""Search Assignment regular/temporary, location, and org"":
 | Assignment         | Location | Organization | Num | Found          |

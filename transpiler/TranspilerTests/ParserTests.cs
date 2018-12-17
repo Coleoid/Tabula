@@ -259,6 +259,8 @@ namespace Tabula
                 new Token(TokenType.Number, "22"),
                 new Token(TokenType.Comma, ","),
                 new Token(TokenType.Number, "28"),
+                new Token(TokenType.Comma, ","),
+                new Token(TokenType.String, "Howdy!"),
             };
             var state = new ParserState(tokens);
             var cst = _parser.ParseCollection(state);
@@ -267,8 +269,9 @@ namespace Tabula
             var collection = cst as SymbolCollection;
             Assert.That(collection, Is.Not.Null);
 
-            Assert.That(collection.Values, Has.Count.EqualTo(2));
+            Assert.That(collection.Values, Has.Count.EqualTo(3));
             Assert.That(collection.Values[0].Type, Is.EqualTo(TokenType.Number));
+            Assert.That(collection.Values[2].Type, Is.EqualTo(TokenType.String));
         }
 
         //FUTURE: Consider treatment of collections of unlike types

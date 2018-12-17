@@ -43,6 +43,7 @@ namespace Tabula
         }  //  lower case, no underscores
 
         //public List<string> Args { get; set; }
+        //TODO: rename to Params
         public List<ArgDetail> Args { get; set; }
 
         public MethodDetail()
