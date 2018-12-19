@@ -416,10 +416,10 @@ namespace Tabula
 
             Assert.That(result, Contains.Substring("myWorkflow.My_friends__say__"));
 
-            var expectedNamesConstruction = @"var arg_222_0 = new List<string> { ""Ann"", ""Bob"" };";
+            var expectedNamesConstruction = @"var arg_222_0 = new List<String> { $""Ann"", $""Bob"" };";
             Assert.That(result, Contains.Substring(expectedNamesConstruction));
 
-            var expectedAgesConstruction = @"var arg_222_1 = new List<string> { ""hello"", ""howdy"" };";
+            var expectedAgesConstruction = @"var arg_222_1 = new List<String> { $""hello"", $""howdy"" };";
             Assert.That(result, Contains.Substring(expectedAgesConstruction));
 
             var expectedArguments = @"(arg_222_0, arg_222_1)";
@@ -467,7 +467,7 @@ namespace Tabula
         //decl for List<int>:
         // var arg_387_0 = new List<int> { 13, Var["offset"].To<int>() };
 
-        //Convert_step_arg_to_param_type(sym, paramType, step.StartLine, argIndex);
+        //Prepare_input_for_param(sym, paramType, step.StartLine, argIndex);
         [Test]
         public void Convert_Step_Arg_To_Param_Type_can_create_collection_of_int__()
         {
@@ -479,10 +479,11 @@ namespace Tabula
             var startLine = 125;
             var argIndex = 3;
 
-            (string text, string declaration) = generator.Convert_step_arg_to_param_type(argSymbol, paramType, startLine, argIndex);
+            (string text, string declaration) = generator.Prepare_input_for_param(argSymbol, paramType, startLine, argIndex);
 
-            Assert.That(declaration, Contains.Substring(@"var arg_125_3 = new List<Int32> { 10, ""11"".To<int>(), Var[""dozen""].To<int>() }"));
+            Assert.That(declaration, Contains.Substring(@"var arg_125_3 = new List<Int32> { 10, $""11"".To<Int32>(), Var[""dozen""].To<Int32>() }"));
         }
+
 
         [Test]
         public void Step_Call_constant_int_arguments_are_inlined()
@@ -651,7 +652,7 @@ namespace Tabula
             generator.BuildStep(step);
             var result = generator.sectionsBody.ToString();
 
-            var expected = $"var arg_{lineNumber}_0 = new List<string> {{ \"Left\", Var[\"Right\"] }};";
+            var expected = $"var arg_{lineNumber}_0 = new List<String> {{ $\"Left\", Var[\"Right\"] }};";
             Assert.That(result, Contains.Substring(expected));
             Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_{lineNumber}_0)"));
         }
@@ -683,6 +684,24 @@ namespace Tabula
             Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_202_0)"));
         }
 
+        // undecided:
+        //[TestCase(TokenType.Number, typeof(int), "12.2", "(12.2).To<Int32>()")]
+        //[TestCase(TokenType.Number, typeof(int), "12.2", "12")]
+        //[TestCase(TokenType.Number, typeof(int), "12.2", "12") ==> exception]
+
+        [TestCase(TokenType.Number, typeof(int), "12", "12")]
+        [TestCase(TokenType.Number, typeof(float), "12", "12")]
+        //[TestCase(TokenType.Number, typeof(decimal), "12", "12m")]
+        [TestCase(TokenType.Number, typeof(string), "12", "12.To<String>()")]
+        [TestCase(TokenType.String, typeof(int), "12", "$\"12\".To<Int32>()")]
+        [TestCase(TokenType.String, typeof(string), "12", "$\"12\"")]
+        [TestCase(TokenType.Variable, typeof(string), "dept", "Var[\"dept\"]")]
+        public void TokenToType(TokenType tokenType, Type collectedType, string text, string expected)
+        {
+            var result = generator.TokenToType(tokenType, collectedType, text);
+
+            Assert.That(result, Is.EqualTo(expected));
+        }
 
 
         [Test]

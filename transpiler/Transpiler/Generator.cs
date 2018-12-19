@@ -396,7 +396,7 @@ namespace Tabula
             foreach (var sym in step.Symbols.Where(s => s.Type != TokenType.Word))
             {
                 Type paramType = method.Args[argIndex].Type;
-                (string newArg, string newDeclaration) = Convert_step_arg_to_param_type(sym, paramType, step.StartLine, argIndex);
+                (string newArg, string newDeclaration) = Prepare_input_for_param(sym, paramType, step.StartLine, argIndex);
                 if (newDeclaration != null)
                     declarations.Add(newDeclaration);
                 argsString += delim + newArg;
@@ -411,18 +411,40 @@ namespace Tabula
             return (call, declarations);
         }
 
+        public string TokenToType(TokenType tokenType, Type paramType, string text)
+        {
+            var targetType = (paramType == typeof(List<string>) ? typeof(string) : paramType);
+
+
+            bool typesAreAligned = false;
+
+            if (tokenType == TokenType.Number && (targetType == typeof(Int32) || targetType == typeof(float))) typesAreAligned = true;
+
+            if (targetType == typeof(string) && (tokenType == TokenType.String || tokenType == TokenType.Variable))
+            {
+                typesAreAligned = true;
+            }
+
+            if (tokenType == TokenType.Variable)
+            {
+                text = $"Var[\"{text}\"]";
+            }
+
+            if (tokenType == TokenType.String)
+            {
+                text = $"$\"{text}\"";
+            }
+
+            return typesAreAligned ? text : text + CastToType(targetType);
+        }
+
         private string CastToType(Type argType)
         {
             var ns = argType.Namespace == "System" ? "" : argType.Namespace + ".";
             return $".To<{ns}{argType.Name}>()";
         }
 
-        public string appropriate_cast(TokenType tokenType, Type collectedType, string text)
-        {
-            return text + CastToType(collectedType);
-        }
-
-        public (string, string) Convert_step_arg_to_param_type(Symbol sym, Type paramType, int lineNumber, int argIndex)
+        public (string, string) Prepare_input_for_param(Symbol sym, Type paramType, int lineNumber, int argIndex)
         {
             string text = string.Empty;
             string declaration = null;
@@ -433,29 +455,11 @@ namespace Tabula
                     string arg_name = $"arg_{lineNumber}_{argIndex}";
                     var collectedType = paramType.GenericTypeArguments[0];
 
-                    string qq = "\"";
                     string comma = "";
                     string elements = string.Empty;
                     foreach (var value in (sym as SymbolCollection).Values)
                     {
-                        string element = string.Empty;
-                        switch (value.Type)
-                        {
-                            case TokenType.String:
-                                element = qq + value.Text + qq;
-                                break;
-                            case TokenType.Number:
-                                element = value.Text;
-                                break;
-                            case TokenType.Variable:
-                                element = "Var[" + qq + value.Text + qq + "]";
-                                break;
-                        }
-
-                        elements += comma + appropriate_cast(value.Type, collectedType, element);
-
-
-
+                        elements += comma + TokenToType(value.Type, collectedType, value.Text);
                         comma = ", ";
                     }
 
@@ -473,7 +477,7 @@ namespace Tabula
                     }
                     else
                     {
-                        text = $"$\"{text}\"";
+                        text = TokenToType(TokenType.String, paramType, text);
 
                         if (paramType == typeof(List<string>))
                         {
@@ -482,10 +486,6 @@ namespace Tabula
                             declaration = $"var {arg_name} = new List<string> {{ {text} }};";
 
                             text = arg_name;
-                        }
-                        else if (paramType != typeof(string))
-                        {
-                            text += CastToType(paramType);
                         }
                     }
 
@@ -501,13 +501,7 @@ namespace Tabula
                     break;
 
                 case TokenType.Variable:
-                    text = $"Var[\"{sym.Text}\"]";
-                    if (paramType == typeof(string))
-                    { }
-                    else
-                    {
-                        text += CastToType(paramType);
-                    }
+                    text = TokenToType( TokenType.Variable, paramType, sym.Text);
 
                     break;
 
