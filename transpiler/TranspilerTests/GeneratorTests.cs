@@ -155,7 +155,7 @@ namespace Tabula
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
 
             //  string arguments are quoted, ints aren't, dates go through conversion
-            var expectedArguments = @"($""Bob"", 28, ""07/15/2017"".To<DateTime>())";
+            var expectedArguments = @"(""Bob"", 28, ""07/15/2017"".To<DateTime>())";
             Assert.That(result, Contains.Substring(expectedArguments));
             
             //  to aid test developers, the Do() call includes a string copy of the args
@@ -416,10 +416,10 @@ namespace Tabula
 
             Assert.That(result, Contains.Substring("myWorkflow.My_friends__say__"));
 
-            var expectedNamesConstruction = @"var arg_222_0 = new List<String> { $""Ann"", $""Bob"" };";
+            var expectedNamesConstruction = @"var arg_222_0 = new List<String> { ""Ann"", ""Bob"" };";
             Assert.That(result, Contains.Substring(expectedNamesConstruction));
 
-            var expectedAgesConstruction = @"var arg_222_1 = new List<String> { $""hello"", $""howdy"" };";
+            var expectedAgesConstruction = @"var arg_222_1 = new List<String> { ""hello"", ""howdy"" };";
             Assert.That(result, Contains.Substring(expectedAgesConstruction));
 
             var expectedArguments = @"(arg_222_0, arg_222_1)";
@@ -469,7 +469,7 @@ namespace Tabula
 
         //Prepare_input_for_param(sym, paramType, step.StartLine, argIndex);
         [Test]
-        public void Convert_Step_Arg_To_Param_Type_can_create_collection_of_int__()
+        public void Convert_Step_Arg_To_Param_Type_can_create_collection_of_int()
         {
             var argSymbol = new SymbolCollection();
             argSymbol.Values.Add(new Symbol(TokenType.Number, "10"));
@@ -481,7 +481,7 @@ namespace Tabula
 
             (string text, string declaration) = generator.Prepare_input_for_param(argSymbol, paramType, startLine, argIndex);
 
-            Assert.That(declaration, Contains.Substring(@"var arg_125_3 = new List<Int32> { 10, $""11"".To<Int32>(), Var[""dozen""].To<Int32>() }"));
+            Assert.That(declaration, Contains.Substring(@"var arg_125_3 = new List<Int32> { 10, 11, Var[""dozen""].To<Int32>() }"));
         }
 
 
@@ -581,7 +581,7 @@ namespace Tabula
 
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
 
-            var expectedArguments = @"(Var[""friendname""], $""THE BIG 23"".To<Int32>(), Var[""birthday""].To<DateTime>())";
+            var expectedArguments = @"(Var[""friendname""], ""THE BIG 23"".To<Int32>(), Var[""birthday""].To<DateTime>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
@@ -619,7 +619,7 @@ namespace Tabula
             Assert.That(result, Contains.Substring("myWorkflow.My_friend__now_works_at__"));
 
             //  variables going into an argument of an enum type get a .To<enumType>()
-            var expectedArguments = @"(Var[""friendname""], $""HR"".To<Tabula.Assignment>())";
+            var expectedArguments = @"(Var[""friendname""], ""HR"".To<Tabula.Assignment>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
@@ -652,7 +652,7 @@ namespace Tabula
             generator.BuildStep(step);
             var result = generator.sectionsBody.ToString();
 
-            var expected = $"var arg_{lineNumber}_0 = new List<String> {{ $\"Left\", Var[\"Right\"] }};";
+            var expected = $"var arg_{lineNumber}_0 = new List<String> {{ \"Left\", Var[\"Right\"] }};";
             Assert.That(result, Contains.Substring(expected));
             Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_{lineNumber}_0)"));
         }
@@ -679,7 +679,7 @@ namespace Tabula
             generator.BuildStep(step);
             var result = generator.sectionsBody.ToString();
 
-            var expected = $"var arg_202_0 = new List<string> {{ $\"Frank\" }};";
+            var expected = $"var arg_202_0 = new List<string> {{ \"Frank\" }};";
             Assert.That(result, Contains.Substring(expected));
             Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_202_0)"));
         }
@@ -691,11 +691,14 @@ namespace Tabula
 
         [TestCase(TokenType.Number, typeof(int), "12", "12")]
         [TestCase(TokenType.Number, typeof(float), "12", "12")]
-        //[TestCase(TokenType.Number, typeof(decimal), "12", "12m")]
-        [TestCase(TokenType.Number, typeof(string), "12", "12.To<String>()")]
-        [TestCase(TokenType.String, typeof(int), "12", "$\"12\".To<Int32>()")]
-        [TestCase(TokenType.String, typeof(string), "12", "$\"12\"")]
+        [TestCase(TokenType.Number, typeof(double), "12", "12")]
+        [TestCase(TokenType.Number, typeof(decimal), "12", "12m")]
+        [TestCase(TokenType.Number, typeof(string), "12", "\"12\"")]
+        [TestCase(TokenType.String, typeof(int), "12", "12")]
+        [TestCase(TokenType.String, typeof(string), "12", "\"12\"")]
         [TestCase(TokenType.Variable, typeof(string), "dept", "Var[\"dept\"]")]
+        [TestCase(TokenType.String, typeof(DateTime), "01/04/2013", "\"01/04/2013\".To<DateTime>()")]
+        [TestCase(TokenType.Date, typeof(DateTime), "01/04/2013", "\"01/04/2013\".To<DateTime>()")]
         public void TokenToType(TokenType tokenType, Type collectedType, string text, string expected)
         {
             var result = generator.TokenToType(tokenType, collectedType, text);
@@ -730,7 +733,7 @@ namespace Tabula
             generator.BuildStep(step);
             var result = generator.sectionsBody.ToString();
 
-            Assert.That(result, Contains.Substring($"myWorkflow.My__are__($\"friends\", arg_321_1)"));
+            Assert.That(result, Contains.Substring($"myWorkflow.My__are__(\"friends\", arg_321_1)"));
         }
 
 
@@ -778,7 +781,7 @@ namespace Tabula
             Assert.That(result, Contains.Substring("Label(     \"short paragraph\");"));
             Assert.That(result, Contains.Substring("public void paragraph__021_to_022()"));
             Assert.That(result, Contains.Substring("myWorkflow = new App.GreetingWorkflow();"));
-            Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__($\"Bob\", $\"where am I?\")"));
+            Assert.That(result, Contains.Substring("myWorkflow.user__made_comment__(\"Bob\", \"where am I?\")"));
         }
 
         [Test]

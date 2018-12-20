@@ -411,31 +411,71 @@ namespace Tabula
             return (call, declarations);
         }
 
-        public string TokenToType(TokenType tokenType, Type paramType, string text)
+        public string TokenToType(TokenType tokenType, Type paramType, string input)
         {
             var targetType = (paramType == typeof(List<string>) ? typeof(string) : paramType);
+            bool typesNeedCast = true;
+            var result = input;
 
+            if (tokenType == TokenType.Number)
+            {
+                if (targetType == typeof(Int32) || 
+                    targetType == typeof(float) || 
+                    targetType == typeof(double) ||
+                    targetType == typeof(decimal))
+                {
+                    typesNeedCast = false;
+                }
 
-            bool typesAreAligned = false;
-
-            if (tokenType == TokenType.Number && (targetType == typeof(Int32) || targetType == typeof(float))) typesAreAligned = true;
+                if (targetType == typeof(decimal))
+                {
+                    result += "m";
+                }
+            }
 
             if (targetType == typeof(string) && (tokenType == TokenType.String || tokenType == TokenType.Variable))
             {
-                typesAreAligned = true;
+                typesNeedCast = false;
             }
 
             if (tokenType == TokenType.Variable)
             {
-                text = $"Var[\"{text}\"]";
+                result = $"Var[\"{input}\"]";
             }
 
             if (tokenType == TokenType.String)
             {
-                text = $"$\"{text}\"";
+                var replaced = Regex.Replace(input, "#(\\w+)", "{Var[\"$1\"]}");
+                bool hasInterp = !input.Equals(replaced);
+                string din = hasInterp ? "$" : "";  // dollar if needed
+                result = $"{din}\"{replaced}\"";
+
+                if (!hasInterp && targetType == typeof(int))
+                {
+                    int int_out;
+                    if (paramType == typeof(int) && int.TryParse(input, out int_out))
+                    {
+                        result = input;
+                        typesNeedCast = false;
+                    }
+                }
             }
 
-            return typesAreAligned ? text : text + CastToType(targetType);
+            if (tokenType == TokenType.Number)
+            {
+                if (targetType == typeof(string))
+                {
+                    result = "\"" + input + "\"";
+                    typesNeedCast = false;
+                }
+            }
+
+            if (tokenType == TokenType.Date)
+            {
+                result = "\"" + input + "\"";
+            }
+
+            return result + (typesNeedCast ? CastToType(targetType) : "");
         }
 
         private string CastToType(Type argType)
@@ -449,11 +489,15 @@ namespace Tabula
             string text = string.Empty;
             string declaration = null;
 
+            Type collectedType = null;
+            if (paramType.GenericTypeArguments.Length > 0)
+                collectedType = paramType.GenericTypeArguments[0];
+
             switch (sym.Type)
             {
+
                 case TokenType.Collection:
                     string arg_name = $"arg_{lineNumber}_{argIndex}";
-                    var collectedType = paramType.GenericTypeArguments[0];
 
                     string comma = "";
                     string elements = string.Empty;
@@ -469,40 +513,20 @@ namespace Tabula
                     break;
 
                 case TokenType.String:
-                    text = Regex.Replace(sym.Text, "#(\\w+)", "{Var[\"$1\"]}");
-                    int result;
-                    if (paramType == typeof(int) && int.TryParse(text, out result))
+                    text = TokenToType(TokenType.String, paramType, sym.Text);
+
+                    if (paramType == typeof(List<string>))
                     {
-                        text = sym.Text;
+                        arg_name = $"arg_{lineNumber}_{argIndex}";
+                        declaration = $"var {arg_name} = new List<string> {{ {text} }};";
+                        text = arg_name;
                     }
-                    else
-                    {
-                        text = TokenToType(TokenType.String, paramType, text);
-
-                        if (paramType == typeof(List<string>))
-                        {
-                            arg_name = $"arg_{lineNumber}_{argIndex}";
-
-                            declaration = $"var {arg_name} = new List<string> {{ {text} }};";
-
-                            text = arg_name;
-                        }
-                    }
-
                     break;
 
                 case TokenType.Date:
-                    text = $"\"{sym.Text}\".To<DateTime>()";
-                    break;
-
                 case TokenType.Number:
-                    var suffix = paramType == typeof(decimal) ? "m" : "";
-                    text = sym.Text + suffix;
-                    break;
-
                 case TokenType.Variable:
-                    text = TokenToType( TokenType.Variable, paramType, sym.Text);
-
+                    text = TokenToType(sym.Type, paramType, sym.Text);
                     break;
 
                 default:
