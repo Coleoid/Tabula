@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Tabula.CST;
 
 namespace Tabula
 {
@@ -14,14 +13,18 @@ namespace Tabula
 
     public class Generator
     {
-        public static string CurrentVersion { get => "0.4"; }
+        public static string CurrentVersion
+        {
+            get => "0.4";
+        }
+
         private readonly Dictionary<string, string> Versions = new Dictionary<string, string>
         {
-            { "0.1", "only generates this rudimentary paste" },
-            { "0.2", "can barely generate a compilable class" },
-            { "0.3", "doesn't always generate a compilable class" },
-            { "0.4", "is not yet alpha (known missing 1.0 features)" },
-            { "0.5", "is a very lean initial alpha, start trying to use it!" },
+            {"0.1", "only generates this rudimentary paste"},
+            {"0.2", "can barely generate a compilable class"},
+            {"0.3", "doesn't always generate a compilable class"},
+            {"0.4", "is not yet alpha (known missing 1.0 features)"},
+            {"0.5", "is a very lean initial alpha, start trying to use it!"},
             //  feels unproductive to project further at this time (29 jan '18)
         };
 
@@ -44,9 +47,9 @@ namespace Tabula
         {
             Workflows = new Dictionary<string, WorkflowDetail>();
             Library = new WorkflowIntrospector();
-    
-            executeMethodBody = new IndentingStringBuilder(12);  // 12 = namespace + class + method
-            sectionsBody = new IndentingStringBuilder(8);  // 8 = namespace + class
+
+            executeMethodBody = new IndentingStringBuilder(12); // 12 = namespace + class + method
+            sectionsBody = new IndentingStringBuilder(8); // 8 = namespace + class
         }
 
         public void Generate(CST.Scenario scenario, string inputFilePath, StringBuilder builder)
@@ -74,6 +77,7 @@ namespace Tabula
         }
 
         #region Prepare Sections (Paragraphs and Tables)
+
         public void PrepareSections()
         {
             foreach (var section in Scenario.Sections)
@@ -100,7 +104,7 @@ namespace Tabula
 
             var tagsArg = string.Join(", ", paragraph.Tags);
             if (!string.IsNullOrEmpty(tagsArg))
-                sectionsBody.AppendLine($"Tags(     \"{tagsArg}\");");  //TODO:  Add test for tags on paragraph
+                sectionsBody.AppendLine($"Tags(     \"{tagsArg}\");"); //TODO:  Add test for tags on paragraph
 
             var useCommands = paragraph.Actions.Where(a => a is CST.CommandUse).Select(a => (CST.CommandUse) a);
             PrepareUses(useCommands);
@@ -109,13 +113,14 @@ namespace Tabula
                 sectionsBody
                     .AppendLine($"var {workflow.InstanceName} = new {workflow.Namespace}.{workflow.Name}();");
             }
+
             if (paragraph.WorkflowsInScope.Count() > 0)
                 sectionsBody.AppendLine();
 
             sectionsBody.AppendLine($"Label(     \"{paragraph.Label}\");");
-            
+
             PrepareActions(paragraph.Actions);
-            
+
             sectionsBody
                 .Dedent()
                 .AppendLine("}")
@@ -127,7 +132,7 @@ namespace Tabula
         public void PrepareTable(CST.Table table)
         {
             sectionsBody
-                .AppendLine($"public Table {table.MethodName}()")  //TODO: if label exists, add it as a comment
+                .AppendLine($"public Table {table.MethodName}()") //TODO: if label exists, add it as a comment
                 .AppendLine("{")
                 .Indent()
                 .AppendLine("return new Table {")
@@ -149,13 +154,13 @@ namespace Tabula
         public void PrepareMetadata(CST.Table table)
         {
             sectionsBody
-                .If(table.Tags.Any())  //  Does .If() make me a bad person?
+                .If(table.Tags.Any()) //  Does .If() make me a bad person?
                 .Append("Tags = new List<string> { ")
                 .Append(string.Join(", ", table.Tags.Select(t => "\"" + Formatter.Reescape(t) + "\"")))
                 .AppendLine(" },");
 
             sectionsBody
-                .If(!string.IsNullOrEmpty(table.Label))  //  Perhaps it's a cry for help.
+                .If(!string.IsNullOrEmpty(table.Label)) //  Perhaps it's a cry for help.
                 .Append("Label = \"")
                 .Append(table.Label)
                 .AppendLine("\",");
@@ -165,7 +170,7 @@ namespace Tabula
         {
             sectionsBody
                 .Append("Header = new List<string>     { ")
-                .Append(string.Join(", ", table.ColumnNames.Select(c => "\"" + Formatter.Reescape(c) + "\"" )))
+                .Append(string.Join(", ", table.ColumnNames.Select(c => "\"" + Formatter.Reescape(c) + "\"")))
                 .AppendLine(" },");
 
             sectionsBody
@@ -217,6 +222,7 @@ namespace Tabula
 
         private bool paragraphPending = false;
         private string stagedParagraph;
+
         public void ClearStage()
         {
             if (!paragraphPending) return;
@@ -380,23 +386,34 @@ namespace Tabula
                 {
                     sectionsBody.AppendLine(declaration);
                 }
+
                 sectionsBody.AppendLine($"Do(() =>    {call}, @{sourceLocation}, {quotedCall});");
             }
         }
 
+        public (WorkflowDetail workflow, MethodDetail method) FindWorkflowMethod(string searchName)
+        {
+            foreach (var workflow in (CurrentParagraph.WorkflowsInScope as IEnumerable<WorkflowDetail>).Reverse())
+            {
+                if (workflow.Methods.ContainsKey(searchName))
+                    return (workflow, workflow.Methods[searchName]);
+            }
+
+            return (null, null);
+        }
 
         public (string, List<string>) ComposeCall(CST.Step step, WorkflowDetail workflow, MethodDetail method)
         {
-            List<string> declarations = new List<string>( );
+            List<string> declarations = new List<string>();
             string argsString = "";
             string delim = "";
-            string text = "";
 
             int argIndex = 0;
             foreach (var sym in step.Symbols.Where(s => s.Type != TokenType.Word))
             {
                 Type paramType = method.Args[argIndex].Type;
-                (string newArg, string newDeclaration) = Prepare_input_for_param(sym, paramType, step.StartLine, argIndex);
+                (string newArg, string newDeclaration) =
+                    Prepare_input_for_param(sym, paramType, step.StartLine, argIndex);
                 if (newDeclaration != null)
                     declarations.Add(newDeclaration);
                 argsString += delim + newArg;
@@ -411,80 +428,7 @@ namespace Tabula
             return (call, declarations);
         }
 
-        public string TokenToType(TokenType tokenType, Type paramType, string input)
-        {
-            var targetType = (paramType == typeof(List<string>) ? typeof(string) : paramType);
-            bool typesNeedCast = true;
-            var result = input;
-
-            if (tokenType == TokenType.Number)
-            {
-                if (targetType == typeof(Int32) || 
-                    targetType == typeof(float) || 
-                    targetType == typeof(double) ||
-                    targetType == typeof(decimal))
-                {
-                    typesNeedCast = false;
-                }
-
-                if (targetType == typeof(decimal))
-                {
-                    result += "m";
-                }
-            }
-
-            if (targetType == typeof(string) && (tokenType == TokenType.String || tokenType == TokenType.Variable))
-            {
-                typesNeedCast = false;
-            }
-
-            if (tokenType == TokenType.Variable)
-            {
-                result = $"Var[\"{input}\"]";
-            }
-
-            if (tokenType == TokenType.String)
-            {
-                var replaced = Regex.Replace(input, "#(\\w+)", "{Var[\"$1\"]}");
-                bool hasInterp = !input.Equals(replaced);
-                string din = hasInterp ? "$" : "";  // dollar if needed
-                result = $"{din}\"{replaced}\"";
-
-                if (!hasInterp && targetType == typeof(int))
-                {
-                    int int_out;
-                    if (paramType == typeof(int) && int.TryParse(input, out int_out))
-                    {
-                        result = input;
-                        typesNeedCast = false;
-                    }
-                }
-            }
-
-            if (tokenType == TokenType.Number)
-            {
-                if (targetType == typeof(string))
-                {
-                    result = "\"" + input + "\"";
-                    typesNeedCast = false;
-                }
-            }
-
-            if (tokenType == TokenType.Date)
-            {
-                result = "\"" + input + "\"";
-            }
-
-            return result + (typesNeedCast ? CastToType(targetType) : "");
-        }
-
-        private string CastToType(Type argType)
-        {
-            var ns = argType.Namespace == "System" ? "" : argType.Namespace + ".";
-            return $".To<{ns}{argType.Name}>()";
-        }
-
-        public (string, string) Prepare_input_for_param(Symbol sym, Type paramType, int lineNumber, int argIndex)
+        public (string, string) Prepare_input_for_param(CST.Symbol sym, Type paramType, int lineNumber, int argIndex)
         {
             string text = string.Empty;
             string declaration = null;
@@ -501,7 +445,7 @@ namespace Tabula
 
                     string comma = "";
                     string elements = string.Empty;
-                    foreach (var value in (sym as SymbolCollection).Values)
+                    foreach (var value in (sym as CST.SymbolCollection).Values)
                     {
                         elements += comma + TokenToType(value.Type, collectedType, value.Text);
                         comma = ", ";
@@ -521,6 +465,7 @@ namespace Tabula
                         declaration = $"var {arg_name} = new List<string> {{ {text} }};";
                         text = arg_name;
                     }
+
                     break;
 
                 case TokenType.Date:
@@ -536,16 +481,121 @@ namespace Tabula
             return (text, declaration);
         }
 
-
-        public (WorkflowDetail workflow, MethodDetail method) FindWorkflowMethod(string searchName)
+        public string TokenToType(TokenType tokenType, Type paramType, string input)
         {
-            foreach(var workflow in (CurrentParagraph.WorkflowsInScope as IEnumerable<WorkflowDetail>).Reverse())
+            var targetType = (paramType == typeof(List<string>) ? typeof(string) : paramType);
+            bool typesNeedCast = true;
+            bool conversionFailed = false;
+            var result = input;
+
+            switch (tokenType)
             {
-                if (workflow.Methods.ContainsKey(searchName))
-                    return (workflow, workflow.Methods[searchName]);
+            case TokenType.Number:
+                if (targetType == typeof(Int32) ||
+                    targetType == typeof(float) ||
+                    targetType == typeof(double) ||
+                    targetType == typeof(decimal))
+                {
+                    typesNeedCast = false;
+                    if (targetType == typeof(decimal)) result += "m";
+                }
+                else if (targetType == typeof(string))
+                {
+                    result = "\"" + input + "\"";
+                }
+                else
+                {
+                    conversionFailed = true;
+                }
+                break;
+
+            case TokenType.Variable:
+                result = $"Var[\"{input}\"]";
+                break;
+
+            case TokenType.String:
+                var replaced = Regex.Replace(input, "#(\\w+)", "{Var[\"$1\"]}");
+
+                if (!input.Equals(replaced))
+                {
+                    result = $"$\"{replaced}\"";
+                    break;
+                }
+
+                if (targetType == typeof(decimal))
+                {
+                    result += "m";
+                }
+
+                if (targetType == typeof(int))
+                {
+                    if (int.TryParse(input, out int out_int)) typesNeedCast = false;
+                    else conversionFailed = true;
+                }
+                else if (targetType == typeof(float))
+                {
+                    if (float.TryParse(input, out float out_float)) typesNeedCast = false;
+                    else conversionFailed = true;
+                }
+                else if (targetType == typeof(double))
+                {
+                    if (double.TryParse(input, out double out_double)) typesNeedCast = false;
+                    else conversionFailed = true;
+                }
+                else if (targetType == typeof(decimal))
+                {
+                    if (decimal.TryParse(input, out decimal out_decimal)) typesNeedCast = false;
+                    else conversionFailed = true;
+                }
+                else
+                {
+                    if (targetType == typeof(DateTime))
+                    {
+                        if (!DateTime.TryParse(input, out DateTime out_DateTime)) conversionFailed = true;
+                    }
+
+                    result = $"\"{result}\"";
+                }
+
+                break;
+
+            case TokenType.Date:
+                if (targetType == typeof(DateTime))
+                {
+                    if (!DateTime.TryParse(input, out DateTime out_DateTime))
+                        conversionFailed = true;
+                }
+                else if (targetType == typeof(Int32) ||
+                         targetType == typeof(float) ||
+                         targetType == typeof(double) ||
+                         targetType == typeof(decimal))
+                {
+                    conversionFailed = true;
+                }
+
+                result = "\"" + input + "\"";
+                break;
+
+            default:
+                conversionFailed = true;
+                break;
             }
 
-            return (null, null);
+            if (conversionFailed)
+                throw new Exception(
+                    $"Cannot convert token type [{tokenType.ToString()}] value [{input}] to an argument of [{targetType.Name}] type.");
+
+            if (targetType == typeof(string)) typesNeedCast = false;
+
+            if (typesNeedCast)
+            {
+                var ns = targetType.Namespace == "System" ? "" : targetType.Namespace + ".";
+                return $"{result}.To<{ns}{targetType.Name}>()";
+            }
+            else
+            {
+                return result;
+            }
         }
 
         public void BuildSetCommand(CST.CommandSet commandSet)
@@ -556,7 +606,7 @@ namespace Tabula
             string varStart = "Var[";
             string varEnd = "]";
             string call = varStart + "\"" + commandSet.Name.Replace("#", "") + "\"" + varEnd;
-            
+
             if (commandSet.Name.Contains('#'))
             {
                 call = varStart + call + varEnd;
@@ -580,7 +630,8 @@ namespace Tabula
         //TODO: Alias POI
         private void BuildAliasCommand(CST.CommandAlias aliasCommand)
         {
-            sectionsBody.AppendLine($"Alias(     {aliasCommand.Name}, {aliasCommand.Action} ); //TODO: Actually implement");
+            sectionsBody.AppendLine(
+                $"Alias(     {aliasCommand.Name}, {aliasCommand.Action} ); //TODO: Actually implement");
         }
 
         //TODO:  block__XXX_to_YYY()

@@ -12,15 +12,15 @@ namespace Tabula
     public class GeneratorTests
     {
         StringBuilder builder;
-        CST.Scenario scenario;
+        Scenario scenario;
         Generator generator;
 
         [SetUp]
         public void SetUp()
         {
             builder = new StringBuilder();
-            scenario = new CST.Scenario();
-            generator = new Generator { Builder = builder, Scenario = scenario, InputFilePath = "scenario_source.tab" };
+            scenario = new Scenario();
+            generator = new Generator {Builder = builder, Scenario = scenario, InputFilePath = "scenario_source.tab"};
         }
 
         //FUTURE:  Report scenario errors in Visual Studio error list
@@ -67,7 +67,7 @@ namespace Tabula
         public void Class_declaration_includes_scenario_label_as_comment()
         {
             var label = "AC-39393: Snock the cubid foratically";
-            var scenario = new CST.Scenario { Label = label };
+            var scenario = new Scenario {Label = label};
             generator.Scenario = scenario;
             generator.InputFilePath = "TuitionBilling";
             generator.WriteClassOpen();
@@ -88,12 +88,12 @@ namespace Tabula
         [Test]
         public void BuildStep_Unfound_includes_source_text_and_location()
         {
-            var step = new CST.Step(12,
+            var step = new Step(12,
                 (TokenType.Word, "hello"),
                 (TokenType.Word, "world")
             );
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.BuildStep(step);
 
             var result = generator.sectionsBody.ToString();
@@ -107,12 +107,12 @@ namespace Tabula
         [TestCase("workflow instance and method name", "myWorkflow.MyMethod_correctly_spelled()")]
         public void Step_Call_includes_(string description, string part)
         {
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "MyMethod_correctly_spelled" });
-            generator.CurrentParagraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "MyMethod_correctly_spelled"});
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(34,
+            var step = new Step(34,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "method"),
                 (TokenType.Word, "correctly"),
@@ -128,18 +128,19 @@ namespace Tabula
         [Test]
         public void Step_Call_includes_arguments()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "age", Type = typeof(int) },
-                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "age", Type = typeof(int)},
+                new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
-            generator.CurrentParagraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friend__turned__on__", Args = args});
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
                 (TokenType.String, "Bob"),
@@ -157,7 +158,7 @@ namespace Tabula
             //  string arguments are quoted, ints aren't, dates go through conversion
             var expectedArguments = @"(""Bob"", 28, ""07/15/2017"".To<DateTime>())";
             Assert.That(result, Contains.Substring(expectedArguments));
-            
+
             //  to aid test developers, the Do() call includes a string copy of the args
             var requotedArguments = expectedArguments.Replace("\"", "\"\"");
             Assert.That(result, Contains.Substring(requotedArguments));
@@ -166,8 +167,8 @@ namespace Tabula
         [Test]
         public void CommandSet_generates_proper_string_for_source_location()
         {
-            var term = new CST.Symbol(TokenType.String, "bar", 1);
-            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+            var term = new Symbol(TokenType.String, "bar", 1);
+            var command = new CommandSet("foo", term) {StartLine = 12};
 
             generator.BuildSetCommand(command);
 
@@ -178,8 +179,8 @@ namespace Tabula
         [Test]
         public void BuildStep_sets_a_variable_on_CommandSet()
         {
-            var term = new CST.Symbol(TokenType.String, "bar", 1);
-            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+            var term = new Symbol(TokenType.String, "bar", 1);
+            var command = new CommandSet("foo", term) {StartLine = 12};
 
             generator.BuildSetCommand(command);
 
@@ -190,8 +191,8 @@ namespace Tabula
         [Test]
         public void BuildStep_can_set_a_variable_to_a_variable_on_CommandSet()
         {
-            var term = new CST.Symbol(TokenType.Variable, "bar", 1);
-            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+            var term = new Symbol(TokenType.Variable, "bar", 1);
+            var command = new CommandSet("foo", term) {StartLine = 12};
 
             generator.BuildSetCommand(command);
 
@@ -202,8 +203,8 @@ namespace Tabula
         [Test]
         public void BuildStep_can_set_a_referenced_value_as_a_variable_to_a_variable_on_CommandSet()
         {
-            var term = new CST.Symbol(TokenType.Variable, "bar", 1);
-            var command = new CST.CommandSet("#foo", term) { StartLine = 12 };
+            var term = new Symbol(TokenType.Variable, "bar", 1);
+            var command = new CommandSet("#foo", term) {StartLine = 12};
 
             generator.BuildSetCommand(command);
 
@@ -214,8 +215,8 @@ namespace Tabula
         [Test]
         public void BuildStep_can_set_a_variable_to_a_date_on_CommandSet()
         {
-            var term = new CST.Symbol(TokenType.Date, "1/1/2323", 1);
-            var command = new CST.CommandSet("foo", term) { StartLine = 12 };
+            var term = new Symbol(TokenType.Date, "1/1/2323", 1);
+            var command = new CommandSet("foo", term) {StartLine = 12};
 
             generator.BuildSetCommand(command);
 
@@ -226,19 +227,20 @@ namespace Tabula
         [Test]
         public void BuildStep_Unfound_on_arg_count_mismatch()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "comment", Type = typeof(string) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "comment", Type = typeof(string)}
             };
 
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "user__made_comment__", Args = args});
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "user"),
                 (TokenType.String, "Bob"),
                 (TokenType.Word, "made"),
@@ -256,19 +258,20 @@ namespace Tabula
         [Test]
         public void BuildStep_complaint_when_TokenType_unrecognized()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "user__thing", Args = args });
-            var paragraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "user__thing", Args = args});
+            var paragraph = new Paragraph();
             generator.CurrentParagraph = paragraph;
             paragraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "user"),
-                (((TokenType)(-1)), "mystery"),
+                ((TokenType) (-1), "mystery"),
                 (TokenType.Word, "thing")
             );
 
@@ -280,18 +283,19 @@ namespace Tabula
         [Test]
         public void Step_Call_handles_variables()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "age", Type = typeof(int) },
-                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "age", Type = typeof(int)},
+                new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
-            generator.CurrentParagraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friend__turned__on__", Args = args});
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
                 (TokenType.Variable, "friendname"),
@@ -313,18 +317,19 @@ namespace Tabula
         [Test]
         public void Step_Call_interpolates_variables_in_strings()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "greeting", Type = typeof(string) },
-                new ArgDetail { Name = "sequence", Type = typeof(string) },
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "greeting", Type = typeof(string)},
+                new ArgDetail {Name = "sequence", Type = typeof(string)},
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "To__I_say__and__", Args = args });
-            generator.CurrentParagraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "To__I_say__and__", Args = args});
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "to"),
                 (TokenType.Variable, "friendname"),
                 (TokenType.Word, "I"),
@@ -348,19 +353,20 @@ namespace Tabula
         [Test]
         public void Step_Call_variables_get_standard_types()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "age", Type = typeof(int) },
-                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "age", Type = typeof(int)},
+                new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friend__turned__on__", Args = args});
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
                 (TokenType.Variable, "friendname"),
@@ -377,25 +383,27 @@ namespace Tabula
 
             //  variables going into an argument of type int need to get a .To<int>()
             //  variables going into an argument of type DateTime need to get a .To<DateTime>()
-            var expectedArguments = @"(Var[""friendname""], Var[""newage""].To<Int32>(), Var[""birthday""].To<DateTime>())";
+            var expectedArguments =
+                @"(Var[""friendname""], Var[""newage""].To<Int32>(), Var[""birthday""].To<DateTime>())";
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
         [Test]
         public void Step_Calls_can_pass_multiple_collections()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "names", Type = typeof(List<string>) },
-                new ArgDetail { Name = "greets", Type = typeof(List<string>) },
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "names", Type = typeof(List<string>)},
+                new ArgDetail {Name = "greets", Type = typeof(List<string>)},
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friends__say__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friends__say__", Args = args});
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friends")
             );
@@ -426,20 +434,21 @@ namespace Tabula
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
-        [Test, Ignore("Tackling at lower level first")]
+        [Test]
         public void Step_Call_can_send_list_of_int()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "numbers", Type = typeof( List<int>) },
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "numbers", Type = typeof(List<int>)},
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "Lucky_numbers__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "Lucky_numbers__", Args = args});
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "lucky"),
                 (TokenType.Word, "numbers")
             );
@@ -455,7 +464,7 @@ namespace Tabula
 
             Assert.That(result, Contains.Substring("myWorkflow.Lucky_numbers__"));
 
-            var expectedAgesConstruction = @"var arg_222_0 = new List<int> { 33, 31 };";
+            var expectedAgesConstruction = @"var arg_222_0 = new List<Int32> { 33, 31 };";
             Assert.That(result, Contains.Substring(expectedAgesConstruction));
 
             var expectedArguments = @"(arg_222_0)";
@@ -479,28 +488,31 @@ namespace Tabula
             var startLine = 125;
             var argIndex = 3;
 
-            (string text, string declaration) = generator.Prepare_input_for_param(argSymbol, paramType, startLine, argIndex);
+            (string text, string declaration) =
+                generator.Prepare_input_for_param(argSymbol, paramType, startLine, argIndex);
 
-            Assert.That(declaration, Contains.Substring(@"var arg_125_3 = new List<Int32> { 10, 11, Var[""dozen""].To<Int32>() }"));
+            Assert.That(declaration,
+                Contains.Substring(@"var arg_125_3 = new List<Int32> { 10, 11, Var[""dozen""].To<Int32>() }"));
         }
 
 
         [Test]
         public void Step_Call_constant_int_arguments_are_inlined()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "age", Type = typeof(int) },
-                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "age", Type = typeof(int)},
+                new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friend__turned__on__", Args = args});
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
                 (TokenType.Variable, "friendname"),
@@ -524,17 +536,18 @@ namespace Tabula
         [Test]
         public void Step_Call_constant_numeric_arguments_get_m_when_going_to_decimal_parameter()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "percentage", Type = typeof(decimal) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "percentage", Type = typeof(decimal)}
             };
 
-            var detail = new WorkflowDetail { Name = "SomeWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "I_feel__percent_awake", Args = args });
+            var detail = new WorkflowDetail {Name = "SomeWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "I_feel__percent_awake", Args = args});
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "I"),
                 (TokenType.Word, "feel"),
                 (TokenType.Number, "23.02"),
@@ -551,59 +564,29 @@ namespace Tabula
             Assert.That(result, Contains.Substring(expectedArguments));
         }
 
-        [Test]
-        public void Step_Call_int_inlining_does_not_happen_when_string_value_does_not_parse_as_int()
+        enum Assignment
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "age", Type = typeof(int) },
-                new ArgDetail { Name = "birthday", Type = typeof(DateTime) }
-            };
-
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friend__turned__on__", Args = args });
-
-            generator.CurrentParagraph = new CST.Paragraph();
-            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
-
-            var step = new CST.Step(222,
-                (TokenType.Word, "my"),
-                (TokenType.Word, "friend"),
-                (TokenType.Variable, "friendname"),
-                (TokenType.Word, "turned"),
-                (TokenType.String, "THE BIG 23"),
-                (TokenType.Word, "on"),
-                (TokenType.Variable, "birthday")
-            );
-
-            generator.BuildStep(step);
-            var result = generator.sectionsBody.ToString();
-
-            Assert.That(result, Contains.Substring("myWorkflow.My_friend__turned__on__"));
-
-            var expectedArguments = @"(Var[""friendname""], ""THE BIG 23"".To<Int32>(), Var[""birthday""].To<DateTime>())";
-            Assert.That(result, Contains.Substring(expectedArguments));
+            HR,
+            Ops
         }
-
-
-        enum Assignment { HR, Ops }
 
 
         [Test]
         public void Step_Call_variables_get_enum_types()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "assignment", Type = typeof(Assignment) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "assignment", Type = typeof(Assignment)}
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friend__now_works_at__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friend__now_works_at__", Args = args});
 
-            generator.CurrentParagraph = new CST.Paragraph();
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(222,
+            var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
                 (TokenType.Variable, "friendname"),
@@ -629,16 +612,17 @@ namespace Tabula
         [TestCase(202)]
         public void List_arguments_create_declaration_line(int lineNumber)
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "names", Type = typeof(List<string>) },
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "names", Type = typeof(List<string>)},
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friends_are__", Args = args });
-            generator.CurrentParagraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friends_are__", Args = args});
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(lineNumber,
+            var step = new Step(lineNumber,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friends"),
                 (TokenType.Word, "are")
@@ -660,16 +644,17 @@ namespace Tabula
         [Test]
         public void Single_values_going_to_a_list_parameter_get_wrapped_in_lists()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "names", Type = typeof(List<string>) },
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "names", Type = typeof(List<string>)},
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My_friends_are__", Args = args });
-            generator.CurrentParagraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My_friends_are__", Args = args});
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(202,
+            var step = new Step(202,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friends"),
                 (TokenType.Word, "are"),
@@ -684,10 +669,11 @@ namespace Tabula
             Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_202_0)"));
         }
 
-        // undecided:
-        //[TestCase(TokenType.Number, typeof(int), "12.2", "(12.2).To<Int32>()")]
-        //[TestCase(TokenType.Number, typeof(int), "12.2", "12")]
-        //[TestCase(TokenType.Number, typeof(int), "12.2", "12") ==> exception]
+        // undecided which of these should pass:
+        //[TestCase(TokenType.Number, typeof(int), "12.5", "(12.5).To<Int32>()")]
+        //[TestCase(TokenType.Number, typeof(int), "12.5", "12")]
+        //[TestCase(TokenType.Number, typeof(int), "12.5", "13")]
+        //[TestCase(TokenType.Number, typeof(int), "12.5", "12") ==> exception]
 
         [TestCase(TokenType.Number, typeof(int), "12", "12")]
         [TestCase(TokenType.Number, typeof(float), "12", "12")]
@@ -695,6 +681,9 @@ namespace Tabula
         [TestCase(TokenType.Number, typeof(decimal), "12", "12m")]
         [TestCase(TokenType.Number, typeof(string), "12", "\"12\"")]
         [TestCase(TokenType.String, typeof(int), "12", "12")]
+        [TestCase(TokenType.String, typeof(float), "12", "12")]
+        [TestCase(TokenType.String, typeof(double), "12", "12")]
+        [TestCase(TokenType.String, typeof(decimal), "12", "12m")]
         [TestCase(TokenType.String, typeof(string), "12", "\"12\"")]
         [TestCase(TokenType.Variable, typeof(string), "dept", "Var[\"dept\"]")]
         [TestCase(TokenType.String, typeof(DateTime), "01/04/2013", "\"01/04/2013\".To<DateTime>()")]
@@ -706,21 +695,48 @@ namespace Tabula
             Assert.That(result, Is.EqualTo(expected));
         }
 
+        [TestCase(TokenType.String, typeof(int), "12#extra", "$\"12{Var[\"extra\"]}\".To<Int32>()")]
+        [TestCase(TokenType.String, typeof(float), "-0.#extra", "$\"-0.{Var[\"extra\"]}\".To<Single>()")]
+        [TestCase(TokenType.String, typeof(double), "cannot #extra", "$\"cannot {Var[\"extra\"]}\".To<Double>()")]
+        [TestCase(TokenType.String, typeof(decimal), "runtime #extra", "$\"runtime {Var[\"extra\"]}\".To<Decimal>()")]
+        public void TokenToType_strings_containing_variables_need_runtime_cast(TokenType tokenType, Type collectedType,
+            string text, string expected)
+        {
+            var result = generator.TokenToType(tokenType, collectedType, text);
+
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        [TestCase(TokenType.String, typeof(int), "c2c")]
+        [TestCase(TokenType.String, typeof(float), "c2c")]
+        [TestCase(TokenType.String, typeof(double), "c2c")]
+        [TestCase(TokenType.String, typeof(decimal), "c2c")]
+        [TestCase(TokenType.String, typeof(DateTime), "Fourth of July, 1776")]
+        [TestCase(TokenType.Date, typeof(DateTime), "91/04/2013")]
+        [TestCase(TokenType.Date, typeof(int), "01/04/2013")]
+        [TestCase(TokenType.Comma, typeof(string), ",")]
+        [TestCase(TokenType.Number, typeof(DateTime), "3")]
+        public void TokenToType_fails_to_convert(TokenType tokenType, Type collectedType, string text)
+        {
+            var ex = Assert.Throws<Exception>(() => generator.TokenToType(tokenType, collectedType, text));
+            Assert.That(ex.Message, Does.StartWith("Cannot convert"));
+        }
 
         [Test]
         public void List_arguments_are_indexed_by_arg_position()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "group", Type = typeof(string) },
-                new ArgDetail { Name = "names", Type = typeof(List<string>) },
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "group", Type = typeof(string)},
+                new ArgDetail {Name = "names", Type = typeof(List<string>)},
             };
 
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow" };
-            detail.AddMethod(new MethodDetail { Name = "My__are__", Args = args });
-            generator.CurrentParagraph = new CST.Paragraph();
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            detail.AddMethod(new MethodDetail {Name = "My__are__", Args = args});
+            generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(321,
+            var step = new Step(321,
                 (TokenType.Word, "my"),
                 (TokenType.String, "friends"),
                 (TokenType.Word, "are")
@@ -736,10 +752,11 @@ namespace Tabula
             Assert.That(result, Contains.Substring($"myWorkflow.My__are__(\"friends\", arg_321_1)"));
         }
 
-
         //TODO:  Scoping of workflows in aliases and blocks
 
-        class UnknownAction : CST.Action { }
+        class UnknownAction : CST.Action
+        {
+        }
 
         [Test]
         public void DispatchAction_explains_when_an_unknown_action_type_arrives()
@@ -752,12 +769,13 @@ namespace Tabula
         [Test]
         public void BuildParagraph_gets_all_the_bits_together()
         {
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "comment", Type = typeof(string) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "comment", Type = typeof(string)}
             };
 
-            var step = new CST.Step(22,
+            var step = new Step(22,
                 (TokenType.Word, "user"),
                 (TokenType.String, "Bob"),
                 (TokenType.Word, "made"),
@@ -765,14 +783,14 @@ namespace Tabula
                 (TokenType.String, "where am I?")
             );
 
-            var paragraph = new CST.Paragraph
+            var paragraph = new Paragraph
             {
                 Label = "short paragraph",
                 MethodName = "paragraph__021_to_022"
             };
             paragraph.Actions.Add(step);
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow", Namespace = "App" };
-            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow", Namespace = "App"};
+            detail.AddMethod(new MethodDetail {Name = "user__made_comment__", Args = args});
             paragraph.WorkflowsInScope.Add(detail);
 
             generator.PrepareParagraph(paragraph);
@@ -787,26 +805,28 @@ namespace Tabula
         [Test]
         public void BuildParagraph_will_reinstantiate_all_workflows_in_scope()
         {
-            var paragraph = new CST.Paragraph
+            var paragraph = new Paragraph
             {
                 Label = "short paragraph",
                 MethodName = "paragraph__021_to_022"
             };
 
-            var args = new List<ArgDetail>() {
-                new ArgDetail { Name = "name", Type = typeof(string) },
-                new ArgDetail { Name = "comment", Type = typeof(string) }
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "comment", Type = typeof(string)}
             };
-            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "myWorkflow", Namespace = "App" };
-            detail.AddMethod(new MethodDetail { Name = "user__made_comment__", Args = args });
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow", Namespace = "App"};
+            detail.AddMethod(new MethodDetail {Name = "user__made_comment__", Args = args});
             paragraph.WorkflowsInScope.Add(detail);
 
-            detail = new WorkflowDetail { Name = "ExtraWorkflow", InstanceName = "otherWorkflow", Namespace = "App" };
+            detail = new WorkflowDetail {Name = "ExtraWorkflow", InstanceName = "otherWorkflow", Namespace = "App"};
             paragraph.WorkflowsInScope.Add(detail);
-            detail = new WorkflowDetail { Name = "ThirdWorkflow", InstanceName = "thirdWorkflow", Namespace = "App.FancyNamespace" };
+            detail = new WorkflowDetail
+                {Name = "ThirdWorkflow", InstanceName = "thirdWorkflow", Namespace = "App.FancyNamespace"};
             paragraph.WorkflowsInScope.Add(detail);
 
-            var step = new CST.Step(22,
+            var step = new Step(22,
                 (TokenType.Word, "user"),
                 (TokenType.String, "Bob"),
                 (TokenType.Word, "made"),
@@ -832,41 +852,17 @@ namespace Tabula
         [TestCase("var in cell", "\"Impressions\", \"#level\"")]
         public void BuildTable_gets_all_the_bits_together(string part, string substring)
         {
-/*
-            Source:
-            [Crucial] [AC-22222]
-            == This is my label ==
-            | First       | Second   |
-            | Blood       | Guessing |
-            | Step        | Chance   |
-            | Impressions | #Level   |
+            var row1 = new TableRow("Blood", "Guessing");
+            var row2 = new TableRow("Step", "Chance");
+            var row3 = new TableRow("Impressions", "#level");
 
-        Target:
-        public Table table__030_to_035()
-        {
-            return new Table {
-                Tags = new List<string> { "Crucial", "AC-22222" },
-                Label = "This is my label",
-                Header = new List<string>     { "First", "Second" },
-                Data = new List<List<string>> {
-                    new List<string>          { "Blood", "Guessing" },
-                    new List<string>          { "Step", "Chance" },
-                    new List<string>          { "Impressions", "#level" },
-                }
-            };
-        };
- */
-
-            var row1 = new CST.TableRow("Blood", "Guessing");
-            var row2 = new CST.TableRow("Step", "Chance");
-            var row3 = new CST.TableRow("Impressions", "#level");
-
-            var table = new CST.Table {
+            var table = new Table
+            {
                 MethodName = "table__030_to_035",
-                Tags = new List<string> { "Crucial", "AC-22222" },
+                Tags = new List<string> {"Crucial", "AC-22222"},
                 Label = "This is my label",
-                ColumnNames = new List<string> { "First", "Second" },
-                Rows = new List<CST.TableRow> { row1, row2, row3 }
+                ColumnNames = new List<string> {"First", "Second"},
+                Rows = new List<TableRow> {row1, row2, row3}
             };
 
             generator.PrepareTable(table);
@@ -880,15 +876,15 @@ namespace Tabula
         public void BuildTable_skips_label_and_tags_if_empty(string part, string substring)
         {
 
-            var row1 = new CST.TableRow("Blood", "Guessing");
-            var row2 = new CST.TableRow("Time", "Chance");
-            var row3 = new CST.TableRow("Impressions", "Thoughts");
+            var row1 = new TableRow("Blood", "Guessing");
+            var row2 = new TableRow("Time", "Chance");
+            var row3 = new TableRow("Impressions", "Thoughts");
 
-            var table = new CST.Table
+            var table = new Table
             {
                 MethodName = "table__030_to_035",
-                ColumnNames = new List<string> { "First", "Second" },
-                Rows = new List<CST.TableRow> { row1, row2, row3 }
+                ColumnNames = new List<string> {"First", "Second"},
+                Rows = new List<TableRow> {row1, row2, row3}
             };
 
             generator.PrepareTable(table);
@@ -901,11 +897,11 @@ namespace Tabula
         public void BuildParagraph_skips_tags_if_empty()
         {
 
-            var row1 = new CST.TableRow("Blood", "Guessing");
-            var row2 = new CST.TableRow("Time", "Chance");
-            var row3 = new CST.TableRow("Impressions", "Thoughts");
+            var row1 = new TableRow("Blood", "Guessing");
+            var row2 = new TableRow("Time", "Chance");
+            var row3 = new TableRow("Impressions", "Thoughts");
 
-            var paragraph = new CST.Paragraph
+            var paragraph = new Paragraph
             {
                 Label = "How to Rebombulate",
                 MethodName = "paragraph__030_to_035",
@@ -914,21 +910,41 @@ namespace Tabula
             generator.PrepareParagraph(paragraph);
             var result = generator.sectionsBody.ToString();
 
-            Assert.That(result.IndexOf("Tags("), Is.LessThan(0), $"generated paragraph should not contain empty Tags() call.");
+            Assert.That(result.IndexOf("Tags("), Is.LessThan(0),
+                $"generated paragraph should not contain empty Tags() call.");
         }
 
         [Test]
         public void Row_ToCodeText_returns_text_for_List_of_string()
         {
             var cells = new List<List<string>>();
-            var cell = new List<string> { "Fluffy" };
+            var cell = new List<string> {"Fluffy"};
             cells.Add(cell);
-            var row = new CST.TableRow(cells);
+            var row = new TableRow(cells);
 
             var result = generator.CodeTextFrom(row);
 
             Assert.That(result, Contains.Substring("new List<string>"));
             Assert.That(result, Contains.Substring("{ \"Fluffy\" }"));
+        }
+
+        [Test]
+        public void WriteNamespaceOpen()
+        {
+            generator.WriteNamespaceOpen();
+
+            string built = generator.Builder.ToString();
+            Assert.That(built, Contains.Substring("namespace Tabula"));
+        }
+
+        [Test]
+        public void WriteConstructor_puts_constructor_method_into_main_StringBuilder()
+        {
+            generator.GeneratedClassName = "TryAnything_generated";
+            generator.WriteConstructor();
+
+            string built = generator.Builder.ToString();
+            Assert.That(built, Contains.Substring("public TryAnything_generated()"));
         }
 
         [Test]
@@ -953,7 +969,9 @@ namespace Tabula
             Assert.That(built, Contains.Substring("my required method"));
         }
 
-        private class UnrecognizedSection : CST.Section { }
+        private class UnrecognizedSection : Section
+        {
+        }
 
         [Test]
         public void Unrecognized_Section_type_complaint()
@@ -967,7 +985,7 @@ namespace Tabula
         [Test]
         public void Single_paragraph_scenario_gets_one_paragraph_call()
         {
-            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
+            scenario.Sections.Add(new Paragraph {MethodName = "paragraph_one"});
 
             generator.PrepareSections();
 
@@ -978,8 +996,8 @@ namespace Tabula
         [Test]
         public void two_paragraph_scenario_gets_both_calls()
         {
-            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
-            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_two" });
+            scenario.Sections.Add(new Paragraph {MethodName = "paragraph_one"});
+            scenario.Sections.Add(new Paragraph {MethodName = "paragraph_two"});
 
             generator.PrepareSections();
 
@@ -991,8 +1009,8 @@ namespace Tabula
         [Test]
         public void Single_paragraph_followed_by_table_gets_run_x_over_y_call()
         {
-            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
-            scenario.Sections.Add(new CST.Table { MethodName = "table_one" });
+            scenario.Sections.Add(new Paragraph {MethodName = "paragraph_one"});
+            scenario.Sections.Add(new Table {MethodName = "table_one"});
 
             generator.PrepareSections();
 
@@ -1003,9 +1021,9 @@ namespace Tabula
         [Test]
         public void Single_paragraph_followed_by_two_tables_gets_two_calls()
         {
-            scenario.Sections.Add(new CST.Paragraph { MethodName = "paragraph_one" });
-            scenario.Sections.Add(new CST.Table { MethodName = "table_one" });
-            scenario.Sections.Add(new CST.Table { MethodName = "table_two" });
+            scenario.Sections.Add(new Paragraph {MethodName = "paragraph_one"});
+            scenario.Sections.Add(new Table {MethodName = "table_one"});
+            scenario.Sections.Add(new Table {MethodName = "table_two"});
 
             generator.PrepareSections();
 
