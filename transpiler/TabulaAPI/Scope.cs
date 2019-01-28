@@ -12,21 +12,36 @@ namespace Tabula.API
         {
             get
             {
-                var lowKey = key.ToLower().Replace(" ", "");
-                if (lowKey.StartsWith("#"))
+                key = norm(key);
+
+                if (key.StartsWith("#"))
                 {
-                    lowKey = this[lowKey.Substring(1)].ToLower().Replace(" ", "");
+                    key = norm(this[key.Substring(1)]);
                 }
-                if (_values.ContainsKey(lowKey))
-                    return _values[lowKey];
+
+                if (_values.ContainsKey(key))
+                {
+                    var innerValue = _values[key];
+                    if (innerValue.StartsWith("#"))
+                    {
+                        innerValue = this[innerValue.Substring(1)];
+                    }
+
+                    return innerValue;
+                }
 
                 if (ParentScope == null)
                     return "";
 
-                return ParentScope[lowKey];
+                return ParentScope[key];
             }
 
             set { _values[key.ToLower().Replace(" ", "")] = value; }
+        }
+
+        public string norm(string input)
+        {
+            return input.ToLower().Replace(" ", "");
         }
 
         //speculation:

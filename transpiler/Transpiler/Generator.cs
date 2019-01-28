@@ -46,7 +46,10 @@ namespace Tabula
         public Generator()
         {
             Workflows = new Dictionary<string, WorkflowDetail>();
-            Library = new WorkflowIntrospector();
+            Library = new WorkflowIntrospector
+            {
+                ConfigWrapper = new ConfigWrapper()
+            };
 
             executeMethodBody = new IndentingStringBuilder(12); // 12 = namespace + class + method
             sectionsBody = new IndentingStringBuilder(8); // 8 = namespace + class

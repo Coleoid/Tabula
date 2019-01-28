@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -617,7 +618,7 @@ namespace Tabula
                 new ArgDetail {Name = "names", Type = typeof(List<string>)},
             };
 
-            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "myWorkflow"};
+            var detail = new WorkflowDetail {Name = "GreetingWorkflow", InstanceName = "greeter"};
             detail.AddMethod(new MethodDetail {Name = "My_friends_are__", Args = args});
             generator.CurrentParagraph = new Paragraph();
             generator.CurrentParagraph.WorkflowsInScope.Add(detail);
@@ -629,17 +630,55 @@ namespace Tabula
             );
 
             var list = new SymbolCollection();
-            list.Values.Add(new Symbol(TokenType.String, "Left"));
-            list.Values.Add(new Symbol(TokenType.Variable, "Right"));
+            list.Values.Add(new Symbol(TokenType.String, "Bob"));
+            list.Values.Add(new Symbol(TokenType.String, "Linda"));
+            list.Values.Add(new Symbol(TokenType.String, "Fred"));
+            list.Values.Add(new Symbol(TokenType.Variable, "Neighbor"));
             step.Symbols.Add(list);
 
             generator.BuildStep(step);
             var result = generator.sectionsBody.ToString();
 
-            var expected = $"var arg_{lineNumber}_0 = new List<String> {{ \"Left\", Var[\"Right\"] }};";
+            var expected = $"var arg_{lineNumber}_0 = new List<String> {{ \"Bob\", \"Linda\", \"Fred\", Var[\"Neighbor\"] }};";
             Assert.That(result, Contains.Substring(expected));
-            Assert.That(result, Contains.Substring($"myWorkflow.My_friends_are__(arg_{lineNumber}_0)"));
+            Assert.That(result, Contains.Substring($"greeter.My_friends_are__(arg_{lineNumber}_0)"));
         }
+
+
+        [Test]
+        public void List_of_int_arguments_create_declaration_line()
+        {
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "names", Type = typeof(List<int>)},
+            };
+
+            var detail = new WorkflowDetail { Name = "GreetingWorkflow", InstanceName = "greeter" };
+            detail.AddMethod(new MethodDetail { Name = "My_lucky_numbers_are__", Args = args });
+            generator.CurrentParagraph = new Paragraph();
+            generator.CurrentParagraph.WorkflowsInScope.Add(detail);
+
+            var step = new Step(321,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "lucky"),
+                (TokenType.Word, "numbers"),
+                (TokenType.Word, "are")
+            );
+
+            var list = new SymbolCollection();
+            list.Values.Add(new Symbol(TokenType.Number, "22"));
+            list.Values.Add(new Symbol(TokenType.Number, "0"));
+            list.Values.Add(new Symbol(TokenType.Number, "28"));
+            step.Symbols.Add(list);
+
+            generator.BuildStep(step);
+            var result = generator.sectionsBody.ToString();
+
+            var expected = $"var arg_321_0 = new List<Int32> {{ 22, 0, 28 }};";
+            Assert.That(result, Contains.Substring(expected));
+            Assert.That(result, Contains.Substring($"greeter.My_lucky_numbers_are__(arg_321_0)"));
+        }
+
 
         [Test]
         public void Single_values_going_to_a_list_parameter_get_wrapped_in_lists()
@@ -1030,6 +1069,16 @@ namespace Tabula
             string built = generator.executeMethodBody.ToString();
             Assert.That(built, Contains.Substring("Foreach_Row_in( table_one, paragraph_one );"));
             Assert.That(built, Contains.Substring("Foreach_Row_in( table_two, paragraph_one );"));
+        }
+
+        [Test]
+        public void CanReadConfig()
+        {
+            string result = ConfigurationManager.AppSettings["ProjectPath"];
+            Assert.That(result, Is.Not.Null);
+
+            result = ConfigurationManager.AppSettings["nonesuch"];
+            Assert.That(result, Is.Null);
         }
     }
 }

@@ -6,8 +6,11 @@ using System.Reflection;
 
 namespace Tabula
 {
+
     public class WorkflowIntrospector
     {
+        public IConfigWrapper ConfigWrapper { get; set; }
+
         public Dictionary<Type, WorkflowDetail> CachedWorkflows { get; set; }
 
         //FUTURE:  Multiple types per search name
@@ -21,11 +24,6 @@ namespace Tabula
         {
             CachedWorkflows = new Dictionary<Type, WorkflowDetail>();
             TypeFromSearchName = new Dictionary<string, Type>();
-            //Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
-            //Library = "ScenarioContext.dll";
-            Location = @"K:\code\Tabula\studio_plugin_tester\ClassLibrary1\bin\Debug";
-            Library = "LibContainingScenarios.dll";
-            DetailLoadedTypes();
         }
 
         public void DetailLoadedTypes()
@@ -98,18 +96,13 @@ namespace Tabula
             AppDomain curDomain = AppDomain.CurrentDomain;
             curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
 
-            Location = @"K:\code\Tabula\transpiler\LibraryHoldingTestWorkflows\bin\Debug";
-            Library = "LibraryHoldingTestWorkflows.dll";
+            Location = ConfigWrapper.GetValue("ProjectPath");
+            Library = ConfigWrapper.GetValue("FixtureLibrary");
             Assembly asm2 = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
-
-            //Location = @"k:\code\acadis_trunk\ScenarioTests\ScenarioContext\bin\Debug\";
-            //Library = "ScenarioContext.dll";
-            //Assembly asm1 = Assembly.ReflectionOnlyLoadFrom(Path.Combine(Location, Library));
 
             var asms = curDomain.GetAssemblies();
 
             var myTypes = new List<Type>();
-            //myTypes.AddRange(asm1.ExportedTypes);
             myTypes.AddRange(asm2.ExportedTypes);
 
             return myTypes;
