@@ -6,7 +6,23 @@ namespace Tabula
     public class WorkflowDetail
     {
         // key = SearchName
-        public Dictionary<string, MethodDetail> Methods { get; set; }
+        private Dictionary<string, MethodDetail> Methods { get; set; }  // INPROG: private
+
+        public MethodDetail GetMethodDetail(string searchName)
+        {
+            MethodDetail method = null;
+            
+            if (Methods.ContainsKey(searchName))
+                method = Methods[searchName];
+
+            if (method == null)
+            {
+                if (Parent != null)
+                    method = Parent.GetMethodDetail(searchName);
+            }
+
+            return method;
+        }
 
         public WorkflowDetail Parent { get; set; }
         public string Name { get; set; }

@@ -398,8 +398,9 @@ namespace Tabula
         {
             foreach (var workflow in (CurrentParagraph.WorkflowsInScope as IEnumerable<WorkflowDetail>).Reverse())
             {
-                if (workflow.Methods.ContainsKey(searchName))
-                    return (workflow, workflow.Methods[searchName]);
+                var method = workflow.GetMethodDetail(searchName);
+                if (method != null)
+                    return (workflow, method);
             }
 
             return (null, null);

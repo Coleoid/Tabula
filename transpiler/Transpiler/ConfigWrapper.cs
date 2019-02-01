@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System.Collections.Generic;
+using System.Configuration;
 
 namespace Tabula
 {
@@ -11,9 +12,19 @@ namespace Tabula
 
     public class ConfigWrapper : IConfigWrapper
     {
-        public string GetValue(string key)
+        public virtual string GetValue(string key)
         {
             return ConfigurationManager.AppSettings[key];
+        }
+    }
+
+    public class MockConfigWrapper : ConfigWrapper
+    {
+        public Dictionary<string, string> Entries = new Dictionary<string, string>();
+
+        public override string GetValue(string key)
+        {
+            return Entries[key];
         }
     }
 }

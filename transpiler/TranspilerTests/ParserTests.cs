@@ -61,23 +61,26 @@ namespace Tabula
         public void Paragraph()
         {
             var tokens = new List<Token> {
-                new Token(TokenType.cmd_Use, "Student Enrollment"),
+                new Token(TokenType.cmd_Use, "Student Enrollment", 10),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.cmd_Use, "Person Search Criteria Workflow"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.Word, "Search"),
                 new Token(TokenType.Word, "here"),
                 new Token(TokenType.NewLine, "\n"),
-                new Token(TokenType.Word, "Search"),
+                new Token(TokenType.Word, "Search", 13),
                 new Token(TokenType.Word, "there"),
                 new Token(TokenType.NewLine, "\n"),
             };
             var state = new ParserState(tokens);
-            var cst = _parser.ParseParagraph(state);
+            var cst = _parser.ParseSection(state);
 
             Assert.That(cst, Is.Not.Null);
-            Assert.That(cst.Actions, Has.Count.EqualTo(3));
-            Assert.That(cst.Actions[0], Is.TypeOf<CST.CommandUse>());
+            Assert.That(cst.MethodName, Is.EqualTo("paragraph__010_to_013"));
+            Assert.That(cst.Label, Is.EqualTo("paragraph__010_to_013"));
+            var paragraph = (Paragraph)cst;
+            Assert.That(paragraph.Actions, Has.Count.EqualTo(3));
+            Assert.That(paragraph.Actions[0], Is.TypeOf<CST.CommandUse>());
         }
 
         [Test]

@@ -72,25 +72,45 @@ namespace Tabula
             Assert.That(detail, Is.Null);
         }
 
-        //FIXME:  this isn't checking parent right now, it's pasta of test below
-        [Test]
-        public void Parents_of_workflow_are_populated()
-        {
-            var myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
-
-            var detail = _introspector.GetWorkflowDetail(myComments);
-            var method = detail.Methods["addcomment"];
-            Assert.That(method.Name == "Add_comment__");
-        }
-
         [Test]
         public void Methods_of_workflow_are_populated()
         {
             var myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
-
             var detail = _introspector.GetWorkflowDetail(myComments);
-            var method = detail.Methods["addcomment"];
+            var method = detail.GetMethodDetail("addcomment");
+
             Assert.That(method.Name == "Add_comment__");
+        }
+
+        [Test]
+        public void Methods_might_be_missed()
+        {
+            var myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
+            var detail = _introspector.GetWorkflowDetail(myComments);
+            var method = detail.GetMethodDetail("withdutylocations");
+
+            Assert.That(method.Name == "With_duty_locations__");
+        }
+
+        [Test]
+        public void Parents_of_workflow_are_searched_for_methods()
+        {
+            var myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
+            var detail = _introspector.GetWorkflowDetail(myComments);
+            var method = detail.GetMethodDetail("stepinbaseclass");
+
+            Assert.That(method.Name == "Step_in_base_class");
+        }
+
+        [Test]
+        public void Unfound_methods_return_null()
+        {
+            var myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
+            var detail = _introspector.GetWorkflowDetail(myComments);
+
+            var method = detail.GetMethodDetail("stepwhichdoesnotexist");
+
+            Assert.IsNull(method);
         }
 
         [Test]
@@ -99,7 +119,7 @@ namespace Tabula
             Type myComments = _types.Single(t => t.Name == "CommentsModalWorkflow");
 
             var detail = _introspector.GetWorkflowDetail(myComments);
-            var method = detail.Methods["verifycommenttextis"];
+            var method = detail.GetMethodDetail("verifycommenttextis");
 
             Assert.That(method.Args.Count(), Is.EqualTo(2));
             Assert.That(method.Args[0].Name, Is.EqualTo("rowNum"));

@@ -19,5 +19,10 @@ namespace LibraryHoldingTestWorkflows
             int index = rowNum - 1;
             Assert.That(_comments[index], Is.EqualTo(text));
         }
+
+        public void With_duty_locations__(List<string> orgNames)
+        {
+        }
+
     }
 }

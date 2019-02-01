@@ -173,6 +173,44 @@ namespace ScenarioContext.PresenterImplementations.People
         {
         }
 
+        public void With_duty_locations__(List<string> orgNames)
+        {
+        }
 
+        public void With_duty_assignment_statuses(List<string> statusNames)
+        {
+        }
+
+        private void SetDutyAssignmentDates(DateTime? startDate, DateTime? endDate)
+        {
+        }
+
+        public void With_duty_assignment_dates_between__and__(DateTime startDate, DateTime endDate)
+        {
+        }
+
+        public void With_duty_assignment_dates_before__(DateTime endDate)
+        {
+        }
+
+        public void With_duty_assignment_dates_after__(DateTime startDate)
+        {
+        }
+
+        public void With_undated_assignments_excluded()
+        {
+        }
+
+        public void With_undated_assignments_only()
+        {
+        }
+
+        public void With_undated_assignments(string modifier)
+        {
+            if (modifier == "Excluded")
+                With_undated_assignments_excluded();
+            else if (modifier == "Only")
+                With_undated_assignments_only();
+        }
     }
 }

@@ -132,6 +132,25 @@ namespace Tabula
         }
 
         [Test]
+        public void FindWorkflowMethod_finds_in_all_workflows_in_scope()
+        {
+            var workflow = new WorkflowDetail { Name = "GreetingWorkflow" };
+            workflow.AddMethod(new MethodDetail { Name = "Howdy_stranger" });
+            workflow.AddMethod(new MethodDetail { Name = "Hello_Everybody" });
+            var secondWorkflow = new WorkflowDetail { Name = "CoderWorkflow" };
+            secondWorkflow.AddMethod(new MethodDetail { Name = "hello_world" });
+            var paragraph = new CST.Paragraph();
+            generator.CurrentParagraph = paragraph;
+            paragraph.WorkflowsInScope.Add(workflow);
+            paragraph.WorkflowsInScope.Add(secondWorkflow);
+
+            (var resultWorkflow, var method) = generator.FindWorkflowMethod("helloworld");
+
+            Assert.That(resultWorkflow, Is.SameAs(secondWorkflow));
+            Assert.That(method, Is.Not.Null);
+        }
+
+        [Test]
         public void FindWorkflowMethod_only_searches_impls_in_scope()
         {
             generator.CurrentParagraph = new CST.Paragraph();

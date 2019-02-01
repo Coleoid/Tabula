@@ -80,8 +80,7 @@ namespace Tabula
                     ).ToList()
                 };
 
-                var searchMethod = Formatter.SearchName_from_MethodName(mi.Name);
-                workflow.Methods[searchMethod] = method;
+                workflow.AddMethod(method);
             }
 
             CachedWorkflows[type] = workflow;

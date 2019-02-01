@@ -30,26 +30,14 @@ namespace Tabula
             Assert.That(cst.Sections, Has.Count.EqualTo(29));
             Assert.That(cst.Sections[0].Label, Is.EqualTo("Enable duty locations"));
             Assert.That(cst.Sections[1].Label, Is.EqualTo("What we'll call our people in this scenario"));
-            Assert.That(cst.Sections[2].Label, Is.Null);
+            Assert.That(cst.Sections[2].Label, Is.EqualTo("table__011_to_015"));
             Assert.That(cst.Sections[3].Label, Is.EqualTo("What we'll call the organizations they work for"));
-            Assert.That(cst.Sections[4].Label, Is.Null);
             Assert.That(cst.Sections[5].Label, Is.EqualTo("Create our people"));
-            Assert.That(cst.Sections[6].Label, Is.Null);
             Assert.That(cst.Sections[7].Label, Is.EqualTo("Create our organizations"));
-            Assert.That(cst.Sections[8].Label, Is.Null);
             Assert.That(cst.Sections[9].Label, Is.EqualTo("Create list items"));
-            Assert.That(cst.Sections[10].Label, Is.Null);
             Assert.That(cst.Sections[11].Label, Is.EqualTo("Add employments"));
-            Assert.That(cst.Sections[12].Label, Is.Null);
-            Assert.That(cst.Sections[13].Label, Is.Null);  // alias
             Assert.That(cst.Sections[14].Label, Is.EqualTo("Add employment actions"));
-            Assert.That(cst.Sections[15].Label, Is.Null);
-            Assert.That(cst.Sections[16].Label, Is.Null);
-            Assert.That(cst.Sections[17].Label, Is.Null);
-            Assert.That(cst.Sections[18].Label, Is.Null);
-            Assert.That(cst.Sections[19].Label, Is.Null);
             Assert.That(cst.Sections[20].Label, Is.EqualTo("Add a comment and duty assignment"));
-            Assert.That(cst.Sections[21].Label, Is.Null);
             Assert.That(cst.Sections[22].Label, Is.EqualTo("Add temporary duty assignments"));
             Assert.That(cst.Sections[23].Label, Is.EqualTo("Search people with many different duty assignment criteria"));
             Assert.That(cst.Sections[24].Label, Is.EqualTo("Search Assignment regular/temporary, location, and org"));
@@ -71,7 +59,7 @@ namespace Tabula
             var cst = _parser.ParseScenario(state);
 
             //  alias: ""Add employment actions for #employeeName at #orgName"" => ...
-            Assert.That(cst.Sections[13].Label, Is.Null);
+            Assert.That(cst.Sections[13].Label, Is.EqualTo("paragraph__068_to_080"));
             var para = cst.Sections[13] as CST.Paragraph;
             Assert.That(para, Is.Not.Null);
             Assert.That(para.Actions, Has.Count.EqualTo(1));
