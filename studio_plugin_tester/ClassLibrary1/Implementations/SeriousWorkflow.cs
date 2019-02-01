@@ -12,7 +12,7 @@ namespace LibContainingScenarios.Implementations
             _seriousTopics = new List<string>();
         }
 
-        public void Register__as_serious(string topic)
+        public void Register__as_really_serious(string topic)
         {
             _seriousTopics.Add(topic);
         }

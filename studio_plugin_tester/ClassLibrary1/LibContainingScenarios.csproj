@@ -53,17 +53,11 @@
     <Compile Include="Implementations\SeriousWorkflow.cs" />
     <Compile Include="Implementations\Workflow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenarios\SeriousBusiness\UserCanGetSerious.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>UserCanGetSerious.tab</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Scenarios\SeriousBusiness\UserCanGetSerious.tab">
       <Generator>TabulaClassGenerator</Generator>
       <CustomToolNamespace>Tabula</CustomToolNamespace>
-      <LastGenOutput>UserCanGetSerious.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

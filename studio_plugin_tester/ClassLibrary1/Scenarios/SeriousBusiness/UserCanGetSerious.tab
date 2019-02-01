@@ -7,12 +7,21 @@ Register "Saving for your retirement" as serious
 Register "Maintaining and improving your health" as serious
 Register "Bobcat Goldthwait" as serious
 
-"On later review, some of these don't meet our standards":
+"On later review, some of these do not meet our standards":
 use: SeriousWorkflow
 Remove "Bobcat Goldthwait" from our topics
 
 "Check that our topics are shaping up extremely seriously": 
 use: SeriousWorkflow
 Verify that #topic is serious
-| topic |
-|"Saving for your retirement"|
+| topic                        |
+| "Saving for your retirement" |
+| "Going to Europe"            |
+
+
+"Check that our mistakes have been cleared out": 
+use: SeriousWorkflow
+Verify that #topic is NOT serious
+| topic               |
+| "Bobcat Goldthwait" |
+| "Rowan Atkinson"    |
