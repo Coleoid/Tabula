@@ -19,7 +19,10 @@ namespace Tabula.Parse
         Regex rxNewLine         = new Regex(@"^\r?\n");
         Regex rxScenarioLabel   = new Regex(@"^Scenario: *([""']?)(.*)\1", RegexOptions.IgnoreCase);
         Regex rxWord            = new Regex(@"^([a-zA-Z_]\w*)");  //  first character = letter or underscore, then any word characters
-        Regex rxString          = new Regex(@"^([""'])(.*?)\1");  //  single or double quotes  (full implementation may take a while)
+        //Regex rxString = new Regex(@"^(?:""((?:[^""\\]|\\[""\\])*)""|'((?:[^'\\]|\\['\\])*)')");  //  double quotes with escaped double quotes
+        //Regex rxString          = new Regex(@"^""((?:[^""\\]|\\[\\.])*)""");  //  double quotes with escaped double quotes
+        //Regex rxString          = new Regex(@"^""((?:[^""\\]|\\[\\""])*)");  //  double quotes with escaped double quotes
+        Regex rxString          = new Regex(@"^""((?:\\.|[^\\""\n])*)""|^'((?:\\.|[^\\'\n])*)'");  //  double quotes with escaped double quotes
         Regex rxCommandUse      = new Regex(@"^use: *([^\n]*)");  //  use: Global Setting Management
         Regex rxCommandSet      = new Regex(@"^set: (.+) =>");    //  set: bob => "Nordberg, Robert" (run time)
         Regex rxCommandAlias    = new Regex(@"^alias: (.+) =>");  //  alias: "prep #name" => prepare user #name for class (build time)
@@ -150,7 +153,19 @@ namespace Tabula.Parse
                 match = rxString.Match(remainingText);
                 if (match.Success)
                 {
-                    AddToken(TokenType.String, match.Groups[2].Value, match.Length);
+                    var rawText = match.Groups[1].Value;
+                    if (rawText == String.Empty)
+                    {
+                        rawText = match.Groups[2].Value;
+                    }
+
+                    var cleanText = rawText
+                        .Replace("\\\"", "\"")
+                        .Replace("\\'", "'")
+                        .Replace("\\\\", "\\")
+                        ;
+
+                    AddToken(TokenType.String, cleanText, match.Length);
                     continue;
                 }
 

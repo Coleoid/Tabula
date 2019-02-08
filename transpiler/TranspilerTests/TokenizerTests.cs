@@ -34,6 +34,7 @@ namespace Tabula
 
             Token token = tokens[0];
             Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo("Hello, World!"));
         }
 
         [TestCase("scenario: What am I doing?", "What am I doing?")]
@@ -74,7 +75,41 @@ namespace Tabula
             Assert.That(token.Type, Is.EqualTo(TokenType.String));
             Assert.That(token.Text, Is.EqualTo(expected));
         }
-        //TODO: Strings containing escaped quotes
+
+        [TestCase(@"""I contain 'single' quotes.""", "I contain 'single' quotes.")]
+        [TestCase(@"'I contain ""double"" quotes.'", @"I contain ""double"" quotes.")]
+        public void String_including_other_quotes(string text, string expected)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase(@"'escaped backslash: \\ '", @"escaped backslash: \ ")]
+        [TestCase(@"'escaped single quote: \' '", @"escaped single quote: ' ")]
+        [TestCase(@"""escaped double quote: \"" """, @"escaped double quote: "" ")]
+        public void String_Escaping(string text, string expected)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase(@"""escaped double quote: \""")]
+        [TestCase(@"'escaped single quote: \'")]
+        public void String_escaped_quotes_should_not_complete_token(string text)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            
+            Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(1));
+            Assert.That(tokens, Has.Count.EqualTo(0));
+        }
 
         [Test]
         public void Tag()
