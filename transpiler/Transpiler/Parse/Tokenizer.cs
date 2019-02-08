@@ -19,9 +19,6 @@ namespace Tabula.Parse
         Regex rxNewLine         = new Regex(@"^\r?\n");
         Regex rxScenarioLabel   = new Regex(@"^Scenario: *([""']?)(.*)\1", RegexOptions.IgnoreCase);
         Regex rxWord            = new Regex(@"^([a-zA-Z_]\w*)");  //  first character = letter or underscore, then any word characters
-        //Regex rxString = new Regex(@"^(?:""((?:[^""\\]|\\[""\\])*)""|'((?:[^'\\]|\\['\\])*)')");  //  double quotes with escaped double quotes
-        //Regex rxString          = new Regex(@"^""((?:[^""\\]|\\[\\.])*)""");  //  double quotes with escaped double quotes
-        //Regex rxString          = new Regex(@"^""((?:[^""\\]|\\[\\""])*)");  //  double quotes with escaped double quotes
         Regex rxString          = new Regex(@"^""((?:\\.|[^\\""\n])*)""|^'((?:\\.|[^\\'\n])*)'");  //  double quotes with escaped double quotes
         Regex rxCommandUse      = new Regex(@"^use: *([^\n]*)");  //  use: Global Setting Management
         Regex rxCommandSet      = new Regex(@"^set: (.+) =>");    //  set: bob => "Nordberg, Robert" (run time)
