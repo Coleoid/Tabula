@@ -30,13 +30,15 @@ namespace Tabula
             Assert.That(fullClass, Contains.Substring("public void ExecuteScenario()"));
         }
 
+        //TODO:  think out how warnings/errors are propagated up to VS
         [Test]
         public void Big_Bad_Wolf_generates()
         {
             var tokens = _tokenizer.Tokenize(BigBadWolf);
+            Assert.That(_tokenizer.Warnings.Count, Is.EqualTo(0));
             var state = new ParserState(tokens);
             var scenario = _parser.ParseScenario(state);
-            
+
             generator.Library.DetailLoadedTypes();
             var types = generator.Library.CachedWorkflows.Keys;
             var globals = types.Where(t => t.Name.Contains("Global")).ToList();
