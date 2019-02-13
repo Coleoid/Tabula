@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.Shell;
 using VSLangProj80;
+using Microsoft.VisualStudio.TextTemplating.VSHost;
 
 namespace Tabula
 {
@@ -22,6 +23,7 @@ namespace Tabula
         GeneratesDesignTimeSource = true,
         GeneratorRegKeyName = "TabulaClassGenerator"
     )]
+    [ProvideCodeGeneratorExtension("TabulaClassGenerator",".tab")]
     [ProvideObject(typeof(TabulaClassGenerator), RegisterUsing = RegistrationMethod.CodeBase)]
     public class TabulaClassGenerator : BaseCodeGenerator_WithOLESite
     {
@@ -39,7 +41,6 @@ namespace Tabula
                 ThreadHelper.ThrowIfNotOnUIThread();  //  Really, Microsoft?
                 CodeGeneratorProgress?.Progress(50, 100);
 
-                //Encoding enc;
                 string bodyText;
                 var builder = new StringBuilder();
                 using (StringWriter writer = new StringWriter(builder))
@@ -48,22 +49,10 @@ namespace Tabula
                     writer.Flush();
                     CodeGeneratorProgress?.Progress(90, 100);
 
-                    //enc = Encoding.GetEncoding(writer.Encoding.WindowsCodePage);
                     bodyText = writer.ToString();
                 }
 
                 return Encoding.UTF8.GetBytes(bodyText);
-
-                //  Older version, I hope we don't need?
-                ////  The preamble provides the byte order mark.  'Round here, we use little-endian UTF16, stranger.
-                //byte[] preamble = enc.GetPreamble();
-                //byte[] body = enc.GetBytes(bodyText);
-
-                //byte[] whole = new byte[preamble.Length + body.Length];
-                //Array.Copy(preamble, 0, whole, 0, preamble.Length);
-                //Array.Copy(body, 0, whole, preamble.Length, body.Length);
-
-                //return whole;
             }
             catch (Exception e)
             {

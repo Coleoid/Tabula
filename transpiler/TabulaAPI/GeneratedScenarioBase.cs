@@ -76,7 +76,7 @@ namespace Tabula.API
                 StackTrace = Context.BuildCallStack(),
                 ActionText = actionText,
                 Outcome = ActionOutcome.Unfound,
-                Message = "Did not find method to match action.",
+                Message = "Did not find method to match step.",
                 TimeElapsed = TimeSpan.Zero,
             };
             RunResults.Add(result);

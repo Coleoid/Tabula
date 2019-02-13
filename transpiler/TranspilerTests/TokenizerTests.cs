@@ -101,14 +101,55 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo(expected));
         }
 
-        [TestCase(@"""escaped double quote: \""")]
-        [TestCase(@"'escaped single quote: \'")]
-        public void String_escaped_quotes_should_not_complete_token(string text)
+        [TestCase(@"""no final dq")]
+        [TestCase(@"'no final sq")]
+        [TestCase(@"""final dq is escaped: \""")]
+        [TestCase(@"'final sq is escaped: \'")]
+        [TestCase(@"% ""after garbage""")]
+        [TestCase(@"% 'after garbage'")]
+        public void Plausible_but_not_strings(string text)
         {
             var tokens = _tokenizer.Tokenize(text);
             
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(1));
             Assert.That(tokens, Has.Count.EqualTo(0));
+        }
+
+        [TestCase("newline", @"""\n""", "\n")]
+        [TestCase("carriage return", @"""\r""", "\r")]
+        [TestCase("tab", @"""\t""", "\t")]
+        [TestCase("backslash", @"""\""", "\\")]
+        public void Special_escape_sequences_generate_special_characters(string name, string text, string expected)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase(@"""\a""", "a")]
+        [TestCase(@"""\A""", "A")]
+        public void Most_backslashed_characters_are_just_the_character(string text, string expected)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase(@"""\#""", "\\#")]
+        public void Backslashed_number_sign_retains_literal_backslash(string text, string expected)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo(expected));
         }
 
         [Test]

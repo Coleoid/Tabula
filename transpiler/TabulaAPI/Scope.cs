@@ -36,7 +36,7 @@ namespace Tabula.API
                 return ParentScope[key];
             }
 
-            set { _values[key.ToLower().Replace(" ", "")] = value; }
+            set { _values[norm(key)] = value; }
         }
 
         public string norm(string input)
