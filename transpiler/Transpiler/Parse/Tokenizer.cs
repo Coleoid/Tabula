@@ -19,7 +19,9 @@ namespace Tabula.Parse
         Regex rxNewLine         = new Regex(@"^\r?\n");
         Regex rxScenarioLabel   = new Regex(@"^Scenario: *([""']?)(.*)\1", RegexOptions.IgnoreCase);
         Regex rxWord            = new Regex(@"^([a-zA-Z_]\w*)");  //  first character = letter or underscore, then any word characters
-        Regex rxString          = new Regex(@"^""((?:\\.|[^\\""\n])*)""|^'((?:\\.|[^\\'\n])*)'");  //  double quotes with escaped double quotes
+        Regex rxStringDQ        = new Regex(@"^""((?:\\.|[^\\""\n])*)""");  //  double quotes with backslash escaping
+        Regex rxStringSQ        = new Regex(@"^'((?:(?:'')|[^'\n])*)'(?!')");  //  single quotes--escape single quotes via two in a row
+        Regex rxStringML        = new Regex(@"^`((?:(?:``)|[^`])*)`(?!`)");  //  backticks--multi-line string, escape backticks via two in a row
         Regex rxCommandUse      = new Regex(@"^use: *([^\n]*)");  //  use: Global Setting Management
         Regex rxCommandSet      = new Regex(@"^set: (.+) =>");    //  set: bob => "Nordberg, Robert" (run time)
         Regex rxCommandAlias    = new Regex(@"^alias: (.+) =>");  //  alias: "prep #name" => prepare user #name for class (build time)
@@ -147,24 +149,50 @@ namespace Tabula.Parse
                     continue;
                 }
 
-                match = rxString.Match(remainingText);
+                match = rxStringDQ.Match(remainingText);
                 if (match.Success)
                 {
                     var rawText = match.Groups[1].Value;
-                    if (rawText == String.Empty)
-                    {
-                        rawText = match.Groups[2].Value;
-                    }
 
                     var cleanText = rawText
-                        .Replace("\\\"", "\"")
-                        .Replace("\\'", "'")
-                        .Replace("\\\\", "\\")
+                            .Replace("\\\"", "\"")
+                            .Replace("\\'", "'")
+                            .Replace("\\\\", "\\")
+                            .Replace("\\n", "\n")
+                            .Replace("\\r","\r")
+                            .Replace("\\t","\t")
+                            ;
+
+                    AddToken(TokenType.String, cleanText, match.Length);
+                    continue;
+                }
+
+                match = rxStringSQ.Match(remainingText);
+                if (match.Success)
+                {
+                    var rawText = match.Groups[1].Value;
+
+                    var cleanText = rawText
+                            .Replace("''", "'")
                         ;
 
                     AddToken(TokenType.String, cleanText, match.Length);
                     continue;
                 }
+
+                match = rxStringML.Match(remainingText);
+                if (match.Success)
+                {
+                    var rawText = match.Groups[1].Value;
+
+                    var cleanText = rawText
+                            .Replace("``", "`")
+                        ;
+
+                    AddToken(TokenType.String, cleanText, match.Length);
+                    continue;
+                }
+
 
                 //FIXME:  Not updated to catch token position/length yet
                 //  multiple matches with variable whitespace make the numbers tricky.

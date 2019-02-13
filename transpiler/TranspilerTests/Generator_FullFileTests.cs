@@ -36,7 +36,7 @@ namespace Tabula
             var tokens = _tokenizer.Tokenize(BigBadWolf);
             var state = new ParserState(tokens);
             var scenario = _parser.ParseScenario(state);
-
+            
             generator.Library.DetailLoadedTypes();
             var types = generator.Library.CachedWorkflows.Keys;
             var globals = types.Where(t => t.Name.Contains("Global")).ToList();
@@ -45,6 +45,7 @@ namespace Tabula
 
             var fullClass = builder.ToString();
             Assert.That(fullClass, Contains.Substring("class person_search_duty_locations_generated"));
+            Assert.That(fullClass, Contains.Substring("Assignment date range, location/org, and employment type"));
         }
     }
 }

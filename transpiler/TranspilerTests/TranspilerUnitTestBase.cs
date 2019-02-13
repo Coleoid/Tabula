@@ -42,17 +42,17 @@ namespace Tabula
 [Person Search, Duty Assignments, AC-16629]
 Scenario: ""Advanced person search with duty assignments""
 
-""Enable duty locations"":
+""We need duty locations active to search on them"":
 use: Global Setting Management
 Enable Duty Locations
 
 ""What we'll call our people in this scenario"":
 set: #handle => #FullNameLF
-| handle | FullNameLF               |
-| Lina   | ""Frixell, Rorolina""    |
-| Gio    | ""Arland, Giovanni""     |
-| Sterky | ""Cranach, Sterkenberg"" |
-| Mimi   | ""Schwarzlang, Mimi""    |
+| handle | FullNameLF             |
+| Lina   | 'Frixell, Rorolina'    |
+| Gio    | 'Arland, Giovanni'     |
+| Sterky | 'Cranach, Sterkenberg' |
+| Mimi   | 'Schwarzlang, Mimi'    |
 
 ""What we'll call the organizations they work for"":
 set: #TLA => #OrganizationName
@@ -82,7 +82,7 @@ Create Organization named #orgName of type ""organization"" under base parent gr
 ""Create list items"":
 use: List Management
 
-Create ""#itemType"" list item ""Tabula #item"" with description ""Tabula #item description"" with usage ""Available for new records""
+Create '#itemType' list item 'Tabula #item' with description 'Tabula #item description' with usage 'Available for new records'
 | itemType         | item       |
 | EmploymentAction | Update     |
 | EmploymentType   | Civilian   |
@@ -98,7 +98,7 @@ Create ""#itemType"" list item ""Tabula #item"" with description ""Tabula #item 
 use: Employment Action Edit
 
 Browse to Add Person Employment for #empName
-Add primary employment at #orgName with title ""Tabula #empTitle"" employment type ""Tabula #empType"" and appointment type ""Tabula #apptType"" starting on #startDate
+Add primary employment at #orgName with title `Tabula #empTitle` employment type `Tabula #empType` and appointment type ""Tabula #apptType"" starting on #startDate
 | empName  | orgName  | empTitle   | empType  | apptType  | startDate  |
 | #Lina    | #HPD     | Lackey     | Civilian | Contract  | 8/15/2008  |
 | #Gio     | #HPD     | Lackey     | Civilian | Contract  | 8/15/2008  |
@@ -122,7 +122,7 @@ alias: ""Add employment actions for #employeeName at #orgName"" => ...
 ""Add employment actions"":
 Add employment actions for #Lina at #HPD
 | actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate |
-| Tabula Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    |
+| Tabula Update   | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    |
 | Separation      | Reserve  | Full Time | Chief      | ""Separated (Inactive)"" | 12/15/2008    |
 
 Add employment actions for #Gio at #HPD
@@ -132,7 +132,7 @@ Add employment actions for #Gio at #HPD
 
 Add employment actions for #Sterky at #OPD
 | actionName      | empType  | apptType  | empTitle   | newStatus                | effectiveDate | comment          |
-| Tabula Update | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    | Tabula Comment |
+| Tabula Update   | Employee | Part Time | Instructor | ""On Leave (Active)""    | 10/15/2008    | Tabula Comment   |
 | Separation      | Civiilan | Contract  | Lackey     | ""Separated (Inactive)"" | 12/15/2008    |                  |
 
 

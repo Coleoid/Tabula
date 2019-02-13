@@ -62,11 +62,24 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo(expectedText));
         }
 
-        [TestCase("'Hello, World!'", "Hello, World!")]
         [TestCase("\"Hello, World!\"", "Hello, World!")]
         [TestCase("\"Hello, #location!\"", "Hello, #location!")]
         [TestCase("\"#itemType\"", "#itemType")]
-        public void String(string text, string expected)
+        public void String_dq(string text, string expected)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase("'Hello, World!'", "Hello, World!")]
+        [TestCase("'\\t'", "\\t")]
+        [TestCase("'\\n'", "\\n")]
+        [TestCase("'\\\\'", "\\\\")]
+        public void String_sq_never_escapes_with_backslash(string text, string expected)
         {
             var tokens = _tokenizer.Tokenize(text);
             Assert.That(tokens, Has.Count.EqualTo(1));
@@ -78,6 +91,7 @@ namespace Tabula
 
         [TestCase(@"""I contain 'single' quotes.""", "I contain 'single' quotes.")]
         [TestCase(@"'I contain ""double"" quotes.'", @"I contain ""double"" quotes.")]
+        [TestCase(@"""I contain `backticks`.""", @"I contain `backticks`.")]
         public void String_including_other_quotes(string text, string expected)
         {
             var tokens = _tokenizer.Tokenize(text);
@@ -88,8 +102,9 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo(expected));
         }
 
-        [TestCase(@"'escaped backslash: \\ '", @"escaped backslash: \ ")]
-        [TestCase(@"'escaped single quote: \' '", @"escaped single quote: ' ")]
+        [TestCase(@"'unescaped backslash: \ '", @"unescaped backslash: \ ")]
+        [TestCase(@"'escaped single quote: '' '", @"escaped single quote: ' ")]
+        [TestCase(@"'Angus O''Brady'", @"Angus O'Brady")]
         [TestCase(@"""escaped double quote: \"" """, @"escaped double quote: "" ")]
         public void String_Escaping(string text, string expected)
         {
@@ -103,10 +118,13 @@ namespace Tabula
 
         [TestCase(@"""no final dq")]
         [TestCase(@"'no final sq")]
+        [TestCase(@"`no final bt")]
         [TestCase(@"""final dq is escaped: \""")]
-        [TestCase(@"'final sq is escaped: \'")]
+        [TestCase(@"'final sq is escaped: ''")]
+        [TestCase(@"`final bt is escaped: ``")]
         [TestCase(@"% ""after garbage""")]
         [TestCase(@"% 'after garbage'")]
+        [TestCase(@"% `after garbage`")]
         public void Plausible_but_not_strings(string text)
         {
             var tokens = _tokenizer.Tokenize(text);
@@ -118,7 +136,7 @@ namespace Tabula
         [TestCase("newline", @"""\n""", "\n")]
         [TestCase("carriage return", @"""\r""", "\r")]
         [TestCase("tab", @"""\t""", "\t")]
-        [TestCase("backslash", @"""\""", "\\")]
+        [TestCase("backslash", @""" \ """, " \\ ")]
         public void Special_escape_sequences_generate_special_characters(string name, string text, string expected)
         {
             var tokens = _tokenizer.Tokenize(text);
@@ -129,9 +147,23 @@ namespace Tabula
             Assert.That(token.Text, Is.EqualTo(expected));
         }
 
-        [TestCase(@"""\a""", "a")]
-        [TestCase(@"""\A""", "A")]
-        public void Most_backslashed_characters_are_just_the_character(string text, string expected)
+        [TestCase("empty string", "``", "")]
+        [TestCase("empty string", "`\n`", "\n")]
+        [TestCase("escaped backtick", "` `` `", " ` ")]
+        [TestCase("empty string", "`\n\n stuff \n`", "\n\n stuff \n")]
+        public void Multi_Line_Strings(string name, string text, string expected)
+        {
+            var tokens = _tokenizer.Tokenize(text);
+            Assert.That(tokens, Has.Count.EqualTo(1));
+
+            Token token = tokens.First();
+            Assert.That(token.Type, Is.EqualTo(TokenType.String));
+            Assert.That(token.Text, Is.EqualTo(expected));
+        }
+
+        [TestCase(@"""\a""", "\\a")]
+        [TestCase(@"""\A""", "\\A")]
+        public void Most_backslashed_characters_are_just_the_character_and_a_backslash(string text, string expected)
         {
             var tokens = _tokenizer.Tokenize(text);
             Assert.That(tokens, Has.Count.EqualTo(1));
