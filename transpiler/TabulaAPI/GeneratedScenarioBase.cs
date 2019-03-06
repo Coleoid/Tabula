@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using TestopiaAPI;
 
 namespace Tabula.API
 {
@@ -14,16 +13,12 @@ namespace Tabula.API
         public string FileName { get; set; }
 
         public RuntimeContext Context { get; set; }
-        protected List<RunResult> RunResults;
+
+        protected List<NUnitReport.TestCase> RunResults;
+        public List<NUnitReport.TestCase> GetResults() => RunResults;
+
         protected List<string> Problems;
-        public List<RunResult> GetResults()
-        {
-            return RunResults;
-        }
-        public List<string> GetProblems()
-        {
-            return Problems;
-        }
+        public List<string> GetProblems() => Problems;
 
         protected Scope Var { get => Context.CurrentScope; }
         private Regex varReference;
@@ -34,7 +29,7 @@ namespace Tabula.API
         public GeneratedScenarioBase()
         {
             Context = new RuntimeContext();
-            RunResults = new List<RunResult>();
+            RunResults = new List<NUnitReport.TestCase>();
             Problems = new List<string>();
 
             varReference = new Regex(@"(Var\[""([^]]+)""\])");
@@ -70,39 +65,51 @@ namespace Tabula.API
 
         public void Unfound(string actionText, string sourceLocation)
         {
-            var result = new RunResult
+            var testCase = new NUnitReport.TestCase
             {
-                SourceLocation = sourceLocation,
-                StackTrace = Context.BuildCallStack(),
-                ActionText = actionText,
-                Outcome = ActionOutcome.Unfound,
-                Message = "Did not find method to match step.",
-                TimeElapsed = TimeSpan.Zero,
+                Result = NUnitTestResult.Failed,
+                Name = actionText,
+                FailureInfo = new NUnitReport.TestCaseFailure
+                {
+                    StackTrace = sourceLocation,
+                    Message = "Did not find method to match step.",
+                }
             };
-            RunResults.Add(result);
+
+            RunResults.Add(testCase);
         }
+
 
         public void Do(Action action, string sourceLocation, string actionText, [CallerMemberName] string callerName = "")
         {
             MethodBase callingMethod = new StackFrame(1).GetMethod();
-            var result = new RunResult
+            var result = new NUnitReport.TestCase
             {
-                SourceLocation = sourceLocation,
-                StackTrace = Context.BuildCallStack(),
-                ActionText = varReference.Replace(actionText, (m) => $"\"{Context[m.Groups[2].Value]}\""),
+                Name = actionText,
+                Result = NUnitTestResult.Passed,
             };
             RunResults.Add(result);
 
             if (SkippingRemainder)
             {
-                result.Skip(SkipMessage);
+                result.Result = NUnitTestResult.Skipped;
+                result.FailureInfo = new NUnitReport.TestCaseFailure
+                {
+                    Message = SkipMessage,
+                    StackTrace = sourceLocation
+                };
                 return;
             }
 
-            PerformAction(action, result);  //  <--<<  The Action
+            string lineNumber = sourceLocation.Split(':')[1];
+            PerformAction(action, result, lineNumber);  //  <--<<  The Action
+            if (result.FailureInfo != null)
+            {
+                result.FailureInfo.StackTrace = sourceLocation;
+            }
         }
 
-        private void PerformAction(Action action, RunResult result)
+        private void PerformAction(Action action, NUnitReport.TestCase result, string lineNumber)
         {
             Exception exception = null;
             var stopwatch = new Stopwatch();
@@ -118,8 +125,33 @@ namespace Tabula.API
             finally
             {
                 stopwatch.Stop();
-                result.SetResult(stopwatch.Elapsed, exception);
-                DetermineIfSkippingRemainder(exception, result.LineNumber);
+                SetResult(result, exception);
+                DetermineIfSkippingRemainder(exception, lineNumber);
+            }
+        }
+
+        public void SetResult(NUnitReport.TestCase result, Exception ex = null)
+        {
+            if (ex == null)
+            {
+                result.Result = NUnitTestResult.Passed;
+            }
+            else if (ex is NotImplementedException)
+            {
+                result.Result = NUnitTestResult.Skipped;
+                result.FailureInfo = new NUnitReport.TestCaseFailure
+                {
+                    StackTrace = string.Join(Environment.NewLine, Context.BuildCallStack()),
+                    Message = "Step is not implemented"
+                };
+            }
+            else
+            {
+                result.Result = NUnitTestResult.Failed;
+                result.FailureInfo = new NUnitReport.TestCaseFailure
+                {
+                    Message = ex.Message
+                };
             }
         }
 
