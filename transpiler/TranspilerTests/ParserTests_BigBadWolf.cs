@@ -28,7 +28,7 @@ namespace Tabula
             Assert.That(cst.Label, Is.EqualTo("Advanced person search with duty assignments"));
 
             Assert.That(cst.Sections, Has.Count.EqualTo(29));
-            Assert.That(cst.Sections[0].Label, Is.EqualTo("Enable duty locations"));
+            Assert.That(cst.Sections[0].Label, Is.EqualTo("We need duty locations active to search on them"));
             Assert.That(cst.Sections[1].Label, Is.EqualTo("What we'll call our people in this scenario"));
             Assert.That(cst.Sections[2].Label, Is.EqualTo("table__011_to_015"));
             Assert.That(cst.Sections[3].Label, Is.EqualTo("What we'll call the organizations they work for"));

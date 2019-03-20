@@ -48,7 +48,7 @@ namespace Tabula
                 TokenType.NewLine
             );
 
-            Assert.That(tokens[6].Text, Does.StartWith("Enable duty locations"));
+            Assert.That(tokens[6].Text, Does.StartWith("We need duty locations active to search on them"));
             Assert.That(tokens[8].Text, Does.Match("Global Setting Management"));
             Assert.That(tokens[10].Text, Does.Match("Enable"));
             Assert.That(tokens[11].Text, Does.Match("Duty"));
