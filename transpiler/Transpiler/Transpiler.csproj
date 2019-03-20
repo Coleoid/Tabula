@@ -54,7 +54,6 @@
     <Compile Include="Generator.cs" />
     <Compile Include="IndentingStringBuilder.cs" />
     <Compile Include="MethodDetail.cs" />
-    <Compile Include="NUnitReport.cs" />
     <Compile Include="Parse\ParserState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parse\Parser.cs" />

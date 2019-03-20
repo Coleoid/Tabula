@@ -12,7 +12,7 @@ namespace Tabula
         {
             var tokens = _tokenizer.Tokenize(BigBadWolf);
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0),
-                () => "Warnings: " + string.Join("\n", _tokenizer.Warnings)
+                "Warnings: " + string.Join("\n", _tokenizer.Warnings)
             );
             var state = new ParserState(tokens);
 
@@ -52,7 +52,7 @@ namespace Tabula
         {
             var tokens = _tokenizer.Tokenize(BigBadWolf);
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0),
-                () => "Warnings: " + string.Join("\n", _tokenizer.Warnings)
+                "Warnings: " + string.Join("\n", _tokenizer.Warnings)
             );
             var state = new ParserState(tokens);
 

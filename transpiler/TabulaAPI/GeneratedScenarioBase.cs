@@ -15,7 +15,73 @@ namespace Tabula.API
         public RuntimeContext Context { get; set; }
 
         protected List<NUnitReport.TestCase> RunResults;
-        public List<NUnitReport.TestCase> GetResults() => RunResults;
+        public NUnitReport.TestSuite GetResults()
+        {
+            return BuildReport(RunResults);
+        }
+
+        public NUnitReport.TestSuite BuildReport(List<NUnitReport.TestCase> cases)
+        {
+            var suite = new NUnitReport.TestSuite();
+
+            suite.TestCases = cases;
+
+            suite.TestCaseCount = cases.Count;
+            suite.TotalTests = cases.Count;
+
+            suite.ClassName = FileName;
+
+            int failedTests = 0;
+            int inconclusiveTests = 0;
+            int passedTests = 0;
+            int skippedTests = 0;
+            
+            foreach (var testCase in cases)
+            {
+                switch (testCase.Result)
+                {
+                case NUnitTestResult.Failed:
+                    failedTests++;
+                    break;
+                case NUnitTestResult.Inconclusive:
+                    inconclusiveTests++;
+                    break;
+                case NUnitTestResult.Passed:
+                    passedTests++;
+                    break;
+                case NUnitTestResult.Skipped:
+                    skippedTests++;
+                    break;
+                default:
+                    break;
+                }
+
+            }
+
+            suite.FailedTests = failedTests;
+            suite.InconclusiveTests = inconclusiveTests;
+            suite.PassedTests = passedTests;
+            suite.SkippedTests = skippedTests;
+
+            suite.FullName = ScenarioLabel;
+
+            suite.Type = NUnitTestSuiteType.TestFixture;
+
+            suite.Result = GetSuiteResult(suite);
+
+            return suite;
+        }
+
+        private NUnitTestResult GetSuiteResult(NUnitReport.TestSuite suite)
+        {
+            if (suite.FailedTests > 0)
+            {
+                return NUnitTestResult.Failed;
+            } else
+            {
+                return NUnitTestResult.Passed;
+            }
+        }
 
         protected List<string> Problems;
         public List<string> GetProblems() => Problems;
@@ -138,7 +204,7 @@ namespace Tabula.API
             }
             else if (ex is NotImplementedException)
             {
-                result.Result = NUnitTestResult.Skipped;
+                result.Result = NUnitTestResult.Inconclusive;
                 result.FailureInfo = new NUnitReport.TestCaseFailure
                 {
                     StackTrace = string.Join(Environment.NewLine, Context.BuildCallStack()),

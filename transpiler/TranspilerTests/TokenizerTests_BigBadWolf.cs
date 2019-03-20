@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Tabula
+namespace Tabula.Tests
 {
     [TestFixture]
     public class TokenizerTests_BigBadWolf : TranspilerUnitTestBase
@@ -13,7 +13,7 @@ namespace Tabula
             var tokens = _tokenizer.Tokenize(BigBadWolf);
 
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0),
-                () => "Warnings: " + string.Join("\n", _tokenizer.Warnings)
+                "Warnings: " + string.Join("\n", _tokenizer.Warnings)
             );
         }
 
