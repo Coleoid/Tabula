@@ -16,16 +16,18 @@ namespace Tabula.API.Tests
             string location = "my_scenario.tabula:88";
             runtime.Unfound(stepText, location);
 
-            //suite should hold 1 case
+            //one test case in the suite
             List<NUnitReport.TestCase> cases = runtime.GetResults();
             Assert.AreEqual(1, cases.Count);
 
-            //case should be a failure
+            //test failed
             var testCase = cases[0];
             Assert.AreEqual(NUnitTestResult.Failed, testCase.Result);
 
-            //result should record step text and location
+            //name holds step text
             Assert.AreEqual(stepText, testCase.Name);
+
+            //failure info holds location and error cause
             var failureInfo = testCase.FailureInfo;
             Assert.AreEqual(location, failureInfo.StackTrace);
             Assert.AreEqual("Did not find method to match step.", failureInfo.Message);
@@ -40,18 +42,18 @@ namespace Tabula.API.Tests
             string location = "my_scenario.tabula:88";
             runtime.Do(() => { }, location, stepText);
 
-            //suite should hold 1 case
+            //one test case in the suite
             List<NUnitReport.TestCase> cases = runtime.GetResults();
             Assert.AreEqual(1, cases.Count);
 
-            //case should be a pass
+            //test passed
             var testCase = cases[0];
             Assert.AreEqual(NUnitTestResult.Passed, testCase.Result);
 
-            //name should hold step text
+            //name holds step text
             Assert.AreEqual(stepText, testCase.Name);
 
-            //should hold no failure info
+            //no failure info
             Assert.IsNull(testCase.FailureInfo);
         }
 
@@ -73,33 +75,7 @@ namespace Tabula.API.Tests
         }
 
         [Test]
-        public void Skipping_results_records_info_on_skip()
-        {
-            var runtime = new GeneratedScenarioBase();
-
-            string stepText = "some_fixture.some_method(1, 2, 3)";
-            string location = "my_scenario.tabula:88";
-
-            runtime.Do(() => { throw new Exception("This is bad"); }, location, stepText);
-            runtime.Do(() => { }, location, stepText);
-
-            List<NUnitReport.TestCase> cases = runtime.GetResults();
-            Assert.AreEqual(2, cases.Count);
-
-            //case should be a skip
-            var testCase = cases[1];
-            Assert.AreEqual(NUnitTestResult.Skipped, testCase.Result);
-
-            //name should hold step text
-            Assert.AreEqual(stepText, testCase.Name);
-
-            //failure info should hold location and message
-            Assert.AreEqual(location, testCase.FailureInfo.StackTrace);
-            Assert.AreEqual("Skipped due to error on line 88", testCase.FailureInfo.Message);
-        }
-
-        [Test]
-        public void Do_recordsotImplemented()
+        public void Do_recordsNotImplemented()
         {
             var runtime = new GeneratedScenarioBase();
 
@@ -111,14 +87,14 @@ namespace Tabula.API.Tests
             List<NUnitReport.TestCase> cases = runtime.GetResults();
             Assert.AreEqual(1, cases.Count);
 
-            //case should be a skip
+            //test skipped
             var testCase = cases[0];
             Assert.AreEqual(NUnitTestResult.Skipped, testCase.Result);
 
-            //name should hold step text
+            //name holds step text
             Assert.AreEqual(stepText, testCase.Name);
 
-            //failure info should hold location and message
+            //failure info holds location and message
             Assert.AreEqual(location, testCase.FailureInfo.StackTrace);
             Assert.AreEqual("Step is not implemented", testCase.FailureInfo.Message);
         }
@@ -149,7 +125,32 @@ namespace Tabula.API.Tests
             Assert.AreEqual(message, testCase.FailureInfo.Message);
         }
 
+        [Test]
+        public void Exception_skips_later_steps()
+        {
+            var runtime = new GeneratedScenarioBase();
 
+            string stepText = "some_fixture.some_method(1, 2, 3)";
+            string location = "my_scenario.tabula:88";
+
+            runtime.Do(() => { throw new Exception("This is bad"); }, location, stepText);
+            runtime.Do(() => { }, location, stepText);
+
+            List<NUnitReport.TestCase> cases = runtime.GetResults();
+
+            //two test cases in the suite
+            Assert.AreEqual(2, cases.Count);
+
+            //second test was skipped because first threw general exception
+            var testCase = cases[1];
+            Assert.AreEqual(NUnitTestResult.Skipped, testCase.Result);
+
+            //name holds step text
+            Assert.AreEqual(stepText, testCase.Name);
+
+            //failure info holds message about original error causing skip
+            Assert.AreEqual(location, testCase.FailureInfo.StackTrace);
+            Assert.AreEqual("Skipped due to error on line 88", testCase.FailureInfo.Message);
+        }
     }
-
 }
