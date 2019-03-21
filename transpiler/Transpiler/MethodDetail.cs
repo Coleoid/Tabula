@@ -6,7 +6,7 @@ namespace Tabula
     public class WorkflowDetail
     {
         // key = SearchName
-        private Dictionary<string, MethodDetail> Methods { get; set; }  // INPROG: private
+        private Dictionary<string, MethodDetail> Methods { get; set; }
 
         public MethodDetail GetMethodDetail(string searchName)
         {
@@ -52,7 +52,7 @@ namespace Tabula
         }
 
         private string _searchName;
-        //FUTURE:  Suffix with arity, probably "/2"
+        //FUTURE:  Suffix with arity, probably like "/2".  No current need.
         public string SearchName
         {
             get => _searchName;

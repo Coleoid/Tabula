@@ -240,8 +240,8 @@ namespace Tabula.Parse
 
         public CST.SymbolCollection ParseCollection(ParserState state)
         {
-            bool tooFar = state.AtEnd || state.Tokens.Count - 1 == state.Position;
-            if (tooFar || state.Tokens[state.Position + 1].Type != TokenType.Comma)
+            bool tooFar = state.AtEnd || state.Output.Tokens.Count - 1 == state.Position;
+            if (tooFar || state.Output.Tokens[state.Position + 1].Type != TokenType.Comma)
                 return null;
 
             var collection = new CST.SymbolCollection();

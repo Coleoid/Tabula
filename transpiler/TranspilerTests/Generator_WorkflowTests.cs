@@ -88,8 +88,6 @@ namespace Tabula
 
         //TODO: second and subsequent workflow usages don't cause a new 'var myfixture = ...' line
 
-        //TODO: in-paragraph instantiations are of 'var xx' locals, and no declarations block at bottom of class.
-
         [Test]
         public void UseWorkflow_will_not_add_duplicate_workflows()
         {

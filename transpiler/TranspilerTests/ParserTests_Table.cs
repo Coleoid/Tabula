@@ -81,11 +81,11 @@ namespace Tabula
         [Test]
         public void TableCell()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Word, "Say"),
                 new Token(TokenType.Word, "Hello"),
                 new Token(TokenType.TableCellSeparator, "|"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseTableCell(state);
 
@@ -96,9 +96,9 @@ namespace Tabula
         [Test]
         public void TableCell_empty()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.TableCellSeparator, "|"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseTableCell(state);
 
@@ -112,13 +112,13 @@ namespace Tabula
         [Test]
         public void TableCell_two_values_with_comma()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Word, "Say"),
                 new Token(TokenType.Word, "Say"),
                 new Token(TokenType.Comma, ","),
                 new Token(TokenType.Word, "Say"),
                 new Token(TokenType.TableCellSeparator, "|"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseTableCell(state);
 

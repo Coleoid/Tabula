@@ -23,8 +23,9 @@ namespace Tabula
             return new ParserState(tokens);
         }
 
-        protected void Assert_TokenSequenceMatches(List<Token> tokens, int fromPosition, params TokenType[] types)
+        protected void Assert_TokenSequenceMatches(TokenizerOutput output, int fromPosition, params TokenType[] types)
         {
+            List<Token> tokens = output.Tokens;
             for (int i = 0; i < types.Length; i++)
             {
                 var tokenIndex = i + fromPosition;
@@ -154,7 +155,7 @@ Add temporary duty assignment at #OPD from 1/1/2013 to 4/1/2013 with status ""Pa
 
 Using employment of #Sterky at #OPD
 Add temporary duty assignment at #HPD from 1/1/2013 to 4/1/2013 with status ""Past""
-Add temporary duty assignment at #OA with status ""Past""
+Add temporary duty assignment at #OA from 1/1/2012 to 4/1/2012 with status ""Past""
 
 
 ""Search people with many different duty assignment criteria"":

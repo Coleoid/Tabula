@@ -29,15 +29,16 @@ namespace Tabula.Tests
                 TokenType.ScenarioLabel
             );
 
-            Assert.That(tokens[3].Text, Does.StartWith("Advanced person"));
+            Assert.That(tokens.Tokens[3].Text, Does.StartWith("Advanced person"));
         }
 
         [Test]
         public void para_1()
         {
-            var tokens = _tokenizer.Tokenize(BigBadWolf);
+            var output = _tokenizer.Tokenize(BigBadWolf);
+            var tokens = output.Tokens;
 
-            Assert_TokenSequenceMatches(tokens, 6,
+            Assert_TokenSequenceMatches(output, 6,
                 TokenType.SectionLabel,
                 TokenType.NewLine,
                 TokenType.cmd_Use,
@@ -58,9 +59,10 @@ namespace Tabula.Tests
         [Test]
         public void para_2()
         {
-            var tokens = _tokenizer.Tokenize(BigBadWolf);
+            var output = _tokenizer.Tokenize(BigBadWolf);
+            var tokens = output.Tokens;
 
-            Assert_TokenSequenceMatches(tokens, 15,
+            Assert_TokenSequenceMatches(output, 15,
                 TokenType.SectionLabel,
                 TokenType.NewLine,
                 TokenType.cmd_Set,

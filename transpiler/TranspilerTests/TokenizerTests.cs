@@ -10,7 +10,8 @@ namespace Tabula
         [Test]
         public void Empty_input_produces_no_tokens_or_warnings()
         {
-            var tokens = _tokenizer.Tokenize("");
+            var output = _tokenizer.Tokenize("");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(0));
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0));
         }
@@ -18,7 +19,8 @@ namespace Tabula
         [Test]
         public void Unrecognized_token_skips_remaining_input_and_warns()
         {
-            var tokens = _tokenizer.Tokenize(" \n  % 'Hello, World!'");
+            var output = _tokenizer.Tokenize(" \n  % 'Hello, World!'");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(1));
 
@@ -29,7 +31,8 @@ namespace Tabula
         [Test]
         public void Skips_leading_whitespace()
         {
-            var tokens = _tokenizer.Tokenize("   'Hello, World!'");
+            var output = _tokenizer.Tokenize("   'Hello, World!'");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
@@ -42,7 +45,8 @@ namespace Tabula
         [TestCase("Scenario: \"duuude.\"", "duuude.")]
         public void Scenario_label(string line, string expectedText)
         {
-            var tokens = _tokenizer.Tokenize(line);
+            var output = _tokenizer.Tokenize(line);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -54,7 +58,8 @@ namespace Tabula
         [TestCase(@"""This thing here"":", "This thing here")]
         public void Section_label(string line, string expectedText)
         {
-            var tokens = _tokenizer.Tokenize(line);
+            var output = _tokenizer.Tokenize(line);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -67,7 +72,8 @@ namespace Tabula
         [TestCase("\"#itemType\"", "#itemType")]
         public void String_dq(string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -81,7 +87,8 @@ namespace Tabula
         [TestCase("'\\\\'", "\\\\")]
         public void String_sq_never_escapes_with_backslash(string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -94,7 +101,8 @@ namespace Tabula
         [TestCase(@"""I contain `backticks`.""", @"I contain `backticks`.")]
         public void String_including_other_quotes(string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -108,7 +116,8 @@ namespace Tabula
         [TestCase(@"""escaped double quote: \"" """, @"escaped double quote: "" ")]
         public void String_Escaping(string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -127,8 +136,9 @@ namespace Tabula
         [TestCase(@"% `after garbage`")]
         public void Plausible_but_not_strings(string text)
         {
-            var tokens = _tokenizer.Tokenize(text);
-            
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
+
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(1));
             Assert.That(tokens, Has.Count.EqualTo(0));
         }
@@ -139,7 +149,8 @@ namespace Tabula
         [TestCase("backslash", @""" \ """, " \\ ")]
         public void Special_escape_sequences_generate_special_characters(string name, string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -153,7 +164,8 @@ namespace Tabula
         [TestCase("empty string", "`\n\n stuff \n`", "\n\n stuff \n")]
         public void Multi_Line_Strings(string name, string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -165,7 +177,8 @@ namespace Tabula
         [TestCase(@"""\A""", "\\A")]
         public void Most_backslashed_characters_are_just_the_character_and_a_backslash(string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -176,7 +189,8 @@ namespace Tabula
         [TestCase(@"""\#""", "\\#")]
         public void Backslashed_number_sign_retains_literal_backslash(string text, string expected)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -187,7 +201,8 @@ namespace Tabula
         [Test]
         public void Tag()
         {
-            var tokens = _tokenizer.Tokenize("[serious business]");
+            var output = _tokenizer.Tokenize("[serious business]");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -198,7 +213,8 @@ namespace Tabula
         [TestCase("#BIZ","biz")]
         public void Variable(string rawText, string varName)
         {
-            var tokens = _tokenizer.Tokenize(rawText);
+            var output = _tokenizer.Tokenize(rawText);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -210,7 +226,8 @@ namespace Tabula
         [TestCase(".", TokenType.BlockEnd)]
         public void Block(string text, TokenType type)
         {
-            var tokens = _tokenizer.Tokenize(text);
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens.First();
@@ -221,7 +238,8 @@ namespace Tabula
         [Test]
         public void Tags_in_single_set_of_brackets()
         {
-            var tokens = _tokenizer.Tokenize("[serious,monkey,   risky]");
+            var output = _tokenizer.Tokenize("[serious,monkey,   risky]");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
@@ -241,7 +259,8 @@ namespace Tabula
         [TestCase("-.2")]
         public void Term_number(string input)
         {
-            var tokens = _tokenizer.Tokenize(input);
+            var output = _tokenizer.Tokenize(input);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
@@ -254,7 +273,8 @@ namespace Tabula
         [TestCase("1/2/1999")]
         public void Term_date(string input)
         {
-            var tokens = _tokenizer.Tokenize(input);
+            var output = _tokenizer.Tokenize(input);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
@@ -267,7 +287,8 @@ namespace Tabula
         [TestCase("digitty_239")]
         public void Word(string input)
         {
-            var tokens = _tokenizer.Tokenize(input);
+            var output = _tokenizer.Tokenize(input);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
@@ -280,7 +301,8 @@ namespace Tabula
         [TestCase("use:  Employment  Action Edit ", "Employment  Action Edit ")]
         public void Command_use(string input, string expected)
         {
-            var tokens = _tokenizer.Tokenize(input);
+            var output = _tokenizer.Tokenize(input);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
@@ -291,7 +313,8 @@ namespace Tabula
         [TestCase("set: this => #that", "this", "that")]
         public void Command_Set(string input, string from, string to)
         {
-            var tokens = _tokenizer.Tokenize(input);
+            var output = _tokenizer.Tokenize(input);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(2));
 
             Token token = tokens[0];
@@ -308,7 +331,8 @@ namespace Tabula
         [TestCase("alias: this => #that", "this", "that")]
         public void Command_Alias(string input, string from, string to)
         {
-            var tokens = _tokenizer.Tokenize(input);
+            var output = _tokenizer.Tokenize(input);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(2));
 
             Token token = tokens[0];
@@ -323,7 +347,8 @@ namespace Tabula
         [TestCase("|")]
         public void Table_cell_separator(string input)
         {
-            var tokens = _tokenizer.Tokenize(input);
+            var output = _tokenizer.Tokenize(input);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(1));
 
             Token token = tokens[0];
@@ -334,7 +359,8 @@ namespace Tabula
         [Test]
         public void Words_and_NewLines()
         {
-            var tokens = _tokenizer.Tokenize("one \n two");
+            var output = _tokenizer.Tokenize("one \n two");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(3));
 
             Token token = tokens[0];
@@ -353,7 +379,8 @@ namespace Tabula
         [TestCase(@"Create ""#itemType"" list item ""Testopia #item"" with description ""Testopia #item description"" with usage ""Available for new records""")]
         public void Full_Step(string step)
         {
-            var tokens = _tokenizer.Tokenize(step);
+            var output = _tokenizer.Tokenize(step);
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(11));
 
             Token token = tokens[0];
@@ -369,7 +396,8 @@ namespace Tabula
         public void multiple_strings()
         {
             string step = @"one ""string one"" two ""string two"" three";
-            var tokens = _tokenizer.Tokenize(step);
+            var output = _tokenizer.Tokenize(step);
+            var tokens = output.Tokens;
             //Assert.That(tokens, Has.Count.EqualTo(5));
 
             Token token = tokens[0];
@@ -405,7 +433,8 @@ namespace Tabula
         [Test]
         public void TableRow()
         {
-            var tokens = _tokenizer.Tokenize("| Name | Age |");
+            var output = _tokenizer.Tokenize("| Name | Age |");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(5));
 
             Assert.That(tokens[0].Type, Is.EqualTo(TokenType.TableCellSeparator));
@@ -427,7 +456,8 @@ namespace Tabula
         [Test]
         public void TableRows()
         {
-            var tokens = _tokenizer.Tokenize("| Name | \n | Bob | \n | Ann | \n");
+            var output = _tokenizer.Tokenize("| Name | \n | Bob | \n | Ann | \n");
+            var tokens = output.Tokens;
             Assert.That(tokens, Has.Count.EqualTo(12));
         }
 

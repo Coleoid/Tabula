@@ -12,11 +12,11 @@ namespace Tabula
         [Test]
         public void Scenario_gets_tags()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput( new List<Token> {
                 new Token(TokenType.Tag, "Laughing Loudly"),
                 new Token(TokenType.Tag, "Jumping"),
                 new Token(TokenType.ScenarioLabel, "Get active and make noise"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseScenario(state);
 
@@ -29,12 +29,12 @@ namespace Tabula
         [Test]
         public void Section_gets_tags()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Tag, "Enrollment"),
                 new Token(TokenType.Tag, "AC-98989"),
                 new Token(TokenType.SectionLabel, ""),
                 new Token(TokenType.cmd_Use, "Student Enrollment"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseSection(state);
             Assert.That(cst, Is.Not.Null);
@@ -46,10 +46,10 @@ namespace Tabula
         public void Section_gets_label()
         {
             string label = "Enroll Bob in Early Structure Fire Detection";
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.SectionLabel, label),
                 new Token(TokenType.cmd_Use, "Student Enrollment"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseSection(state);
             Assert.That(cst, Is.Not.Null);
@@ -60,7 +60,7 @@ namespace Tabula
         [Test]
         public void Paragraph()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Use, "Student Enrollment", 10),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.cmd_Use, "Person Search Criteria Workflow"),
@@ -71,7 +71,7 @@ namespace Tabula
                 new Token(TokenType.Word, "Search", 13),
                 new Token(TokenType.Word, "there"),
                 new Token(TokenType.NewLine, "\n"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseSection(state);
 
@@ -86,7 +86,7 @@ namespace Tabula
         [Test]
         public void Paragraph_with_extra_blank_lines()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Use, "Student Enrollment", 22),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.cmd_Use, "Person Search Criteria Workflow", 23),
@@ -99,7 +99,7 @@ namespace Tabula
                 new Token(TokenType.Word, "Search", 27),
                 new Token(TokenType.Word, "there", 27),
                 new Token(TokenType.NewLine, "\n"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseParagraph(state);
 
@@ -114,7 +114,7 @@ namespace Tabula
         [Test]
         public void Paragraph_gets_suitable_name()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Use, "Student Enrollment", 42),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.cmd_Set, "#Fred", 43),
@@ -129,7 +129,7 @@ namespace Tabula
                 new Token(TokenType.Word, "Search", 46),
                 new Token(TokenType.Word, "elsewhere"),
                 new Token(TokenType.NewLine, "\n"),
-            };
+            });
             var state = new ParserState(tokens);
 
             var para = _parser.ParseParagraph(state);
@@ -140,7 +140,7 @@ namespace Tabula
         [Test]
         public void Paragraph_name_correct_with_block_at_end()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Use, "Student Enrollment", 42),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.cmd_Set, "#Fred", 43),
@@ -153,7 +153,7 @@ namespace Tabula
                 new Token(TokenType.Word, "there"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.BlockEnd, ".", 46),
-            };
+            });
             var state = new ParserState(tokens);
 
             var para = _parser.ParseParagraph(state);
@@ -175,7 +175,7 @@ namespace Tabula
         [Test]
         public void Paragraph_with_set_and_alias()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Use, "Student Enrollment"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.cmd_Set, "#Fred"),
@@ -188,7 +188,7 @@ namespace Tabula
                 new Token(TokenType.Word, "there"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.BlockEnd, "."),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseParagraph(state);
 
@@ -200,10 +200,10 @@ namespace Tabula
         [Test]
         public void Step_two_words()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Word, "Say") { Line = 7 },
                 new Token(TokenType.Word, "Hello"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseStep(state);
 
@@ -217,14 +217,14 @@ namespace Tabula
         public void Step_with_number_and_date()
         {
             // this number 22 this date ..
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Word, "this"),
                 new Token(TokenType.Word, "number"),
                 new Token(TokenType.Number, "22"),
                 new Token(TokenType.Word, "this"),
                 new Token(TokenType.Word, "date"),
                 new Token(TokenType.Date, "11/22/2044"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseStep(state);
 
@@ -236,7 +236,7 @@ namespace Tabula
         public void Step_with_numbers_in_a_list()
         {
             // my lucky numbers 22, 28, 42
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Word, "my"),
                 new Token(TokenType.Word, "lucky"),
                 new Token(TokenType.Word, "numbers"),
@@ -245,7 +245,7 @@ namespace Tabula
                 new Token(TokenType.Number, "28"),
                 new Token(TokenType.Comma, ","),
                 new Token(TokenType.Number, "42"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseStep(state);
 
@@ -258,13 +258,13 @@ namespace Tabula
         [Test]
         public void Collection_with_numbers_in_a_list()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Number, "22"),
                 new Token(TokenType.Comma, ","),
                 new Token(TokenType.Number, "28"),
                 new Token(TokenType.Comma, ","),
                 new Token(TokenType.String, "Howdy!"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseCollection(state);
 
@@ -282,11 +282,11 @@ namespace Tabula
         [Test]
         public void Collection_trailing_comma_error()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Number, "22"),
                 new Token(TokenType.Comma, ","),
                 new Token(TokenType.Word, "balloons"),
-            };
+            });
             var state = new ParserState(tokens);
             var ex = Assert.Throws<Exception>(() => _parser.ParseCollection(state));
             Assert.That(ex.Message, Is.EqualTo("Can only collect terms"));
@@ -295,10 +295,10 @@ namespace Tabula
         [Test]
         public void Collection_trailing_comma_atEnd_error()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Number, "22"),
                 new Token(TokenType.Comma, ","),
-            };
+            });
             var state = new ParserState(tokens);
             var ex = Assert.Throws<Exception>(() => _parser.ParseCollection(state));
             Assert.That(ex.Message, Is.EqualTo("Can only collect terms"));
@@ -307,11 +307,11 @@ namespace Tabula
         [Test]
         public void Step_with_variable()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Word, "this"),
                 new Token(TokenType.Word, "person"),
                 new Token(TokenType.Variable, "#nextPerson"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseStep(state);
 
@@ -323,11 +323,11 @@ namespace Tabula
         [Test]
         public void Section_header()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.SectionLabel, "Search people with many different duty assignment criteria"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.SectionLabel, "Search people with 5 duty assignment criteria"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseSectionLabel(state);
 
@@ -340,14 +340,14 @@ namespace Tabula
         [Test]
         public void Steps()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.Word, "Search"),
                 new Token(TokenType.Word, "here"),
                 new Token(TokenType.NewLine, "\n"),
                 new Token(TokenType.Word, "Search"),
                 new Token(TokenType.Word, "there"),
                 new Token(TokenType.NewLine, "\n"),
-            };
+            });
             var state = new ParserState(tokens);
             var cst = _parser.ParseSteps(state);
 
@@ -359,7 +359,7 @@ namespace Tabula
         [Test]
         public void Term_date()
         {
-            var tokens = new List<Token> { new Token(TokenType.Date, "09/30/2016") };
+            var tokens = new TokenizerOutput(new List<Token> { new Token(TokenType.Date, "09/30/2016") });
             var state = new ParserState(tokens);
             var cst = _parser.ParseTerm(state);
 
@@ -372,7 +372,7 @@ namespace Tabula
         [TestCase("44.4")]
         public void Term_number(string number)
         {
-            var tokens = new List<Token> { new Token(TokenType.Number, number) };
+            var tokens = new TokenizerOutput(new List <Token> { new Token(TokenType.Number, number) });
             var state = new ParserState(tokens);
             var cst = _parser.ParseTerm(state);
 
@@ -385,7 +385,7 @@ namespace Tabula
         [Test]
         public void ParseBlock_returns_null_when_no_match()
         {
-            var tokens = new List<Token> { new Token(TokenType.Number, "23") };
+            var tokens = new TokenizerOutput(new List<Token> { new Token(TokenType.Number, "23") });
 
             var state = new ParserState(tokens);
             var block = _parser.ParseBlock(state);
@@ -396,7 +396,7 @@ namespace Tabula
         [Test]
         public void ParseBlock_works_with_an_empty_block()
         {
-            var tokens = new List<Token> { new Token(TokenType.BlockStart, "...") { Line = 5 }, new Token(TokenType.BlockEnd, ".") { Line = 6 } };
+            var tokens = new TokenizerOutput(new List<Token> { new Token(TokenType.BlockStart, "...") { Line = 5 }, new Token(TokenType.BlockEnd, ".") { Line = 6 } });
 
             var state = new ParserState(tokens);
             var block = _parser.ParseBlock(state);
@@ -410,11 +410,11 @@ namespace Tabula
         [Test]
         public void ParseBlock_includes_actions()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.BlockStart, "..."),
                 new Token(TokenType.cmd_Use, "Employment Action Edit"),
                 new Token(TokenType.BlockEnd, ".")
-            };
+            });
 
             var state = new ParserState(tokens);
             var block = _parser.ParseBlock(state);
@@ -425,10 +425,10 @@ namespace Tabula
         [Test]
         public void ParseBlock_throws_descriptively_when_unclosed()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.BlockStart, "..."),
                 new Token(TokenType.cmd_Use, "Employment Action Edit"),
-            };
+            });
 
             var state = new ParserState(tokens);
 
@@ -442,10 +442,10 @@ namespace Tabula
         [Test]
         public void ParseAlias_throws_descriptively_when_not_followed_by_Action()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Alias, "Do the magic"),
                 new Token(TokenType.TableCellSeparator, "|"),
-            };
+            });
 
             var state = new ParserState(tokens);
 
@@ -456,7 +456,7 @@ namespace Tabula
         [Test]
         public void ParseAlias_null_case()
         {
-            var tokens = new List<Token> { new Token(TokenType.Number, "23") };
+            var tokens = new TokenizerOutput(new List<Token> { new Token(TokenType.Number, "23") });
             var state = new ParserState(tokens);
             var alias = _parser.ParseCommand_Alias(state);
 
@@ -467,10 +467,10 @@ namespace Tabula
         [Test]
         public void ParseAlias_correct_case()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Alias, "Test should Work"),
                 new Token(TokenType.cmd_Use, "Employment Action Edit") { Line = 18 }
-            };
+            });
 
             var state = new ParserState(tokens);
 
@@ -490,10 +490,10 @@ namespace Tabula
         [Test]
         public void ParseSet_gets_proper_start_and_end_line_numbers()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Set, "foo", 18),
                 new Token(TokenType.String, "Blargh", 18)
-            };
+            });
 
             var state = new ParserState(tokens);
 
@@ -509,10 +509,10 @@ namespace Tabula
         [Test]
         public void ParseSet_returns_null_when_not_()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput( new List<Token> {
                 new Token(TokenType.String, "foo", 18),
                 new Token(TokenType.cmd_Set, "bar", 19),
-            };
+            });
 
             var state = new ParserState(tokens);
 
@@ -523,10 +523,10 @@ namespace Tabula
         [Test]
         public void ParseSet_throws_descriptively_when_not_followed_by_Action()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.cmd_Set, "foo", 18),
                 new Token(TokenType.cmd_Set, "bar", 19),
-            };
+            });
 
             var state = new ParserState(tokens);
 
@@ -539,12 +539,12 @@ namespace Tabula
         [Test]
         public void Parse_simplest_table()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.TableCellSeparator, "|"),
                 new Token(TokenType.Word, "January"),
                 new Token(TokenType.TableCellSeparator, "|"),
                 new Token(TokenType.NewLine, "\n"),
-            };
+            });
 
             var state = new ParserState(tokens);
 
@@ -558,7 +558,7 @@ namespace Tabula
         [Test]
         public void Parse_less_simplest_table()
         {
-            var tokens = new List<Token> {
+            var tokens = new TokenizerOutput(new List<Token> {
                 new Token(TokenType.TableCellSeparator, "|"),
                 new Token(TokenType.Word, "January"),
                 new Token(TokenType.TableCellSeparator, "|"),
@@ -567,7 +567,7 @@ namespace Tabula
                 new Token(TokenType.Variable, "another_month"),
                 new Token(TokenType.TableCellSeparator, "|"),
                 new Token(TokenType.NewLine, "\n"),
-            };
+            });
 
             var state = new ParserState(tokens);
 

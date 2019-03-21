@@ -7,18 +7,18 @@ namespace Tabula.Parse
 {
     public class ParserState
     {
-        public List<Token> Tokens;
+        public TokenizerOutput Output;
         public int Position;
 
-        public ParserState(List<Token> tokens, int position = 0)
+        public ParserState(TokenizerOutput output, int position = 0)
         {
-            Tokens = tokens;
+            Output = output;
             Position = position;
         }
 
         public bool AtEnd
         {
-            get => Position == Tokens.Count;
+            get => Position == Output.Tokens.Count;
         }
         public bool LineComplete
         {
@@ -27,7 +27,7 @@ namespace Tabula.Parse
 
         public Token Peek()
         {
-            return AtEnd ? null : Tokens[Position];
+            return AtEnd ? null : Output.Tokens[Position];
         }
 
         public bool NextIs(TokenType tokenType)
@@ -43,7 +43,7 @@ namespace Tabula.Parse
 
         public Token Take()
         {
-            return AtEnd ? null : Tokens[Position++];
+            return AtEnd ? null : Output.Tokens[Position++];
         }
 
         internal Token Take(TokenType tokenType)

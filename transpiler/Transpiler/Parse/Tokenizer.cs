@@ -6,10 +6,28 @@ using Tabula.CST;
 
 namespace Tabula.Parse
 {
+    public class TokenizerOutput
+    {
+        public List<Token> Tokens { get; set; }
+        public List<Token> UnrecognizedTokens { get; set; }
+
+        public TokenizerOutput(List<Token> startingTokens)
+        {
+            Tokens = startingTokens;
+            UnrecognizedTokens = new List<Token>();
+        }
+
+        public TokenizerOutput()
+        {
+            Tokens = new List<Token>();
+            UnrecognizedTokens = new List<Token>();
+        }
+    }
+
     public class Tokenizer
     {
         public List<string> Warnings { get; set; }
-        public List<Token> Tokens;
+        public TokenizerOutput Output;
         public int position;
         public int line;
         public int column;
@@ -38,7 +56,7 @@ namespace Tabula.Parse
         public Tokenizer()
         {
             Warnings = new List<string>();
-            Tokens = new List<Token>();
+            Output = new TokenizerOutput();
             position = 0;
             line = 1;
             column = 1;
@@ -60,13 +78,13 @@ namespace Tabula.Parse
         {
             Token token = new Token(type, text, line) { Column = column, StartPosition = position, FullLength = length };
 
-            Tokens.Add(token);
+            Output.Tokens.Add(token);
             Advance(length);
 
             return token;
         }
 
-        public List<Token> Tokenize(string inputText)
+        public TokenizerOutput Tokenize(string inputText)
         {
             string remainingText = inputText.Substring(position);
 
@@ -262,11 +280,12 @@ namespace Tabula.Parse
 
                 //TODO: Fail softer.
                 //  Make it consume one 'word' instead, and insert an "Unrecognized" token,
-                //  as an attempt to recover from the problem.  Needs some mature problem reporting,
-                //  first, since it may ignore quite a bit of input before resyncing.
+                //  as an attempt to recover from the problem.
+                //  Since a resync may take a while, may also want some better error
+                //  reporting.
             }
 
-            return Tokens;
+            return Output;
         }
     }
 }
