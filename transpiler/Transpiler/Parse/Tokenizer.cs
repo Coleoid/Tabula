@@ -52,6 +52,7 @@ namespace Tabula.Parse
         Regex rxBlockStart      = new Regex(@"^\.\.\.");
         Regex rxBlockEnd        = new Regex(@"^\.");
         Regex rxComma           = new Regex(@"^,");
+        Regex rxUnrecognized    = new Regex(@"^\S+");
 
         public Tokenizer()
         {
@@ -76,12 +77,20 @@ namespace Tabula.Parse
 
         public Token AddToken(TokenType type, string text, int length)
         {
+            return NewToken(type, text, length, Output.Tokens);
+        }
+
+        private Token NewToken(TokenType type, string text, int length, List<Token> collection)
+        {
             Token token = new Token(type, text, line) { Column = column, StartPosition = position, FullLength = length };
-
-            Output.Tokens.Add(token);
             Advance(length);
-
+            collection.Add(token);
             return token;
+        }
+
+        public Token AddUnrecognizedToken(string text, int length)
+        {
+            return NewToken(TokenType.Unrecognized, text, length, Output.UnrecognizedTokens);
         }
 
         public TokenizerOutput Tokenize(string inputText)
@@ -271,18 +280,16 @@ namespace Tabula.Parse
                 }
 
 
-                //  Fail:  At this point, the next input matches no token.
-                //  To quit, we advance to the end of our text and complain.
-                int snippetLength = Math.Min(20, remainingText.Length);
-                Warnings.Add($"Text not tokenizable on line {line} column {column}, at:\n{remainingText.Substring(0,snippetLength)}\n");
+                // Catch an unrocognized chunk, add it to the unrecognized list, move forward.
+                match = rxUnrecognized.Match(remainingText);
+                if (match.Success)
+                {
+                    int snippetLength = Math.Min(20, remainingText.Length);
+                    Warnings.Add($"Text not tokenizable on line {line} column {column}, at:\n{remainingText.Substring(0, snippetLength)}\n");
 
-                position = inputText.Length;
-
-                //TODO: Fail softer.
-                //  Make it consume one 'word' instead, and insert an "Unrecognized" token,
-                //  as an attempt to recover from the problem.
-                //  Since a resync may take a while, may also want some better error
-                //  reporting.
+                    AddUnrecognizedToken(match.Groups[0].Value, match.Length);
+                    continue;
+                }
             }
 
             return Output;

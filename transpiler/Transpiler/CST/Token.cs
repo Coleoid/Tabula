@@ -41,6 +41,7 @@ public enum TokenType
     BlockStart,
     BlockEnd,
     Collection,
+    Unrecognized
 }
 
 

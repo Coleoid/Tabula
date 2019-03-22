@@ -16,16 +16,41 @@ namespace Tabula
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0));
         }
 
+        [TestCase("'What am I doing?':  ")]
+        [TestCase("'Hello, World!' ")]
+        public void Whitespace_before_EOF_not_a_problem(string text)
+        {
+            var output = _tokenizer.Tokenize(text);
+            var tokens = output.Tokens;
+            Assert.That(tokens, Has.Count.EqualTo(1));
+            Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(0));
+        }
+
         [Test]
-        public void Unrecognized_token_skips_remaining_input_and_warns()
+        public void Unrecognized_token_is_added_to_unregognized_collection_and_parse_resumes()
         {
             var output = _tokenizer.Tokenize(" \n  % 'Hello, World!'");
             var tokens = output.Tokens;
-            Assert.That(tokens, Has.Count.EqualTo(1));
+            Assert.That(tokens, Has.Count.EqualTo(2));
+            Assert.That(tokens[1].Text, Is.EqualTo("Hello, World!"));
+            Assert.That(output.UnrecognizedTokens, Has.Count.EqualTo(1));
             Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(1));
 
             var warning = _tokenizer.Warnings[0];
             Assert.That(warning, Is.EqualTo("Text not tokenizable on line 2 column 3, at:\n% 'Hello, World!'\n"));
+            Assert.That(output.UnrecognizedTokens[0].Text, Is.EqualTo("%"));
+            Assert.That(output.UnrecognizedTokens[0].Type, Is.EqualTo(TokenType.Unrecognized));
+        }
+
+        [Test]
+        public void Unrecognized_token_length_correctly_recorded()
+        {
+            var output = _tokenizer.Tokenize(" \n  %$#*^%#&%^( 'Hello, World!'");
+            var tokens = output.Tokens;
+            Assert.That(tokens[1].Text, Is.EqualTo("Hello, World!"));
+            Assert.That(output.UnrecognizedTokens, Has.Count.EqualTo(1));
+            Assert.That(output.UnrecognizedTokens[0].Text, Is.EqualTo("%$#*^%#&%^("));
+            Assert.That(output.UnrecognizedTokens[0].FullLength, Is.EqualTo(11));
         }
 
         [Test]
@@ -131,16 +156,13 @@ namespace Tabula
         [TestCase(@"""final dq is escaped: \""")]
         [TestCase(@"'final sq is escaped: ''")]
         [TestCase(@"`final bt is escaped: ``")]
-        [TestCase(@"% ""after garbage""")]
-        [TestCase(@"% 'after garbage'")]
-        [TestCase(@"% `after garbage`")]
         public void Plausible_but_not_strings(string text)
         {
             var output = _tokenizer.Tokenize(text);
             var tokens = output.Tokens;
 
-            Assert.That(_tokenizer.Warnings, Has.Count.EqualTo(1));
-            Assert.That(tokens, Has.Count.EqualTo(0));
+            Assert.That(tokens[0].Type, Is.Not.EqualTo(TokenType.String));
+            Assert.That(output.UnrecognizedTokens.Count, Is.GreaterThan(0));
         }
 
         [TestCase("newline", @"""\n""", "\n")]
