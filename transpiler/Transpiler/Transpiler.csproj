@@ -53,6 +53,7 @@
     <Compile Include="Formatter.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="IndentingStringBuilder.cs" />
+    <Compile Include="Interpreter.cs" />
     <Compile Include="MethodDetail.cs" />
     <Compile Include="Parse\ParserState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

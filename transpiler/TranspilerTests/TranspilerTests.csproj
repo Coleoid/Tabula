@@ -56,6 +56,7 @@
     <Compile Include="Generator_FullFileTests.cs" />
     <Compile Include="Generator_WorkflowTests.cs" />
     <Compile Include="IndentingStringBuilderTests.cs" />
+    <Compile Include="InterpreterTests.cs" />
     <Compile Include="IsWorkflowTests.cs" />
     <Compile Include="ParserStateTests.cs" />
     <Compile Include="ParserTests.cs" />
