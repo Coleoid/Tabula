@@ -61,7 +61,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scenarios\SeriousBusiness\LargeExample.tab">
+    <None Include="Scenarios\SeriousBusiness\LargeExample.tabula">
       <Generator>TabulaClassGenerator</Generator>
       <CustomToolNamespace>Tabula</CustomToolNamespace>
     </None>

@@ -1,0 +1,70 @@
+//  This is a speculative syntax for Tabula scenarios,
+//  exploring how to clarify which parts of the test scenario
+//  speak about which parts of the story.
+
+Card AC-98989:
+    Behavior:
+        Changing the class on a forecasting-accounting-activity
+            will change the class on incurred expenses (IXes)
+            attached to that activity.
+        When this will happen, we alert the user and allow them to cancel.
+
+    Test cases:
+        Alert only shows when the Activity has Incurred Expenses
+            No IXes, no alert
+            Has IXes, shows alert
+        User can either cancel or proceed at that point
+            Cancel does not change Activity or IXes
+            Okay changes Activity and IXes
+
+//  Then there can be more Behavior and Cases blocks as the scenario
+//  grows to handle more cards.
+
+
+Scenario:
+    Create an Activity
+    Create an IX with no activity and Class "Original Class"
+    Change activity's Class to "Class One"
+    Hit Save
+    Verify no alert displays [shows 98989:'No IXes, no alert']
+    Verify IX class still has original class ("Original") [shows 98989:'No IXes...']
+    Verify Activity has "Class One" [shows 98989:'No IXes...']
+
+    Attach our activity to our IX
+    Change activity Class to "Class Two"
+    Hit Save
+    Verify alert displays [shows 98989:'Has IXes, shows alert']
+
+    Hit Cancel on alert [for 2.a]
+    Verify Activity still has original class ("One") [shows 98989:'Cancel...']
+    Verify IX still has original class ("Original") [shows 98989:'Cancel...']
+
+    Change activity Class to "Class Two"
+    Hit Save
+    Hit Okay on alert
+    Verify Activity has "Class Two" [shows 98989:'Okay...']
+    Verify IX has "Class Two" [shows 98989:'Okay...']
+
+
+---  End speculative fragment
+
+Notes:
+
+  Agnostic on test case outline labels, as long as they're distinct
+    Could prefix with 1:, 1.A:, etc., but maintenance bah...
+    The Jira card number prefix on 'shows' looks clunky
+
+  The 'Test Cases' lines get red/green highlighting.
+    When the "[shows ...]" lines pass, the matching Test Cases are green.
+    Any line failing will fail upward in the outline.
+      In our example, if the last line failed, that would turn the...
+        Okay changes Activity and IXes
+      ...line to red, along with the 'User can either...' line two lines above it.
+    Any test case line without a matching '[shows xxx]' in the scenario
+      gets some different color to signal "Case isn't tested".
+
+  Active row highlighting?  So that clicking 'User can either...' highlights it and the
+    scenario lines tagged with it or its subcases ('Cancel...' and 'Okay...')
+
+  Could also have a "go to..." link/icon to scroll to the first such line
+    (Limited value?  Browser 'Find' is ~80% of that feature.)

@@ -20,7 +20,6 @@ set: #TLA => #OrganizationName
 | OPD | Otherville Police Department |
 | OA  | Otherville Academy           |
 
-
 "Create our people":
 use: User Creation
 Create Person named #name

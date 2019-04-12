@@ -17,7 +17,7 @@ Verify that #topic is serious
 | topic                        |
 | "Saving for your retirement" |
 | "Going to Europe"            |
-
+| "Saving the world"           |
 
 "Check that our mistakes have been cleared out": 
 use: SeriousWorkflow
@@ -25,3 +25,4 @@ Verify that #topic is NOT serious
 | topic               |
 | "Bobcat Goldthwait" |
 | "Rowan Atkinson"    |
+| "Bozo the Clown"    |
