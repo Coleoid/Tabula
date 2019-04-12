@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using NUnit.Framework.Internal;
 using System.Reflection.Emit;
+using NUnit.Framework;
 
 namespace Tabula
 {
@@ -9,6 +11,8 @@ namespace Tabula
     {
         public Type Workflow { get; set; }
         public Object Instance { get; set; }
+        public bool skipSteps { get; set; }
+        public int skipLine { get; set; }
 
 
         public List<string> ExecuteScenario(CST.Scenario scenario, string fileName)
@@ -23,8 +27,16 @@ namespace Tabula
 
         //  skipping middle steps
 
-        public string ExecuteStep(CST.Step step)
+
+
+
+        public (string, NUnitTestResult) ExecuteStep(CST.Step step)
         {
+            if (skipSteps)
+            {
+                return ($"Step skipped: Due to error on line {skipLine}.", NUnitTestResult.Skipped);
+            }
+
             var instance = Activator.CreateInstance(Workflow);
             Instance = instance;
 
@@ -51,7 +63,7 @@ namespace Tabula
                     break;
 
                 case TokenType.Word:
-                    searchName += symbol.Text;
+                    searchName += symbol.Text.ToLower();
                     break;
 
                 default:
@@ -70,12 +82,40 @@ namespace Tabula
 
             MethodInfo methodInfo = FindMethod(searchName);
 
-            if (methodInfo != null)
+            if (methodInfo == null)
             {
-                methodInfo.Invoke(instance, parameters.ToArray());
+                return ($"Couldn't find step '{stepText.Trim()}' on line {step.StartLine}", NUnitTestResult.Inconclusive);
             }
 
-            return $"Couldn't find step '{stepText.Trim()}' on line {step.StartLine}";
+            try
+            {
+                using (var ic = new TestExecutionContext.IsolatedContext())
+                {
+                    methodInfo.Invoke(instance, parameters.ToArray());
+                }
+            }
+            catch (Exception e)
+            {
+
+
+                Exception stepException = e.InnerException;
+
+                var failureCatagory = string.Empty;
+                if (stepException is AssertionException)
+                {
+                    failureCatagory = "failed";
+                }
+                else
+                {
+                    failureCatagory = "threw exception";
+                    skipLine = step.StartLine;
+                    skipSteps = true;
+                }
+
+                return ($"Step {failureCatagory}: {stepException.Message.TrimStart()}", NUnitTestResult.Failed);
+
+            }
+            return ("Success", NUnitTestResult.Passed);
         }
 
 
