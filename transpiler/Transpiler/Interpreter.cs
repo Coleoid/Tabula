@@ -25,16 +25,55 @@ namespace Tabula
             return results;
         }
 
-        //  skipping middle steps
-
-
-
-
-        public (string, NUnitTestResult) ExecuteStep(CST.Step step)
+        public NUnitReport.TestSuite ExecuteParagraph(CST.Paragraph paragraph)
         {
+            var result = new NUnitReport.TestSuite();
+
+            foreach (var action in paragraph.Actions)
+            {
+                if (action is CST.Step step)
+                {
+                    var stepResult = ExecuteStep(step);
+                    result.TestCases.Add(stepResult);
+                    result.TestCaseCount++;
+                    if (stepResult.Result == NUnitTestResult.Passed) result.PassedTests++;
+                    if (stepResult.Result == NUnitTestResult.Failed) result.FailedTests++;
+                    if (stepResult.Result == NUnitTestResult.Skipped) result.SkippedTests++;
+                    if (stepResult.Result == NUnitTestResult.Inconclusive) result.InconclusiveTests++;
+                }
+            }
+
+            if (result.FailedTests + result.InconclusiveTests > 0)
+            {
+                result.Result = NUnitTestResult.Failed;
+            }
+            else if (result.SkippedTests == result.TestCaseCount)
+            {
+                result.Result = NUnitTestResult.Skipped;
+            }
+            else
+            {
+                result.Result = NUnitTestResult.Passed;
+            }
+
+            return result;
+        }
+
+
+
+        public NUnitReport.TestCase ExecuteStep(CST.Step step)
+        {
+            var result = new NUnitReport.TestCase
+            {
+                FailureInfo = new NUnitReport.TestCaseFailure(),
+                Name = step.GetReadableText()
+            };
+
             if (skipSteps)
             {
-                return ($"Step skipped: Due to error on line {skipLine}.", NUnitTestResult.Skipped);
+                result.FailureInfo.Message = $"Step skipped: Due to error on line {skipLine}.";
+                result.Result = NUnitTestResult.Skipped;
+                return result;
             }
 
             var instance = Activator.CreateInstance(Workflow);
@@ -84,7 +123,9 @@ namespace Tabula
 
             if (methodInfo == null)
             {
-                return ($"Couldn't find step '{stepText.Trim()}' on line {step.StartLine}", NUnitTestResult.Inconclusive);
+                result.FailureInfo.Message = $"Couldn't find step '{stepText.Trim()}' on line {step.StartLine}";
+                result.Result = NUnitTestResult.Inconclusive;
+                return result;
             }
 
             try
@@ -96,8 +137,6 @@ namespace Tabula
             }
             catch (Exception e)
             {
-
-
                 Exception stepException = e.InnerException;
 
                 var failureCatagory = string.Empty;
@@ -112,10 +151,11 @@ namespace Tabula
                     skipSteps = true;
                 }
 
-                return ($"Step {failureCatagory}: {stepException.Message.TrimStart()}", NUnitTestResult.Failed);
-
+                result.FailureInfo.Message = $"Step {failureCatagory}: {stepException.Message.TrimStart()}";
+                result.Result = NUnitTestResult.Failed;
             }
-            return ("Success", NUnitTestResult.Passed);
+
+            return result;
         }
 
 
