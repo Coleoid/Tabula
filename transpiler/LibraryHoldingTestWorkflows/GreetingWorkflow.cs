@@ -33,6 +33,9 @@ namespace LibraryHoldingTestWorkflows
             Assert.That(theseGuys, Is.EqualTo(8), "failed as expected");
         }
 
+        public void My_favorite_day_is__(DateTime favoriteDay)
+        { }
+
         public void Always_explode()
         {
             int zero = 0;

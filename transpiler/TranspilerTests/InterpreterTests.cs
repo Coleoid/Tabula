@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using LibraryHoldingTestWorkflows;
-using NUnit.Framework.Constraints;
 using NUnit.Framework.Internal;
 using Tabula.CST;
 
@@ -40,6 +39,72 @@ namespace Tabula
             Assert.That(result.Name, Is.EqualTo("There should be eight of 8"));
         }
 
+        [TestCase(TokenType.String, "eight", "\"eight\"", "\"eight\" (String)")]
+        [TestCase(TokenType.Date, "11/22/2033", "11/22/2033", "\"11/22/2033\" (DateTime)")]
+        public void Clear_error_when_argument_type_mismatches_int_parameter(TokenType argType, string argValue, string nameValue, string argMessageDetail)
+        {
+            var step = new Step(44,
+                (TokenType.Word, "There"),
+                (TokenType.Word, "should"),
+                (TokenType.Word, "be"),
+                (TokenType.Word, "eight"),
+                (TokenType.Word, "of"),
+                (argType, argValue)
+            );
+
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            NUnitReport.TestCase result = interpreter.ExecuteStep(step);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
+            Assert.That(result.Name, Is.EqualTo($"There should be eight of {nameValue}"));
+            Assert.That(result.FailureInfo.Message, Does.StartWith($"Step threw exception: argument {argMessageDetail} does not match parameter 'theseGuys' (Int32)."));
+        }
+
+        [Test]
+        public void Clear_error_when_more_arguments_than_parameters()
+        {
+            var step = new Step(44,
+                (TokenType.Word, "There"),
+                (TokenType.Word, "should"),
+                (TokenType.Word, "be"),
+                (TokenType.Word, "eight"),
+                (TokenType.Word, "of"),
+                (TokenType.Number, "8"),
+                (TokenType.Number, "8"),
+                (TokenType.Number, "8")
+            );
+
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            NUnitReport.TestCase result = interpreter.ExecuteStep(step);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
+            Assert.That(result.Name, Is.EqualTo($"There should be eight of 8 8 8"));
+            Assert.That(result.FailureInfo.Message, Does.StartWith($"Step threw exception: 3 arguments were provided to a 1 parameter method."));
+        }
+
+        [TestCase(TokenType.String, "eight", "\"eight\"", "\"eight\" (String)")]
+        [TestCase(TokenType.Number, "12", "12", "\"12\" (Int32)")]
+        public void Clear_error_when_argument_type_mismatches_DateTime_parameter(TokenType argType, string argValue, string nameValue, string argMessageDetail)
+        {
+            var step = new Step(44,
+                (TokenType.Word, "My"),
+                (TokenType.Word, "favorite"),
+                (TokenType.Word, "day"),
+                (TokenType.Word, "is"),
+                (argType, argValue)
+            );
+
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            NUnitReport.TestCase result = interpreter.ExecuteStep(step);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
+            Assert.That(result.Name, Is.EqualTo($"My favorite day is {nameValue}"));
+            Assert.That(result.FailureInfo.Message, Does.StartWith($"Step threw exception: argument {argMessageDetail} does not match parameter 'favoriteDay' (DateTime)."));
+        }
+
         [TestCase("Bob", 22, "1/12/2000")]
         [TestCase("Greta", 34, "2/14/1998")]
         public void Step_Call_passes_arguments(string name, int age, string birthday)
@@ -63,9 +128,7 @@ namespace Tabula
 
             interpreter.Workflow = typeof(GreetingWorkflow);
 
-
             var result = interpreter.ExecuteStep(step);
-
 
             var greetings = (GreetingWorkflow)interpreter.Instance;
             Assert.That(greetings.friendName, Is.EqualTo(name));

@@ -4,6 +4,8 @@ using System.Reflection;
 using NUnit.Framework.Internal;
 using System.Reflection.Emit;
 using NUnit.Framework;
+using System.Globalization;
+using System.Runtime.Remoting.Messaging;
 
 namespace Tabula
 {
@@ -76,38 +78,20 @@ namespace Tabula
                 return result;
             }
 
+            //TODO: hoist this out to ExecuteParagraph
             var instance = Activator.CreateInstance(Workflow);
             Instance = instance;
 
             LearnMethods(Workflow);
-            
-            var parameters = new List<Object>();
+
+            var arguments = new List<Object>();
             string searchName = string.Empty;
             string stepText = string.Empty;
 
             foreach (var symbol in step.Symbols)
             {
-                switch (symbol.Type)
-                {
-                case TokenType.String:
-                    parameters.Add(symbol.Text);
-                    break;
-
-                case TokenType.Number:
-                    parameters.Add(int.Parse(symbol.Text));
-                    break;
-
-                case TokenType.Date:
-                    parameters.Add(DateTime.Parse(symbol.Text));
-                    break;
-
-                case TokenType.Word:
+                if (symbol.Type == TokenType.Word)
                     searchName += symbol.Text.ToLower();
-                    break;
-
-                default:
-                    break;
-                }
 
                 if (symbol.Type == TokenType.String)
                 {
@@ -120,7 +104,6 @@ namespace Tabula
             }
 
             MethodInfo methodInfo = FindMethod(searchName);
-
             if (methodInfo == null)
             {
                 result.FailureInfo.Message = $"Couldn't find step '{stepText.Trim()}' on line {step.StartLine}";
@@ -128,16 +111,52 @@ namespace Tabula
                 return result;
             }
 
+            var parameters = methodInfo.GetParameters();
+            int paramIndex = 0;
             try
             {
+                foreach (var symbol in step.Symbols)
+                {
+                    switch (symbol.Type)
+                    {
+                    case TokenType.String:
+                        TypeCheck(parameters, "String", paramIndex++, symbol);
+                        arguments.Add(symbol.Text);
+                        break;
+
+                    case TokenType.Number:
+                        TypeCheck(parameters, "Int32", paramIndex++, symbol);
+                        arguments.Add(int.Parse(symbol.Text));
+                        break;
+
+                    case TokenType.Date:
+                        TypeCheck(parameters, "DateTime", paramIndex++, symbol);
+                        arguments.Add(DateTime.Parse(symbol.Text));
+                        break;
+
+                    default:
+                        break;
+                    }
+                }
+
+                if (arguments.Count > parameters.Length)
+                {
+                    throw new Exception(
+                        $"{arguments.Count} arguments were provided to a {parameters.Length} parameter method.");
+                }
+
                 using (var ic = new TestExecutionContext.IsolatedContext())
                 {
-                    methodInfo.Invoke(instance, parameters.ToArray());
+                    methodInfo.Invoke(instance, arguments.ToArray());
                 }
             }
             catch (Exception e)
             {
                 Exception stepException = e.InnerException;
+                if (e.InnerException == null)
+                {
+                    stepException = e;
+                }
 
                 var failureCatagory = string.Empty;
                 if (stepException is AssertionException)
@@ -158,8 +177,20 @@ namespace Tabula
             return result;
         }
 
+        private static void TypeCheck(ParameterInfo[] parameters, string actualType, int paramIndex, CST.Symbol symbol)
+        {
+            if (paramIndex + 1 > parameters.Length)
+            {
+                return;
+            }
+            var param = parameters[paramIndex];
+            var type = param.ParameterType.Name;
+            if (type != actualType)
+                throw new Exception(
+                    $"argument \"{symbol.Text}\" ({actualType}) does not match parameter '{param.Name}' ({type}).");
+        }
 
-        public Dictionary<string,MethodInfo> searchableMethods { get; set; }
+        public Dictionary<string, MethodInfo> searchableMethods { get; set; }
         public void LearnMethods(Type workflowType)
         {
             searchableMethods = new Dictionary<string, MethodInfo>();
