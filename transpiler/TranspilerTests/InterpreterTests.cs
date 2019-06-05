@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using LibraryHoldingTestWorkflows;
+using NUnit.Framework;
 using NUnit.Framework.Internal;
+using LibraryHoldingTestWorkflows;
 using Tabula.CST;
 
 namespace Tabula
@@ -17,6 +17,18 @@ namespace Tabula
         {
             interpreter = new Interpreter();
         }
+
+        [TestCase("helloworld", true)]
+        [TestCase("Hello_World", false)]
+        [TestCase("nosuchthing", false)]
+        [TestCase("myfriendturnedon", true)]
+        public void LearnMethods_builds_dictionary(string searchName, bool hasKey)
+        {
+            interpreter.LearnMethods(typeof(GreetingWorkflow));
+
+            Assert.That(interpreter.searchableMethods.ContainsKey(searchName), Is.EqualTo(hasKey));
+        }
+
 
         [Test]
         public void Passed_step_sets_status_and_message()
@@ -324,18 +336,55 @@ namespace Tabula
             Assert.That(caseResult.Result, Is.EqualTo(NUnitTestResult.Passed));
         }
 
-
-
-        [TestCase("helloworld", true)]
-        [TestCase("Hello_World", false)]
-        [TestCase("nosuchthing", false)]
-        [TestCase("myfriendturnedon", true)]
-        public void LearnMethods_builds_dictionary(string searchName, bool hasKey)
+        [Test]
+        public void Scenario_runs_paragraph_multiple_times_when_table_follows_paragraph()
         {
-            interpreter.LearnMethods(typeof(GreetingWorkflow));
+            Paragraph paragraph = new Paragraph();
+            paragraph.Actions.Add(
+                new Step(4,
+                    (TokenType.Word, "Hello"),
+                    (TokenType.Word, "America")
+                ));
 
-            Assert.That(interpreter.searchableMethods.ContainsKey(searchName), Is.EqualTo(hasKey));
+            paragraph.Actions.Add(
+                new Step(5,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "world")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(6,
+                    (TokenType.Word, "There"),
+                    (TokenType.Word, "should"),
+                    (TokenType.Word, "be"),
+                    (TokenType.Word, "eight"),
+                    (TokenType.Word, "of"),
+                    (TokenType.Variable, "InputNumber")
+                ));
+
+            Table table = new Table();
+            table.ColumnNames = new List<string> {"InputNumber", "RowName"};
+
+            var rowData = new List<List<string>>{ new List<string> { "8" }, new List<string> { "Fred" } };
+            table.Rows.Add(new TableRow(rowData));
+            rowData = new List<List<string>> { new List<string> { "2" }, new List<string> { "Wosmark" } };
+            table.Rows.Add(new TableRow(rowData));
+            rowData = new List<List<string>> { new List<string> { "8" }, new List<string> { "Miriam" } };
+            table.Rows.Add(new TableRow(rowData));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+            scenario.Sections.Add(table);
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.TestCaseCount, Is.EqualTo(9));
+            Assert.That(result.TestSuites.Count, Is.EqualTo(3));
+            Assert.That(result.PassedTests, Is.EqualTo(8));
+            Assert.That(result.FailedTests, Is.EqualTo(1));
+            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
+            Assert.That(result.SkippedTests, Is.EqualTo(0));
         }
-
     }
 }

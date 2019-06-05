@@ -29,7 +29,8 @@ namespace Tabula
             var parser = new Parser();
             CST.Scenario scenario = parser.ParseScenario(state);
             var interpreter = new Interpreter();
-            var results = interpreter.ExecuteScenario(scenario, fileName);
+            //var results = interpreter.ExecuteScenario(scenario, fileName);
+            var results = interpreter.ExecuteScenario(scenario);
         }
     }
 }

@@ -45,6 +45,17 @@ namespace Tabula.CST
             : base(new Token(type, text) { Line = line })
         { }
 
+        public bool IsStepArgument 
+        { 
+            get
+            {
+                return Type == TokenType.Date
+                    || Type == TokenType.Number
+                    || Type == TokenType.String
+                    || Type == TokenType.Variable;
+            }
+        }
+
         internal static Symbol NewOrNull(Token token)
         {
             return token == null ? null : new Symbol(token);

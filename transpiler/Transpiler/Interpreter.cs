@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using NUnit.Framework;
 using System.Globalization;
 using System.Runtime.Remoting.Messaging;
+using Tabula.CST;
 
 namespace Tabula
 {
@@ -17,48 +18,62 @@ namespace Tabula
         public int skipLine { get; set; }
 
 
-        public List<string> ExecuteScenario(CST.Scenario scenario, string fileName)
+        public NUnitReport.TestSuite ExecuteScenario(CST.Scenario scenario)
         {
-            // type to change
-            List<string> results = new List<string>();
+            var scenarioResult = new NUnitReport.TestSuite();
 
-            //???
+            // complete cheese
+            var paragraph = scenario.Sections[0] as Paragraph;
+            var table = scenario.Sections[1] as Table;
 
-            return results;
+            NUnitReport.TestSuite paragraphResult;
+            foreach (var row in table.Rows)
+            {
+
+                paragraphResult = ExecuteParagraph((paragraph));
+                scenarioResult.TestSuites.Add(paragraphResult);
+                scenarioResult.TestCaseCount += paragraphResult.TestCaseCount;
+                scenarioResult.PassedTests += paragraphResult.PassedTests;
+                scenarioResult.FailedTests += paragraphResult.FailedTests;
+                scenarioResult.InconclusiveTests += paragraphResult.InconclusiveTests;
+                scenarioResult.SkippedTests += paragraphResult.SkippedTests;
+            }
+
+            return scenarioResult;
         }
 
         public NUnitReport.TestSuite ExecuteParagraph(CST.Paragraph paragraph)
         {
-            var result = new NUnitReport.TestSuite();
+            var paragraphResult = new NUnitReport.TestSuite();
 
             foreach (var action in paragraph.Actions)
             {
                 if (action is CST.Step step)
                 {
-                    var stepResult = ExecuteStep(step);
-                    result.TestCases.Add(stepResult);
-                    result.TestCaseCount++;
-                    if (stepResult.Result == NUnitTestResult.Passed) result.PassedTests++;
-                    if (stepResult.Result == NUnitTestResult.Failed) result.FailedTests++;
-                    if (stepResult.Result == NUnitTestResult.Skipped) result.SkippedTests++;
-                    if (stepResult.Result == NUnitTestResult.Inconclusive) result.InconclusiveTests++;
+                    NUnitReport.TestCase stepResult = ExecuteStep(step);
+                    paragraphResult.TestCases.Add(stepResult);
+                    paragraphResult.TestCaseCount++;
+                    if (stepResult.Result == NUnitTestResult.Passed) paragraphResult.PassedTests++;
+                    if (stepResult.Result == NUnitTestResult.Failed) paragraphResult.FailedTests++;
+                    if (stepResult.Result == NUnitTestResult.Skipped) paragraphResult.SkippedTests++;
+                    if (stepResult.Result == NUnitTestResult.Inconclusive) paragraphResult.InconclusiveTests++;
                 }
             }
 
-            if (result.FailedTests + result.InconclusiveTests > 0)
+            if (paragraphResult.FailedTests + paragraphResult.InconclusiveTests > 0)
             {
-                result.Result = NUnitTestResult.Failed;
+                paragraphResult.Result = NUnitTestResult.Failed;
             }
-            else if (result.SkippedTests == result.TestCaseCount)
+            else if (paragraphResult.SkippedTests == paragraphResult.TestCaseCount)
             {
-                result.Result = NUnitTestResult.Skipped;
+                paragraphResult.Result = NUnitTestResult.Skipped;
             }
             else
             {
-                result.Result = NUnitTestResult.Passed;
+                paragraphResult.Result = NUnitTestResult.Passed;
             }
 
-            return result;
+            return paragraphResult;
         }
 
 
@@ -117,26 +132,76 @@ namespace Tabula
             {
                 foreach (var symbol in step.Symbols)
                 {
-                    switch (symbol.Type)
+                    if (symbol.IsStepArgument)
                     {
-                    case TokenType.String:
-                        TypeCheck(parameters, "String", paramIndex++, symbol);
-                        arguments.Add(symbol.Text);
-                        break;
-
-                    case TokenType.Number:
-                        TypeCheck(parameters, "Int32", paramIndex++, symbol);
-                        arguments.Add(int.Parse(symbol.Text));
-                        break;
-
-                    case TokenType.Date:
-                        TypeCheck(parameters, "DateTime", paramIndex++, symbol);
-                        arguments.Add(DateTime.Parse(symbol.Text));
-                        break;
-
-                    default:
-                        break;
+                        string variableValue = "";  //????  get value from symbol table
+                        Type ParamType = GetParameterType(parameters[paramIndex]);
+                        if (ParamType == typeof(String))
+                        {
+                            arguments.Add(variableValue);
+                        }
+                        if (ParamType == typeof(Int32))
+                        {
+                            int intValue;
+                            if (int.TryParse(variableValue, out intValue))
+                            {
+                                arguments.Add(intValue);
+                            }
+                            else
+                            {
+                                throw new Exception("I died.");
+                            }
+                        }
+                        if (ParamType == typeof(DateTime))
+                        {
+                            // validate?
+                            arguments.Add(variableValue);
+                        }
                     }
+                    //    switch (symbol.Type)
+                    //    {
+                    //    case TokenType.String:
+                    //        TypeCheck(parameters, "String", paramIndex++, symbol);
+                    //        arguments.Add(symbol.Text);
+                    //        break;
+
+                    //    case TokenType.Number:
+                    //        TypeCheck(parameters, "Int32", paramIndex++, symbol);
+                    //        arguments.Add(int.Parse(symbol.Text));
+                    //        break;
+
+                    //    case TokenType.Date:
+                    //        TypeCheck(parameters, "DateTime", paramIndex++, symbol);
+                    //        arguments.Add(DateTime.Parse(symbol.Text));
+                    //        break;
+
+                    //    case TokenType.Variable:
+                    //        Type ParamType = GetParameterType(parameters[paramIndex]);
+
+                    //        string variableValue = "";  //????  get value from symbol table
+
+                    //        if (ParamType == typeof(String))
+                    //        {
+                    //            arguments.Add(variableValue);
+                    //        }
+                    //        if (ParamType == typeof(Int32))
+                    //        {
+
+                    //            // can we convert our variableValue to an int?
+                    //            arguments.Add(variableValue);
+                    //        }
+                    //        if (ParamType == typeof(DateTime))
+                    //        {
+                    //            // validate?
+                    //            arguments.Add(variableValue);
+                    //        }
+
+                    //        ///!!!
+                    //        break;
+
+                    //    default:
+                    //        break;
+                    //    }
                 }
 
                 if (arguments.Count > parameters.Length)
@@ -188,6 +253,12 @@ namespace Tabula
             if (type != actualType)
                 throw new Exception(
                     $"argument \"{symbol.Text}\" ({actualType}) does not match parameter '{param.Name}' ({type}).");
+        }
+
+        public static Type GetParameterType(ParameterInfo parameter)
+        {
+            Type param = parameter.ParameterType;
+            return param;
         }
 
         public Dictionary<string, MethodInfo> searchableMethods { get; set; }
