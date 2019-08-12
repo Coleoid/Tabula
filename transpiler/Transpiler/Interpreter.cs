@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework.Internal;
-using System.Reflection.Emit;
 using NUnit.Framework;
-using System.Globalization;
-using System.Runtime.Remoting.Messaging;
-using Tabula.CST;
+using Tabula.API;
 
 namespace Tabula
 {
@@ -17,18 +14,20 @@ namespace Tabula
         public bool skipSteps { get; set; }
         public int skipLine { get; set; }
 
+        public Scope Scope { get; set; } = new Scope();
 
         public NUnitReport.TestSuite ExecuteScenario(CST.Scenario scenario)
         {
             var scenarioResult = new NUnitReport.TestSuite();
 
-            // complete cheese
-            var paragraph = scenario.Sections[0] as Paragraph;
-            var table = scenario.Sections[1] as Table;
+            // complete cheese, only correct enough to prop up some tests briefly
+            var paragraph = scenario.Sections[0] as CST.Paragraph;
+            var table = scenario.Sections[1] as CST.Table;
 
             NUnitReport.TestSuite paragraphResult;
             foreach (var row in table.Rows)
             {
+                //TODO put cell values into scope
 
                 paragraphResult = ExecuteParagraph((paragraph));
                 scenarioResult.TestSuites.Add(paragraphResult);
@@ -50,7 +49,7 @@ namespace Tabula
             {
                 if (action is CST.Step step)
                 {
-                    NUnitReport.TestCase stepResult = ExecuteStep(step);
+                    var stepResult = ExecuteStep(step);
                     paragraphResult.TestCases.Add(stepResult);
                     paragraphResult.TestCaseCount++;
                     if (stepResult.Result == NUnitTestResult.Passed) paragraphResult.PassedTests++;
@@ -76,8 +75,6 @@ namespace Tabula
             return paragraphResult;
         }
 
-
-
         public NUnitReport.TestCase ExecuteStep(CST.Step step)
         {
             var result = new NUnitReport.TestCase
@@ -102,11 +99,14 @@ namespace Tabula
             var arguments = new List<Object>();
             string searchName = string.Empty;
             string stepText = string.Empty;
+            int argCount = 0;
 
             foreach (var symbol in step.Symbols)
             {
                 if (symbol.Type == TokenType.Word)
                     searchName += symbol.Text.ToLower();
+
+                if (symbol.IsStepArgument) argCount++;
 
                 if (symbol.Type == TokenType.String)
                 {
@@ -130,78 +130,63 @@ namespace Tabula
             int paramIndex = 0;
             try
             {
+                if (parameters.Length != argCount)
+                    throw new Exception($"{argCount} arguments were provided to a {parameters.Length} parameter method.");
+
                 foreach (var symbol in step.Symbols)
                 {
                     if (symbol.IsStepArgument)
                     {
-                        string variableValue = "";  //????  get value from symbol table
+                        string variableValue = symbol.Text;
                         Type ParamType = GetParameterType(parameters[paramIndex]);
                         if (ParamType == typeof(String))
                         {
-                            arguments.Add(variableValue);
+                            if (symbol.Type == TokenType.Variable)
+                            {
+                                arguments.Add(Scope[variableValue.ToLower()]);
+                            }
+                            else
+                            {
+                                arguments.Add(variableValue);
+                            }
                         }
                         if (ParamType == typeof(Int32))
                         {
-                            int intValue;
-                            if (int.TryParse(variableValue, out intValue))
+                            //if token is number
+                            if (int.TryParse(variableValue, out int intValue))
                             {
                                 arguments.Add(intValue);
                             }
                             else
                             {
-                                throw new Exception("I died.");
+                                string message =
+                                    $"argument \"{symbol.Text}\" ({symbol.Type}) does not match parameter '{parameters[paramIndex].Name}' ({ParamType.Name}).";
+
+                                throw new Exception(message);
                             }
+
+                            //if token is variable
+                            //if token is datetime
+                            //if token is string
                         }
                         if (ParamType == typeof(DateTime))
                         {
                             // validate?
-                            arguments.Add(variableValue);
+                            if (DateTime.TryParse(variableValue, out DateTime dateValue))
+                            {
+                                arguments.Add(dateValue);
+                            }
+                            else
+                            {
+                                string message =
+                                    $"argument \"{symbol.Text}\" ({symbol.Type}) does not match parameter '{parameters[paramIndex].Name}' ({ParamType.Name}).";
+
+                                throw new Exception(message);
+                            }
                         }
+                        //only increment paramtypes we care about
+                        paramIndex++;
                     }
-                    //    switch (symbol.Type)
-                    //    {
-                    //    case TokenType.String:
-                    //        TypeCheck(parameters, "String", paramIndex++, symbol);
-                    //        arguments.Add(symbol.Text);
-                    //        break;
-
-                    //    case TokenType.Number:
-                    //        TypeCheck(parameters, "Int32", paramIndex++, symbol);
-                    //        arguments.Add(int.Parse(symbol.Text));
-                    //        break;
-
-                    //    case TokenType.Date:
-                    //        TypeCheck(parameters, "DateTime", paramIndex++, symbol);
-                    //        arguments.Add(DateTime.Parse(symbol.Text));
-                    //        break;
-
-                    //    case TokenType.Variable:
-                    //        Type ParamType = GetParameterType(parameters[paramIndex]);
-
-                    //        string variableValue = "";  //????  get value from symbol table
-
-                    //        if (ParamType == typeof(String))
-                    //        {
-                    //            arguments.Add(variableValue);
-                    //        }
-                    //        if (ParamType == typeof(Int32))
-                    //        {
-
-                    //            // can we convert our variableValue to an int?
-                    //            arguments.Add(variableValue);
-                    //        }
-                    //        if (ParamType == typeof(DateTime))
-                    //        {
-                    //            // validate?
-                    //            arguments.Add(variableValue);
-                    //        }
-
-                    //        ///!!!
-                    //        break;
-
-                    //    default:
-                    //        break;
-                    //    }
                 }
 
                 if (arguments.Count > parameters.Length)
@@ -240,6 +225,11 @@ namespace Tabula
             }
 
             return result;
+        }
+
+        public void SetVariable(string name, string value)
+        {
+            Scope[name] = value;
         }
 
         private static void TypeCheck(ParameterInfo[] parameters, string actualType, int paramIndex, CST.Symbol symbol)

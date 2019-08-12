@@ -33,14 +33,13 @@ namespace Tabula
         [Test]
         public void Passed_step_sets_status_and_message()
         {
-            int quantity = 8;
             var step = new Step(123,
                 (TokenType.Word, "There"),
                 (TokenType.Word, "should"),
                 (TokenType.Word, "be"),
                 (TokenType.Word, "eight"),
                 (TokenType.Word, "of"),
-                (TokenType.Number, quantity.ToString())
+                (TokenType.Number, "8")
             );
 
             interpreter.Workflow = typeof(GreetingWorkflow);
@@ -52,7 +51,7 @@ namespace Tabula
         }
 
         [TestCase(TokenType.String, "eight", "\"eight\"", "\"eight\" (String)")]
-        [TestCase(TokenType.Date, "11/22/2033", "11/22/2033", "\"11/22/2033\" (DateTime)")]
+        [TestCase(TokenType.Date, "11/22/2033", "11/22/2033", "\"11/22/2033\" (Date)")]
         public void Clear_error_when_argument_type_mismatches_int_parameter(TokenType argType, string argValue, string nameValue, string argMessageDetail)
         {
             var step = new Step(44,
@@ -97,7 +96,7 @@ namespace Tabula
         }
 
         [TestCase(TokenType.String, "eight", "\"eight\"", "\"eight\" (String)")]
-        [TestCase(TokenType.Number, "12", "12", "\"12\" (Int32)")]
+        [TestCase(TokenType.Number, "12", "12", "\"12\" (Number)")]
         public void Clear_error_when_argument_type_mismatches_DateTime_parameter(TokenType argType, string argValue, string nameValue, string argMessageDetail)
         {
             var step = new Step(44,
@@ -128,6 +127,8 @@ namespace Tabula
                 new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
             };
 
+            //  my friend "Bob" turned 22 on 1/12/2000
+
             var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
@@ -142,6 +143,44 @@ namespace Tabula
 
             var result = interpreter.ExecuteStep(step);
 
+            var greetings = (GreetingWorkflow)interpreter.Instance;
+            Assert.That(greetings.friendName, Is.EqualTo(name));
+            Assert.That(greetings.friendAge, Is.EqualTo(age));
+            Assert.That(greetings.friendBirthday, Is.EqualTo(DateTime.Parse(birthday)));
+        }
+
+        [TestCase("Bob", 22, "1/12/2000")]
+        [TestCase("Greta", 34, "2/14/1998")]
+        public void Step_Call_passes_values_from_variables(string name, int age, string birthday)
+        {
+            var args = new List<ArgDetail>()
+            {
+                new ArgDetail {Name = "name", Type = typeof(string)},
+                new ArgDetail {Name = "age", Type = typeof(int)},
+                new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
+            };
+
+            //  my friend #friendName turned #age on #birthday
+
+            interpreter.SetVariable("friendName", name);
+            interpreter.SetVariable("age", age.ToString());
+            interpreter.SetVariable("birthday", birthday);
+
+            var step = new Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Variable, "friendName"),
+                (TokenType.Word, "turned"),
+                (TokenType.Variable, "age"),
+                (TokenType.Word, "on"),
+                (TokenType.Variable, "birthday")
+            );
+
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            var result = interpreter.ExecuteStep(step);
+
+            Assert.That(result.FailureInfo.Message, Is.Null);
             var greetings = (GreetingWorkflow)interpreter.Instance;
             Assert.That(greetings.friendName, Is.EqualTo(name));
             Assert.That(greetings.friendAge, Is.EqualTo(age));
