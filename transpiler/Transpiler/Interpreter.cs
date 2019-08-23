@@ -90,10 +90,9 @@ namespace Tabula
                 return result;
             }
 
-            //TODO: hoist this out to ExecuteParagraph
+            //TODO: hoist this up to ExecuteParagraph
             var instance = Activator.CreateInstance(Workflow);
             Instance = instance;
-
             LearnMethods(Workflow);
 
             var arguments = new List<Object>();
@@ -138,37 +137,39 @@ namespace Tabula
                     if (symbol.IsStepArgument)
                     {
                         string variableValue = symbol.Text;
-                        Type ParamType = GetParameterType(parameters[paramIndex]);
-                        if (ParamType == typeof(String))
+
+                        //if token is variable
+                        if (symbol.Type == TokenType.Variable)
                         {
-                            if (symbol.Type == TokenType.Variable)
+                            if (Scope.HasVariable(symbol.Text))
                             {
-                                arguments.Add(Scope[variableValue.ToLower()]);
+                                variableValue = Scope[symbol.Text];
                             }
                             else
                             {
-                                arguments.Add(variableValue);
+                                throw new Exception($"Expected variable \"{symbol.Text}\" but it was not passed in. {Scope.NearHits(symbol.Text)}");
                             }
                         }
+
+                        Type ParamType = GetParameterType(parameters[paramIndex]);
+                        if (ParamType == typeof(String))
+                        {
+                            arguments.Add(variableValue);
+                        }
+
+                        //TODO:  Handle other numeric types
                         if (ParamType == typeof(Int32))
                         {
-                            //if token is number
                             if (int.TryParse(variableValue, out int intValue))
                             {
                                 arguments.Add(intValue);
                             }
                             else
                             {
-                                string message =
-                                    $"argument \"{symbol.Text}\" ({symbol.Type}) does not match parameter '{parameters[paramIndex].Name}' ({ParamType.Name}).";
-
-                                throw new Exception(message);
+                                throw new Exception($"argument \"{symbol.Text}\" ({symbol.Type}) does not match parameter '{parameters[paramIndex].Name}' ({ParamType.Name}).");
                             }
-
-                            //if token is variable
-                            //if token is datetime
-                            //if token is string
                         }
+
                         if (ParamType == typeof(DateTime))
                         {
                             // validate?
@@ -178,13 +179,10 @@ namespace Tabula
                             }
                             else
                             {
-                                string message =
-                                    $"argument \"{symbol.Text}\" ({symbol.Type}) does not match parameter '{parameters[paramIndex].Name}' ({ParamType.Name}).";
-
-                                throw new Exception(message);
+                                throw new Exception($"argument \"{symbol.Text}\" ({symbol.Type}) does not match parameter '{parameters[paramIndex].Name}' ({ParamType.Name}).");
                             }
                         }
-                        //only increment paramtypes we care about
+
                         paramIndex++;
                     }
                 }

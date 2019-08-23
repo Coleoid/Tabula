@@ -120,13 +120,6 @@ namespace Tabula
         [TestCase("Greta", 34, "2/14/1998")]
         public void Step_Call_passes_arguments(string name, int age, string birthday)
         {
-            var args = new List<ArgDetail>()
-            {
-                new ArgDetail {Name = "name", Type = typeof(string)},
-                new ArgDetail {Name = "age", Type = typeof(int)},
-                new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
-            };
-
             //  my friend "Bob" turned 22 on 1/12/2000
 
             var step = new Step(222,
@@ -149,21 +142,72 @@ namespace Tabula
             Assert.That(greetings.friendBirthday, Is.EqualTo(DateTime.Parse(birthday)));
         }
 
-        [TestCase("Bob", 22, "1/12/2000")]
-        [TestCase("Greta", 34, "2/14/1998")]
-        public void Step_Call_passes_values_from_variables(string name, int age, string birthday)
+        [TestCase("Bob", "twenty-two", "1/12/2000", "Step threw exception: argument \"twenty-two\" (String) does not match parameter 'age' (Int32).")]
+        [TestCase("Greta", "34", "Mayday, 1998", "Step threw exception: argument \"Mayday, 1998\" (String) does not match parameter 'birthday' (DateTime).")]
+        public void Step_Call_complains_clearly_when_value_types_do_not_match_param_types(string name, string age, string birthday, string expectedMessage)
         {
-            var args = new List<ArgDetail>()
-            {
-                new ArgDetail {Name = "name", Type = typeof(string)},
-                new ArgDetail {Name = "age", Type = typeof(int)},
-                new ArgDetail {Name = "birthday", Type = typeof(DateTime)}
-            };
+            var step = new Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.String, name),
+                (TokenType.Word, "turned"),
+                (TokenType.String, age),
+                (TokenType.Word, "on"),
+                (TokenType.String, birthday)
+            );
 
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            var result = interpreter.ExecuteStep(step);
+            Assert.That(result.FailureInfo.Message, Is.EqualTo(expectedMessage));
+        }
+
+        [Test]
+        public void Step_Call_complains_clearly_when_date_does_not_match_int()
+        {
+            var step = new Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.String, "Ann"),
+                (TokenType.Word, "turned"),
+                (TokenType.Date, "2/2/2002"),
+                (TokenType.Word, "on"),
+                (TokenType.String, "1/1/2001")
+            );
+
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            var result = interpreter.ExecuteStep(step);
+            Assert.That(result.FailureInfo.Message, Is.EqualTo("Step threw exception: argument \"2/2/2002\" (Date) does not match parameter 'age' (Int32)."));
+        }
+
+        [Test]
+        public void Step_Call_complains_clearly_when_number_does_not_match_datetime()
+        {
+            var step = new Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.String, "Phred"),
+                (TokenType.Word, "turned"),
+                (TokenType.String, "111"),
+                (TokenType.Word, "on"),
+                (TokenType.Number, "88")
+            );
+
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            var result = interpreter.ExecuteStep(step);
+            Assert.That(result.FailureInfo.Message, Is.EqualTo("Step threw exception: argument \"88\" (Number) does not match parameter 'birthday' (DateTime)."));
+        }
+
+        [TestCase("Bob", "22", "1/12/2000")]
+        [TestCase("Greta", "34", "2/14/1998")]
+        public void Step_Call_passes_values_from_variables(string name, string age, string birthday)
+        {
             //  my friend #friendName turned #age on #birthday
 
             interpreter.SetVariable("friendName", name);
-            interpreter.SetVariable("age", age.ToString());
+            interpreter.SetVariable("age", age);
             interpreter.SetVariable("birthday", birthday);
 
             var step = new Step(222,
@@ -183,9 +227,37 @@ namespace Tabula
             Assert.That(result.FailureInfo.Message, Is.Null);
             var greetings = (GreetingWorkflow)interpreter.Instance;
             Assert.That(greetings.friendName, Is.EqualTo(name));
-            Assert.That(greetings.friendAge, Is.EqualTo(age));
+            Assert.That(greetings.friendAge.ToString(), Is.EqualTo(age));
             Assert.That(greetings.friendBirthday, Is.EqualTo(DateTime.Parse(birthday)));
         }
+
+        [TestCase("frieendName", "Maybe you meant 'friendname'?")]
+        [TestCase("friend", "Maybe you meant 'friendname'?")]
+        [TestCase("Name", "Maybe you meant 'friendname'?")]
+        [TestCase("WhoAmI", "This doesn't sound like any variable I know about.")]
+        public void Step_Call_complains_clearly_when_a_variable_is_missing(string unfoundVarName, string message)
+        {
+            interpreter.SetVariable("friendName", "Bob");
+            interpreter.SetVariable("age", "23");
+            interpreter.SetVariable("birthday", "3/3/2003");
+
+            var step = new Step(222,
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Variable, unfoundVarName),
+                (TokenType.Word, "turned"),
+                (TokenType.Variable, "age"),
+                (TokenType.Word, "on"),
+                (TokenType.Variable, "birthday")
+            );
+
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            var result = interpreter.ExecuteStep(step);
+
+            Assert.That(result.FailureInfo.Message, Is.EqualTo($"Step threw exception: Expected variable \"{unfoundVarName}\" but it was not passed in. {message}"));
+        }
+
 
         [TestCase("world", "all of us")]
         [TestCase("america", "how are you?")]
@@ -375,7 +447,7 @@ namespace Tabula
             Assert.That(caseResult.Result, Is.EqualTo(NUnitTestResult.Passed));
         }
 
-        [Test]
+        [Test, Ignore("fleshing out other code for now")]
         public void Scenario_runs_paragraph_multiple_times_when_table_follows_paragraph()
         {
             Paragraph paragraph = new Paragraph();
