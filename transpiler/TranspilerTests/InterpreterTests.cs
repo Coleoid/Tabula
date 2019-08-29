@@ -120,6 +120,7 @@ namespace Tabula
         [TestCase("Greta", 34, "2/14/1998")]
         public void Step_Call_passes_arguments(string name, int age, string birthday)
         {
+            //  my friend "Bob" turned "22" on "1/12/2000"
             //  my friend "Bob" turned 22 on 1/12/2000
 
             var step = new Step(222,
@@ -232,6 +233,7 @@ namespace Tabula
         }
 
         [TestCase("frieendName", "Maybe you meant 'friendname'?")]
+        [TestCase("frieendNamr", "Maybe you meant 'friendname'?")]
         [TestCase("friend", "Maybe you meant 'friendname'?")]
         [TestCase("Name", "Maybe you meant 'friendname'?")]
         [TestCase("WhoAmI", "This doesn't sound like any variable I know about.")]

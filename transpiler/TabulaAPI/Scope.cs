@@ -49,7 +49,7 @@ namespace Tabula.API
         //speculation:
         public string NearHits(string unfoundName)
         {
-            var near = Levenshtein(unfoundName).Select(x=> $"'{x}'").ToList();
+            var near = NearMatchesOrdered(unfoundName).Select(x=> $"'{x}'").ToList();
 
             if (near.Any())
             {
@@ -61,9 +61,12 @@ namespace Tabula.API
             }
         }
 
-        private IEnumerable<string> Levenshtein(string unfoundName)
+        public static double CloseEnoughThreshold = .5;
+        private IEnumerable<string> NearMatchesOrdered(string unfoundName)
         {
-            return OrderByMatchLevel(_values.Keys, unfoundName).Where(x => x.level > HeuristicMatch).Select(x => x.match);
+            return OrderByFitness(unfoundName, _values.Keys)
+                .Where(x => x.fitness > CloseEnoughThreshold)
+                .Select(x => x.match);
         }
 
         public bool HasVariable(string text)
@@ -93,16 +96,69 @@ namespace Tabula.API
             }
         }
 
-        private static IOrderedEnumerable<(String match, double level)> OrderByMatchLevel(IEnumerable<String> candidates, String goal)
+        public static IOrderedEnumerable<(String match, double fitness)> 
+            OrderByFitness(string goal, IEnumerable<String> candidates)
         {
-            return candidates.Select(x => (x, LevenshteinishDistance(goal, x))).OrderByDescending(x => x.Item2);
+            return candidates
+                .Select(candidate => (candidate, MatchFitness(goal, candidate)))
+                .OrderByDescending(x => x.Item2);
         }
 
-        public static double HeuristicMatch = 1;
-
-        private static double LevenshteinishDistance(String goal, String candidate)
+        public static double MatchFitness(string goal, string candidate)
         {
-            if (String.IsNullOrEmpty(goal) || String.IsNullOrEmpty(candidate))
+            double sp = SubstringPercentage(goal, candidate);
+            double ep = EditPercentage(goal, candidate);
+            return (sp+ep)/2;  // first stab
+        }
+
+        public static double SubstringPercentage(string goal, string candidate)
+        {
+            double len = goal.Length < candidate.Length ? goal.Length : candidate.Length;
+            return LongestCommonSubstring(goal, candidate).Length / len;
+        }
+
+        public static double EditPercentage(string goal, string candidate)
+        {
+            double len = 0.0;
+            if (goal.Length > candidate.Length)
+                len = goal.Length;
+            else
+                len = candidate.Length;
+
+            return 1.0 - EditDistance(goal, candidate) / len;
+        }
+
+        public static string LongestCommonSubstring(string a, string b)
+        {
+            var lengths = new int[a.Length, b.Length];
+            int greatestLength = 0;
+            string output = "";
+            for (int ax = 0; ax < a.Length; ax++)
+            {
+                for (int bx = 0; bx < b.Length; bx++)
+                {
+                    if (a[ax] == b[bx])
+                    {
+                        lengths[ax, bx] = ax == 0 || bx == 0 ? 1 : lengths[ax - 1, bx - 1] + 1;
+                        if (lengths[ax, bx] > greatestLength)
+                        {
+                            greatestLength = lengths[ax, bx];
+                            output = a.Substring(ax - greatestLength + 1, greatestLength);
+                        }
+                    }
+                    else
+                    {
+                        lengths[ax, bx] = 0;
+                    }
+                }
+            }
+
+            return output;
+        }
+
+        public static int EditDistance(String goal, String candidate)
+        {
+            if (String.IsNullOrEmpty(goal) && String.IsNullOrEmpty(candidate))
             {
                 return 0;
             }
@@ -130,7 +186,7 @@ namespace Tabula.API
                 }
             }
 
-            return goal.Length / (double)distances[goal.Length, candidate.Length];
+            return distances[goal.Length, candidate.Length];
         }
     }
 }
