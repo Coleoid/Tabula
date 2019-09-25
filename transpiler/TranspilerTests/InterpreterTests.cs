@@ -421,7 +421,7 @@ namespace Tabula
                 ));
 
             paragraph.Actions.Add(
-                new Step(222,
+                new Step(124,
                     (TokenType.Word, "hello"),
                     (TokenType.Word, "world")
                 ));
@@ -449,7 +449,69 @@ namespace Tabula
             Assert.That(caseResult.Result, Is.EqualTo(NUnitTestResult.Passed));
         }
 
-        [Test, Ignore("fleshing out other code for now")]
+        [Test]
+        public void Missing_variable_reported_in_results()
+        {
+            var paragraph = new Paragraph();
+            paragraph.Actions.Add(new Step(6,
+                (TokenType.Word, "There"),
+                (TokenType.Word, "should"),
+                (TokenType.Word, "be"),
+                (TokenType.Word, "eight"),
+                (TokenType.Word, "of"),
+                (TokenType.Variable, "InputNumber")
+            ));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+            
+            Assert.That(result.TestCaseCount, Is.EqualTo(1));
+            Assert.That(result.TestSuites.Count, Is.EqualTo(1));
+            Assert.That(result.PassedTests, Is.EqualTo(0));
+            Assert.That(result.FailedTests, Is.EqualTo(1));
+            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
+            Assert.That(result.SkippedTests, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Table_puts_column_values_into_variables()
+        {
+            var paragraph = new Paragraph();
+            paragraph.Actions.Add(new Step(6,
+                (TokenType.Word, "There"),
+                (TokenType.Word, "should"),
+                (TokenType.Word, "be"),
+                (TokenType.Word, "eight"),
+                (TokenType.Word, "of"),
+                (TokenType.Variable, "InputNumber")
+            ));
+
+            Table table = new Table
+            {
+                ColumnNames = new List<string> { "InputNumber" }
+            };
+            var rowData = new List<List<string>> { new List<string> { "8" } };
+            table.Rows.Add(new TableRow(rowData));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+            scenario.Sections.Add(table);
+            interpreter.Workflow = typeof(GreetingWorkflow);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.TestCaseCount, Is.EqualTo(1));
+            Assert.That(result.TestSuites.Count, Is.EqualTo(1));
+            Assert.That(result.PassedTests, Is.EqualTo(1));
+            Assert.That(result.FailedTests, Is.EqualTo(0));
+            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
+            Assert.That(result.SkippedTests, Is.EqualTo(0));
+        }
+
+        [Test]
         public void Scenario_runs_paragraph_multiple_times_when_table_follows_paragraph()
         {
             Paragraph paragraph = new Paragraph();
@@ -476,9 +538,9 @@ namespace Tabula
                 ));
 
             Table table = new Table();
-            table.ColumnNames = new List<string> {"InputNumber", "RowName"};
+            table.ColumnNames = new List<string> { "InputNumber", "RowName" };
 
-            var rowData = new List<List<string>>{ new List<string> { "8" }, new List<string> { "Fred" } };
+            var rowData = new List<List<string>> { new List<string> { "8" }, new List<string> { "Fred" } };
             table.Rows.Add(new TableRow(rowData));
             rowData = new List<List<string>> { new List<string> { "2" }, new List<string> { "Wosmark" } };
             table.Rows.Add(new TableRow(rowData));
