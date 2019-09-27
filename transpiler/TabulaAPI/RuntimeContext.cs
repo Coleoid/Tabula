@@ -39,7 +39,7 @@ namespace Tabula.API
 
         public void OpenScope(string name)
         {
-            OpenScope(new Scope { Name = name });
+            OpenScope(new Scope(parent: null) { Name = name });
         }
         public void OpenScope(Scope newScope)
         {

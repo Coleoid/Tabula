@@ -10,6 +10,11 @@ namespace Tabula.API
         public Scope ParentScope = null;
         private Dictionary<string, string> _values = new Dictionary<string, string>();
 
+        public Scope(Scope parent)
+        {
+            this.ParentScope = parent;
+        }
+
         public string this[string key]
         {
             get
@@ -46,7 +51,12 @@ namespace Tabula.API
             return input.ToLower().Replace(" ", "");
         }
 
-        //speculation:
+        //BUG: make test where we have the variable in a parent scope
+        public bool HasVariable(string text)
+        {
+            return _values.ContainsKey(norm(text));
+        }
+
         public string NearHits(string unfoundName)
         {
             var near = NearMatchesOrdered(unfoundName).Select(x=> $"'{x}'").ToList();
@@ -67,11 +77,6 @@ namespace Tabula.API
             return OrderByFitness(unfoundName, _values.Keys)
                 .Where(x => x.fitness > CloseEnoughThreshold)
                 .Select(x => x.match);
-        }
-
-        public bool HasVariable(string text)
-        {
-            return _values.ContainsKey(norm(text));
         }
 
         private static String Listify(IEnumerable<String> vals)

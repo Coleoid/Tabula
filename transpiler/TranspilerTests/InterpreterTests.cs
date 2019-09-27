@@ -366,6 +366,21 @@ namespace Tabula
 
 
         [Test]
+        public void Variables_have_lifetime_of_scope()
+        {
+            interpreter.OpenScope();
+
+            interpreter.Scope["foo"] = "more foo";
+
+            Assert.That(interpreter.Scope.HasVariable("foo"));
+
+            interpreter.CloseScope();
+
+            Assert.False(interpreter.Scope.HasVariable("foo"));
+        }
+
+
+        [Test]
         public void Failing_paragraph_accumulates_results()
         {
             Paragraph paragraph = new Paragraph();
@@ -447,6 +462,41 @@ namespace Tabula
 
             caseResult = result.TestCases[1];
             Assert.That(caseResult.Result, Is.EqualTo(NUnitTestResult.Passed));
+        }
+
+        [Test]
+        public void Empty_Scenario_succeeds_and_reports_zeroes()
+        {
+            Scenario scenario = new Scenario();
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.TestCaseCount, Is.EqualTo(0));
+            Assert.That(result.TestSuites.Count, Is.EqualTo(0));
+            Assert.That(result.PassedTests, Is.EqualTo(0));
+            Assert.That(result.FailedTests, Is.EqualTo(0));
+            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
+            Assert.That(result.SkippedTests, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Table_before_any_paragraph_is_wrong()
+        {
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(new Table());
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            string message = result.TestCases[0].FailureInfo.Message;
+            Assert.That(message, Is.EqualTo("Cannot have a table as the first section of a scenario."));
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
+            
+            Assert.That(result.TestCaseCount, Is.EqualTo(1));
+            Assert.That(result.TestSuites.Count, Is.EqualTo(0));
+            Assert.That(result.PassedTests, Is.EqualTo(0));
+            Assert.That(result.FailedTests, Is.EqualTo(1));
+            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
+            Assert.That(result.SkippedTests, Is.EqualTo(0));
         }
 
         [Test]

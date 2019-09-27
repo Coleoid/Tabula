@@ -14,31 +14,100 @@ namespace Tabula
         public bool skipSteps { get; set; }
         public int skipLine { get; set; }
 
-        public Scope Scope { get; set; } = new Scope();
+        public Scope Scope { get; set; } = new Scope(parent: null);
+
+        public void OpenScope()
+        {
+            var scope = new Scope(this.Scope);
+            this.Scope = scope;
+        }
+
+        public void CloseScope()
+        {
+            Scope = Scope.ParentScope;
+        }
 
         public NUnitReport.TestSuite ExecuteScenario(CST.Scenario scenario)
         {
-            var scenarioResult = new NUnitReport.TestSuite();
-
-            // complete cheese, only correct enough to prop up some tests briefly
-            var paragraph = scenario.Sections[0] as CST.Paragraph;
-            var table = scenario.Sections[1] as CST.Table;
+            var scenarioResult = new NUnitReport.TestSuite();         
+            CST.Paragraph previousParagraph = null;
+            bool hasExecuted = false;
 
             NUnitReport.TestSuite paragraphResult;
-            foreach (var row in table.Rows)
-            {
-                //TODO put cell values into scope
+            foreach (var section in scenario.Sections)
+            {                
+                if (section is CST.Paragraph)
+                {                   
 
-                paragraphResult = ExecuteParagraph((paragraph));
-                scenarioResult.TestSuites.Add(paragraphResult);
-                scenarioResult.TestCaseCount += paragraphResult.TestCaseCount;
-                scenarioResult.PassedTests += paragraphResult.PassedTests;
-                scenarioResult.FailedTests += paragraphResult.FailedTests;
-                scenarioResult.InconclusiveTests += paragraphResult.InconclusiveTests;
-                scenarioResult.SkippedTests += paragraphResult.SkippedTests;
+                    if (previousParagraph != null && !hasExecuted)
+                    {
+                        paragraphResult = ExecuteParagraph((previousParagraph));
+                        FoldParagraphResultsIn(scenarioResult, paragraphResult);
+                    }
+
+                    previousParagraph = (CST.Paragraph)section;
+                    hasExecuted = false;
+
+                }
+                else if (section is CST.Table && previousParagraph != null)
+                {
+                    CST.Table table = (CST.Table) section;
+                   
+                    foreach (var row in table.Rows)
+                    {
+                        OpenScope();
+
+                        var columnHeaders = table.ColumnNames;
+                        for (int i = 0; i < columnHeaders.Count; i++)
+                        {
+                            //TODO: that hardcoded 0 will need to mature to handle lists
+                            Scope[columnHeaders[i]] = row.Cells[i][0];
+                        }
+
+
+                        paragraphResult = ExecuteParagraph((previousParagraph));
+                        FoldParagraphResultsIn(scenarioResult, paragraphResult);
+
+                        CloseScope();
+                    }
+
+                    hasExecuted = true;
+
+                }
+                else
+                {
+                    var testCase = new NUnitReport.TestCase();
+                    testCase.FailureInfo = new NUnitReport.TestCaseFailure
+                    {
+                        Message = "Cannot have a table as the first section of a scenario.",
+                        StackTrace = "Interpreter.ExecuteScenario"
+                    };
+                    scenarioResult.TestCases.Add(testCase);
+                    scenarioResult.Result = NUnitTestResult.Failed;
+                    scenarioResult.TestCaseCount += 1;
+                    scenarioResult.FailedTests += 1;
+                }
+
+
+            }
+
+            if (!hasExecuted && previousParagraph != null)
+            {
+                paragraphResult = ExecuteParagraph((previousParagraph));
+                FoldParagraphResultsIn(scenarioResult, paragraphResult);
             }
 
             return scenarioResult;
+        }
+
+        private void FoldParagraphResultsIn(NUnitReport.TestSuite scenarioResult, NUnitReport.TestSuite paragraphResult)
+        {
+            scenarioResult.TestSuites.Add(paragraphResult);
+            scenarioResult.TestCaseCount += paragraphResult.TestCaseCount;
+            scenarioResult.PassedTests += paragraphResult.PassedTests;
+            scenarioResult.FailedTests += paragraphResult.FailedTests;
+            scenarioResult.InconclusiveTests += paragraphResult.InconclusiveTests;
+            scenarioResult.SkippedTests += paragraphResult.SkippedTests;
         }
 
         public NUnitReport.TestSuite ExecuteParagraph(CST.Paragraph paragraph)

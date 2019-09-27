@@ -9,7 +9,7 @@ namespace Tabula
         [Test]
         public void Scope_single_level()
         {
-            var scope = new Scope();
+            var scope = new Scope(parent: null);
             scope["freddy"] = "Fred Jones";
             scope["my_friend"] = "freddy";
 
@@ -19,7 +19,7 @@ namespace Tabula
         [Test]
         public void Scope_two_levels_from_stored_number_sign()
         {
-            var scope = new Scope();
+            var scope = new Scope(parent: null);
             scope["freddy"] = "Fred Jones";
             scope["MY_friend"] = "#freddy";
 
@@ -29,7 +29,7 @@ namespace Tabula
         [Test]
         public void Scope_two_levels_from_request_with_number_sign()
         {
-            var scope = new Scope();
+            var scope = new Scope(parent: null);
             scope["freddy"] = "Fred Jones";
             scope["MY_friend"] = "Freddy";
 
@@ -39,7 +39,7 @@ namespace Tabula
         [Test]
         public void Scope_three_levels()
         {
-            var scope = new Scope();
+            var scope = new Scope(parent: null);
             scope["freddy"] = "Fred Jones";
             scope["MY_friend"] = "#freddy";
             scope["guy"] = "my_friend";
@@ -50,7 +50,7 @@ namespace Tabula
         [Test]
         public void Unfound_returns_Empty()
         {
-            var scope = new Scope();
+            var scope = new Scope(parent: null);
 
             Assert.That(scope["#dude"], Is.EqualTo(string.Empty));
             Assert.That(scope["dude"], Is.EqualTo(string.Empty));
