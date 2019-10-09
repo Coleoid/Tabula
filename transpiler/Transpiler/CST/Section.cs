@@ -24,6 +24,8 @@ namespace Tabula.CST
     {
         public List<string> ColumnNames { get; set; }
         public List<TableRow> Rows { get; set; }
+        public int StartLine { get; set; }
+        public int EndLine { get; set; }
 
         public Table()
         {

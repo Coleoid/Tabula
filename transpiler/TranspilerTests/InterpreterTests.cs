@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using LibraryHoldingTestWorkflows;
+using NUnit.Framework.Constraints;
 using Tabula.CST;
 
 namespace Tabula
@@ -52,7 +53,8 @@ namespace Tabula
 
         [TestCase(TokenType.String, "eight", "\"eight\"", "\"eight\" (String)")]
         [TestCase(TokenType.Date, "11/22/2033", "11/22/2033", "\"11/22/2033\" (Date)")]
-        public void Clear_error_when_argument_type_mismatches_int_parameter(TokenType argType, string argValue, string nameValue, string argMessageDetail)
+        public void Clear_error_when_argument_type_mismatches_int_parameter(TokenType argType, string argValue,
+            string nameValue, string argMessageDetail)
         {
             var step = new Step(44,
                 (TokenType.Word, "There"),
@@ -69,7 +71,9 @@ namespace Tabula
 
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
             Assert.That(result.Name, Is.EqualTo($"There should be eight of {nameValue}"));
-            Assert.That(result.FailureInfo.Message, Does.StartWith($"Step threw exception: argument {argMessageDetail} does not match parameter 'theseGuys' (Int32)."));
+            Assert.That(result.FailureInfo.Message,
+                Does.StartWith(
+                    $"Step threw exception: argument {argMessageDetail} does not match parameter 'theseGuys' (Int32)."));
         }
 
         [Test]
@@ -92,12 +96,14 @@ namespace Tabula
 
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
             Assert.That(result.Name, Is.EqualTo($"There should be eight of 8 8 8"));
-            Assert.That(result.FailureInfo.Message, Does.StartWith($"Step threw exception: 3 arguments were provided to a 1 parameter method."));
+            Assert.That(result.FailureInfo.Message,
+                Does.StartWith($"Step threw exception: 3 arguments were provided to a 1 parameter method."));
         }
 
         [TestCase(TokenType.String, "eight", "\"eight\"", "\"eight\" (String)")]
         [TestCase(TokenType.Number, "12", "12", "\"12\" (Number)")]
-        public void Clear_error_when_argument_type_mismatches_DateTime_parameter(TokenType argType, string argValue, string nameValue, string argMessageDetail)
+        public void Clear_error_when_argument_type_mismatches_DateTime_parameter(TokenType argType, string argValue,
+            string nameValue, string argMessageDetail)
         {
             var step = new Step(44,
                 (TokenType.Word, "My"),
@@ -113,7 +119,9 @@ namespace Tabula
 
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
             Assert.That(result.Name, Is.EqualTo($"My favorite day is {nameValue}"));
-            Assert.That(result.FailureInfo.Message, Does.StartWith($"Step threw exception: argument {argMessageDetail} does not match parameter 'favoriteDay' (DateTime)."));
+            Assert.That(result.FailureInfo.Message,
+                Does.StartWith(
+                    $"Step threw exception: argument {argMessageDetail} does not match parameter 'favoriteDay' (DateTime)."));
         }
 
         [TestCase("Bob", 22, "1/12/2000")]
@@ -137,15 +145,18 @@ namespace Tabula
 
             var result = interpreter.ExecuteStep(step);
 
-            var greetings = (GreetingWorkflow)interpreter.Instance;
+            var greetings = (GreetingWorkflow) interpreter.Instance;
             Assert.That(greetings.friendName, Is.EqualTo(name));
             Assert.That(greetings.friendAge, Is.EqualTo(age));
             Assert.That(greetings.friendBirthday, Is.EqualTo(DateTime.Parse(birthday)));
         }
 
-        [TestCase("Bob", "twenty-two", "1/12/2000", "Step threw exception: argument \"twenty-two\" (String) does not match parameter 'age' (Int32).")]
-        [TestCase("Greta", "34", "Mayday, 1998", "Step threw exception: argument \"Mayday, 1998\" (String) does not match parameter 'birthday' (DateTime).")]
-        public void Step_Call_complains_clearly_when_value_types_do_not_match_param_types(string name, string age, string birthday, string expectedMessage)
+        [TestCase("Bob", "twenty-two", "1/12/2000",
+            "Step threw exception: argument \"twenty-two\" (String) does not match parameter 'age' (Int32).")]
+        [TestCase("Greta", "34", "Mayday, 1998",
+            "Step threw exception: argument \"Mayday, 1998\" (String) does not match parameter 'birthday' (DateTime).")]
+        public void Step_Call_complains_clearly_when_value_types_do_not_match_param_types(string name, string age,
+            string birthday, string expectedMessage)
         {
             var step = new Step(222,
                 (TokenType.Word, "my"),
@@ -179,7 +190,9 @@ namespace Tabula
             interpreter.Workflow = typeof(GreetingWorkflow);
 
             var result = interpreter.ExecuteStep(step);
-            Assert.That(result.FailureInfo.Message, Is.EqualTo("Step threw exception: argument \"2/2/2002\" (Date) does not match parameter 'age' (Int32)."));
+            Assert.That(result.FailureInfo.Message,
+                Is.EqualTo(
+                    "Step threw exception: argument \"2/2/2002\" (Date) does not match parameter 'age' (Int32)."));
         }
 
         [Test]
@@ -198,7 +211,9 @@ namespace Tabula
             interpreter.Workflow = typeof(GreetingWorkflow);
 
             var result = interpreter.ExecuteStep(step);
-            Assert.That(result.FailureInfo.Message, Is.EqualTo("Step threw exception: argument \"88\" (Number) does not match parameter 'birthday' (DateTime)."));
+            Assert.That(result.FailureInfo.Message,
+                Is.EqualTo(
+                    "Step threw exception: argument \"88\" (Number) does not match parameter 'birthday' (DateTime)."));
         }
 
         [TestCase("Bob", "22", "1/12/2000")]
@@ -226,7 +241,7 @@ namespace Tabula
             var result = interpreter.ExecuteStep(step);
 
             Assert.That(result.FailureInfo.Message, Is.Null);
-            var greetings = (GreetingWorkflow)interpreter.Instance;
+            var greetings = (GreetingWorkflow) interpreter.Instance;
             Assert.That(greetings.friendName, Is.EqualTo(name));
             Assert.That(greetings.friendAge.ToString(), Is.EqualTo(age));
             Assert.That(greetings.friendBirthday, Is.EqualTo(DateTime.Parse(birthday)));
@@ -257,7 +272,9 @@ namespace Tabula
 
             var result = interpreter.ExecuteStep(step);
 
-            Assert.That(result.FailureInfo.Message, Is.EqualTo($"Step threw exception: Expected variable \"{unfoundVarName}\" but it was not passed in. {message}"));
+            Assert.That(result.FailureInfo.Message,
+                Is.EqualTo(
+                    $"Step threw exception: Expected variable \"{unfoundVarName}\" but it was not passed in. {message}"));
         }
 
 
@@ -274,7 +291,7 @@ namespace Tabula
 
             interpreter.ExecuteStep(step);
 
-            var greetings = (GreetingWorkflow)interpreter.Instance;
+            var greetings = (GreetingWorkflow) interpreter.Instance;
 
             Assert.That(greetings.range, Is.EqualTo(range));
         }
@@ -296,7 +313,8 @@ namespace Tabula
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
             Assert.That(result.Name, Is.EqualTo($"Hey \"{friend}\" {question} am I"));
-            Assert.That(result.FailureInfo.Message, Is.EqualTo($"Couldn't find step 'Hey \"{friend}\" {question} am I' on line {lineNumber}"));
+            Assert.That(result.FailureInfo.Message,
+                Is.EqualTo($"Couldn't find step 'Hey \"{friend}\" {question} am I' on line {lineNumber}"));
             //TODO:  stack trace
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Inconclusive));
         }
@@ -335,7 +353,8 @@ namespace Tabula
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
-            Assert.That(result.FailureInfo.Message, Does.StartWith($"Step threw exception: Attempted to divide by zero."));
+            Assert.That(result.FailureInfo.Message,
+                Does.StartWith($"Step threw exception: Attempted to divide by zero."));
             Assert.That(result.Name, Is.EqualTo("Always explode"));
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
         }
@@ -385,23 +404,23 @@ namespace Tabula
         {
             Paragraph paragraph = new Paragraph();
 
-            paragraph.Actions.Add( 
+            paragraph.Actions.Add(
                 new Step(123,
                     (TokenType.Word, "Always"),
                     (TokenType.Word, "explode")
-            ));
+                ));
 
             paragraph.Actions.Add(
                 new Step(222,
                     (TokenType.Word, "hello"),
                     (TokenType.Word, "world")
-            ));
+                ));
 
 
             interpreter.Workflow = typeof(GreetingWorkflow);
 
             NUnitReport.TestSuite result = interpreter.ExecuteParagraph(paragraph);
-            
+
             Assert.That(result, Is.Not.Null);
             Assert.That(result.TestCases.Count, Is.EqualTo(2));
             Assert.That(result.TestCaseCount, Is.EqualTo(2));
@@ -410,12 +429,13 @@ namespace Tabula
             Assert.That(result.FailedTests, Is.EqualTo(1));
             Assert.That(result.InconclusiveTests, Is.EqualTo(0));
             Assert.That(result.SkippedTests, Is.EqualTo(1));
-            
+
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
 
 
             var caseResult = result.TestCases[0];
-            Assert.That(caseResult.FailureInfo.Message, Does.StartWith($"Step threw exception: Attempted to divide by zero."));
+            Assert.That(caseResult.FailureInfo.Message,
+                Does.StartWith($"Step threw exception: Attempted to divide by zero."));
             Assert.That(caseResult.Result, Is.EqualTo(NUnitTestResult.Failed));
 
             caseResult = result.TestCases[1];
@@ -479,27 +499,6 @@ namespace Tabula
         }
 
         [Test]
-        public void Table_before_any_paragraph_is_wrong()
-        {
-            Scenario scenario = new Scenario();
-            scenario.Sections.Add(new Table());
-
-            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
-
-            string message = result.TestCases[0].FailureInfo.Message;
-            Assert.That(message, Is.EqualTo("Cannot have a table as the first section of a scenario."));
-
-            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
-            
-            Assert.That(result.TestCaseCount, Is.EqualTo(1));
-            Assert.That(result.TestSuites.Count, Is.EqualTo(0));
-            Assert.That(result.PassedTests, Is.EqualTo(0));
-            Assert.That(result.FailedTests, Is.EqualTo(1));
-            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
-            Assert.That(result.SkippedTests, Is.EqualTo(0));
-        }
-
-        [Test]
         public void Missing_variable_reported_in_results()
         {
             var paragraph = new Paragraph();
@@ -517,13 +516,17 @@ namespace Tabula
             interpreter.Workflow = typeof(GreetingWorkflow);
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
-            
+
             Assert.That(result.TestCaseCount, Is.EqualTo(1));
             Assert.That(result.TestSuites.Count, Is.EqualTo(1));
             Assert.That(result.PassedTests, Is.EqualTo(0));
             Assert.That(result.FailedTests, Is.EqualTo(1));
             Assert.That(result.InconclusiveTests, Is.EqualTo(0));
             Assert.That(result.SkippedTests, Is.EqualTo(0));
+
+            //TODO: propagate execution-level error messages
+            string message = result.TestSuites[0].TestCases[0].FailureInfo.Message;
+            Assert.That(message.IndexOf("Expected variable \"InputNumber\"") > -1);
         }
 
         [Test]
@@ -541,9 +544,9 @@ namespace Tabula
 
             Table table = new Table
             {
-                ColumnNames = new List<string> { "InputNumber" }
+                ColumnNames = new List<string> {"InputNumber"}
             };
-            var rowData = new List<List<string>> { new List<string> { "8" } };
+            var rowData = new List<List<string>> {new List<string> {"8"}};
             table.Rows.Add(new TableRow(rowData));
 
             Scenario scenario = new Scenario();
@@ -561,55 +564,5 @@ namespace Tabula
             Assert.That(result.SkippedTests, Is.EqualTo(0));
         }
 
-        [Test]
-        public void Scenario_runs_paragraph_multiple_times_when_table_follows_paragraph()
-        {
-            Paragraph paragraph = new Paragraph();
-            paragraph.Actions.Add(
-                new Step(4,
-                    (TokenType.Word, "Hello"),
-                    (TokenType.Word, "America")
-                ));
-
-            paragraph.Actions.Add(
-                new Step(5,
-                    (TokenType.Word, "hello"),
-                    (TokenType.Word, "world")
-                ));
-
-            paragraph.Actions.Add(
-                new Step(6,
-                    (TokenType.Word, "There"),
-                    (TokenType.Word, "should"),
-                    (TokenType.Word, "be"),
-                    (TokenType.Word, "eight"),
-                    (TokenType.Word, "of"),
-                    (TokenType.Variable, "InputNumber")
-                ));
-
-            Table table = new Table();
-            table.ColumnNames = new List<string> { "InputNumber", "RowName" };
-
-            var rowData = new List<List<string>> { new List<string> { "8" }, new List<string> { "Fred" } };
-            table.Rows.Add(new TableRow(rowData));
-            rowData = new List<List<string>> { new List<string> { "2" }, new List<string> { "Wosmark" } };
-            table.Rows.Add(new TableRow(rowData));
-            rowData = new List<List<string>> { new List<string> { "8" }, new List<string> { "Miriam" } };
-            table.Rows.Add(new TableRow(rowData));
-
-            Scenario scenario = new Scenario();
-            scenario.Sections.Add(paragraph);
-            scenario.Sections.Add(table);
-            interpreter.Workflow = typeof(GreetingWorkflow);
-
-            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
-
-            Assert.That(result.TestCaseCount, Is.EqualTo(9));
-            Assert.That(result.TestSuites.Count, Is.EqualTo(3));
-            Assert.That(result.PassedTests, Is.EqualTo(8));
-            Assert.That(result.FailedTests, Is.EqualTo(1));
-            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
-            Assert.That(result.SkippedTests, Is.EqualTo(0));
-        }
     }
 }

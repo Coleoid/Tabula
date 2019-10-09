@@ -5,6 +5,7 @@ namespace Tabula.CST
     /// <summary> An entire test file. </summary>
     public class Scenario : CST_Entity
     {
+        public string FileName { get; set; }
         public List<Section> Sections { get; set; }
         public List<string> SeenWorkflowRequests { get; set; }
 
