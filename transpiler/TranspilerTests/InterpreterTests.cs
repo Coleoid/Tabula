@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using LibraryHoldingTestWorkflows;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using LibraryHoldingTestWorkflows;
-using NUnit.Framework.Constraints;
+using System;
+using System.Collections.Generic;
 using Tabula.CST;
 
 namespace Tabula
@@ -517,7 +516,8 @@ namespace Tabula
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
-            Assert.That(result.TestCaseCount, Is.EqualTo(1));
+            Assert.That(result.TestCaseCount, Is.EqualTo(0));
+            Assert.That(result.TotalTests, Is.EqualTo(1));
             Assert.That(result.TestSuites.Count, Is.EqualTo(1));
             Assert.That(result.PassedTests, Is.EqualTo(0));
             Assert.That(result.FailedTests, Is.EqualTo(1));
@@ -556,13 +556,15 @@ namespace Tabula
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
-            Assert.That(result.TestCaseCount, Is.EqualTo(1));
+            Assert.That(result.TestCaseCount, Is.EqualTo(0));
+            Assert.That(result.TotalTests, Is.EqualTo(1));
             Assert.That(result.TestSuites.Count, Is.EqualTo(1));
             Assert.That(result.PassedTests, Is.EqualTo(1));
             Assert.That(result.FailedTests, Is.EqualTo(0));
             Assert.That(result.InconclusiveTests, Is.EqualTo(0));
             Assert.That(result.SkippedTests, Is.EqualTo(0));
         }
+
 
     }
 }

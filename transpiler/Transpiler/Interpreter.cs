@@ -85,7 +85,6 @@ namespace Tabula
                         if (table.Label != null)
                         {
                             paragraphResult.ClassName = $"Row {i} of table {table.Label}";
-                           
                         }
                         else
                         {
@@ -112,7 +111,7 @@ namespace Tabula
         private void FoldParagraphResultsIn(NUnitReport.TestSuite scenarioResult, NUnitReport.TestSuite paragraphResult)
         {
             scenarioResult.TestSuites.Add(paragraphResult);
-            scenarioResult.TestCaseCount += paragraphResult.TestCaseCount;
+            scenarioResult.TotalTests += paragraphResult.TestCaseCount;
             scenarioResult.PassedTests += paragraphResult.PassedTests;
             scenarioResult.FailedTests += paragraphResult.FailedTests;
             scenarioResult.InconclusiveTests += paragraphResult.InconclusiveTests;
