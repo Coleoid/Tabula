@@ -89,7 +89,6 @@ namespace Tabula
 
         #region Reflective sausage-making
 
-        //TODO:  Get workflow dll(s) from config and/or command line args
         public List<Type> GetLoadedTypes()
         {
             AppDomain curDomain = AppDomain.CurrentDomain;

@@ -41,5 +41,10 @@ namespace LibraryHoldingTestWorkflows
             int zero = 0;
             int x = 34268 / zero;
         }
+
+        public string GetRange()
+        {
+            return range;
+        }
     }
 }

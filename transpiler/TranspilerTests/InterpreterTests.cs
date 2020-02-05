@@ -3,6 +3,7 @@ using NUnit.Framework;
 using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Tabula.CST;
 
 namespace Tabula
@@ -42,7 +43,7 @@ namespace Tabula
                 (TokenType.Number, "8")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
@@ -64,7 +65,7 @@ namespace Tabula
                 (argType, argValue)
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
@@ -89,7 +90,7 @@ namespace Tabula
                 (TokenType.Number, "8")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
@@ -112,7 +113,7 @@ namespace Tabula
                 (argType, argValue)
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
@@ -140,7 +141,7 @@ namespace Tabula
                 (TokenType.Date, birthday)
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             var result = interpreter.ExecuteStep(step);
 
@@ -167,7 +168,7 @@ namespace Tabula
                 (TokenType.String, birthday)
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             var result = interpreter.ExecuteStep(step);
             Assert.That(result.FailureInfo.Message, Is.EqualTo(expectedMessage));
@@ -183,10 +184,10 @@ namespace Tabula
                 (TokenType.Word, "turned"),
                 (TokenType.Date, "2/2/2002"),
                 (TokenType.Word, "on"),
-                (TokenType.String, "1/1/2001")
+                (TokenType.Date, "1/1/2001")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             var result = interpreter.ExecuteStep(step);
             Assert.That(result.FailureInfo.Message,
@@ -207,7 +208,7 @@ namespace Tabula
                 (TokenType.Number, "88")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             var result = interpreter.ExecuteStep(step);
             Assert.That(result.FailureInfo.Message,
@@ -235,7 +236,7 @@ namespace Tabula
                 (TokenType.Variable, "birthday")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             var result = interpreter.ExecuteStep(step);
 
@@ -267,7 +268,7 @@ namespace Tabula
                 (TokenType.Variable, "birthday")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             var result = interpreter.ExecuteStep(step);
 
@@ -286,13 +287,16 @@ namespace Tabula
                 (TokenType.Word, location)
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             interpreter.ExecuteStep(step);
 
-            var greetings = (GreetingWorkflow) interpreter.Instance;
+            //var greetings = (GreetingWorkflow)interpreter.Instance;
+            //Assert.That(greetings.range, Is.EqualTo(range));
+            MethodInfo mInfo =  interpreter.FindMethod("getrange");
+            var result = mInfo.Invoke(interpreter.Instance, new object[] { });
 
-            Assert.That(greetings.range, Is.EqualTo(range));
+            Assert.That((string)result, Is.EqualTo(range));
         }
 
         [TestCase(222, "who", "George")]
@@ -307,7 +311,7 @@ namespace Tabula
                 (TokenType.Word, "I")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
@@ -331,7 +335,7 @@ namespace Tabula
                 (TokenType.Number, quantity.ToString())
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
@@ -348,7 +352,7 @@ namespace Tabula
                 (TokenType.Word, "explode")
             );
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestCase result = interpreter.ExecuteStep(step);
 
@@ -373,7 +377,8 @@ namespace Tabula
             );
 
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            //interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             interpreter.ExecuteStep(step);
             NUnitReport.TestCase result = interpreter.ExecuteStep(stepAfter);
@@ -416,7 +421,52 @@ namespace Tabula
                 ));
 
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
+
+            NUnitReport.TestSuite result = interpreter.ExecuteParagraph(paragraph);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.TestCases.Count, Is.EqualTo(2));
+            Assert.That(result.TestCaseCount, Is.EqualTo(2));
+
+            Assert.That(result.PassedTests, Is.EqualTo(0));
+            Assert.That(result.FailedTests, Is.EqualTo(1));
+            Assert.That(result.InconclusiveTests, Is.EqualTo(0));
+            Assert.That(result.SkippedTests, Is.EqualTo(1));
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
+
+
+            var caseResult = result.TestCases[0];
+            Assert.That(caseResult.FailureInfo.Message,
+                Does.StartWith($"Step threw exception: Attempted to divide by zero."));
+            Assert.That(caseResult.Result, Is.EqualTo(NUnitTestResult.Failed));
+
+            caseResult = result.TestCases[1];
+            Assert.That(caseResult.FailureInfo.Message, Does.StartWith($"Step skipped: Due to error on line 123."));
+            Assert.That(caseResult.Result, Is.EqualTo(NUnitTestResult.Skipped));
+        }
+
+
+        [Test]
+        public void Paragraph_loads_workflow()
+        {
+            Paragraph paragraph = new Paragraph();
+
+            paragraph.Actions.Add(new CommandUse(new List<string> { "GreetingWorkflow" }));
+
+            paragraph.Actions.Add(
+                new Step(123,
+                    (TokenType.Word, "Always"),
+                    (TokenType.Word, "explode")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(222,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "world")
+                ));
+
 
             NUnitReport.TestSuite result = interpreter.ExecuteParagraph(paragraph);
 
@@ -461,7 +511,7 @@ namespace Tabula
                 ));
 
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestSuite result = interpreter.ExecuteParagraph(paragraph);
 
@@ -512,7 +562,7 @@ namespace Tabula
 
             Scenario scenario = new Scenario();
             scenario.Sections.Add(paragraph);
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
@@ -552,7 +602,7 @@ namespace Tabula
             Scenario scenario = new Scenario();
             scenario.Sections.Add(paragraph);
             scenario.Sections.Add(table);
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 

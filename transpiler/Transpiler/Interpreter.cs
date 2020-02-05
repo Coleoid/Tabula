@@ -4,12 +4,13 @@ using System.Reflection;
 using NUnit.Framework.Internal;
 using NUnit.Framework;
 using Tabula.API;
+using System.IO;
 
 namespace Tabula
 {
     public class Interpreter
     {
-        public Type Workflow { get; set; }
+       // public Type Workflow { get; set; }
         public Object Instance { get; set; }
         public bool skipSteps { get; set; }
         public int skipLine { get; set; }
@@ -26,6 +27,29 @@ namespace Tabula
         {
             Scope = Scope.ParentScope;
         }
+
+        public Interpreter()
+        {
+            LoadWorkflowDLL();
+        }
+
+        List<Type> MyTypes { get; set; }
+        public void LoadWorkflowDLL()
+        {
+            AppPath = @"D:\code\coleoid\Tabula\transpiler";
+            var dllLocation = Path.Combine(AppPath, @"LibraryHoldingTestWorkflows\bin\Debug\LibraryHoldingTestWorkflows.dll");
+
+            Assembly asm2 = Assembly.LoadFrom(dllLocation);
+
+            AppDomain curDomain = AppDomain.CurrentDomain;
+            curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
+            var asms = curDomain.GetAssemblies();
+
+            MyTypes = new List<Type>();
+            MyTypes.AddRange(asm2.ExportedTypes);
+        }
+
+
 
         public NUnitReport.TestSuite ExecuteScenario(CST.Scenario scenario)
         {
@@ -123,6 +147,34 @@ namespace Tabula
             }
         }
 
+
+
+        //TODO:  Get location(s) from config and/or command line args
+        private Assembly resolveAssembly(object sender, ResolveEventArgs args)
+        {
+            string libName = args.Name.Substring(0, args.Name.IndexOf(","));
+
+            string libPath = Path.Combine(AppPath, libName + ".dll");
+            if (File.Exists(libPath))
+                return Assembly.ReflectionOnlyLoadFrom(libPath);
+
+            string exePath = AppPath + libName + ".exe";
+            if (File.Exists(exePath))
+                return Assembly.ReflectionOnlyLoadFrom(exePath);
+
+            return Assembly.ReflectionOnlyLoad(args.Name);
+        }
+
+        private string AppPath { get; set; }
+        public void UseWorkflow(string name)
+        {
+            Type workflow = MyTypes.Find(t => t.Name == name);
+
+            var instance = Activator.CreateInstance(workflow);
+            Instance = instance;
+            LearnMethods(workflow);
+        }
+
         public NUnitReport.TestSuite ExecuteParagraph(CST.Paragraph paragraph)
         {
             var paragraphResult = new NUnitReport.TestSuite();
@@ -131,7 +183,20 @@ namespace Tabula
 
             foreach (var action in paragraph.Actions)
             {
-                if (action is CST.Step step)
+                if (action is CST.CommandUse cmd)
+                {
+                    //TODO: loop over all workflows
+                    var name = cmd.Workflows[0];
+                    UseWorkflow(name);
+
+                    
+                    //Type workflow = MyTypes.Find(t => t.Name == name);
+
+                    //var instance = Activator.CreateInstance(workflow);
+                    //Instance = instance;
+                    //LearnMethods(workflow);
+                }
+                else if (action is CST.Step step)
                 {
                     var stepResult = ExecuteStep(step);
                     paragraphResult.TestCases.Add(stepResult);
@@ -174,11 +239,6 @@ namespace Tabula
                 return result;
             }
 
-            //TODO: hoist this up to ExecuteParagraph
-            var instance = Activator.CreateInstance(Workflow);
-            Instance = instance;
-            LearnMethods(Workflow);
-
             var arguments = new List<Object>();
             string searchName = string.Empty;
             string stepText = string.Empty;
@@ -200,6 +260,11 @@ namespace Tabula
                     stepText += symbol.Text + " ";
                 }
             }
+
+            //var instance = Activator.CreateInstance(Workflow);
+            //Instance = instance;
+            //string name = Instance.GetType().FullName;
+            //LearnMethods(Workflow);
 
             MethodInfo methodInfo = FindMethod(searchName);
             if (methodInfo == null)
@@ -279,7 +344,7 @@ namespace Tabula
 
                 using (var ic = new TestExecutionContext.IsolatedContext())
                 {
-                    methodInfo.Invoke(instance, arguments.ToArray());
+                    methodInfo.Invoke(Instance, arguments.ToArray());
                 }
             }
             catch (Exception e)
@@ -345,7 +410,7 @@ namespace Tabula
             }
         }
 
-        private MethodInfo FindMethod(string searchName)
+        public MethodInfo FindMethod(string searchName)
         {
             if (searchableMethods.ContainsKey(searchName))
             {

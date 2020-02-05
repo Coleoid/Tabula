@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using LibraryHoldingTestWorkflows;
@@ -26,7 +24,7 @@ namespace Tabula
             Scenario scenario = new Scenario();
             scenario.Sections.Add(paragraph);
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
@@ -69,7 +67,7 @@ namespace Tabula
             Table table = ExampleTable();
             Scenario scenario = ExampleScenario(null, null, paragraph, table);
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
@@ -98,7 +96,7 @@ namespace Tabula
                                                 table,
                                                 table2);
 
-            interpreter.Workflow = typeof(GreetingWorkflow);
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
