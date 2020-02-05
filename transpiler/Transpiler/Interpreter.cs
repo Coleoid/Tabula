@@ -185,26 +185,50 @@ namespace Tabula
             {
                 if (action is CST.CommandUse cmd)
                 {
-                    //TODO: loop over all workflows
                     var name = cmd.Workflows[0];
-                    UseWorkflow(name);
+                   
+                    try
+                    {
+                        //TODO: loop over all workflows
+                        
+                        UseWorkflow(name);
 
-                    
-                    //Type workflow = MyTypes.Find(t => t.Name == name);
+                    }
+                    catch (Exception ex)
+                    {
+                        var result = new NUnitReport.TestCase
+                        {
+                            FailureInfo = new NUnitReport.TestCaseFailure(),
+                            Name = "" //FIX step.GetReadableText()
+                        };
 
-                    //var instance = Activator.CreateInstance(workflow);
-                    //Instance = instance;
-                    //LearnMethods(workflow);
+                        Exception stepException = ex.InnerException;
+                        if (ex.InnerException == null)
+                        {
+                            stepException = ex;
+                        }
+
+                        var failureCatagory = string.Empty;
+                        if (stepException is AssertionException)
+                        {
+                            failureCatagory = "failed";
+                        }
+                        else
+                        {
+                            failureCatagory = "threw exception";
+                            skipLine = cmd.StartLine;
+                            skipSteps = true;
+                        }
+
+                        result.FailureInfo.Message = $"Tried to use workflow \""  + name + "\", and did not find it.";
+                        result.Result = NUnitTestResult.Failed;
+                        FoldLineResultsIn(paragraphResult, result);
+                    }
                 }
                 else if (action is CST.Step step)
                 {
                     var stepResult = ExecuteStep(step);
-                    paragraphResult.TestCases.Add(stepResult);
-                    paragraphResult.TestCaseCount++;
-                    if (stepResult.Result == NUnitTestResult.Passed) paragraphResult.PassedTests++;
-                    if (stepResult.Result == NUnitTestResult.Failed) paragraphResult.FailedTests++;
-                    if (stepResult.Result == NUnitTestResult.Skipped) paragraphResult.SkippedTests++;
-                    if (stepResult.Result == NUnitTestResult.Inconclusive) paragraphResult.InconclusiveTests++;
+                    FoldLineResultsIn(paragraphResult, stepResult);
                 }
             }
 
@@ -222,6 +246,16 @@ namespace Tabula
             }
 
             return paragraphResult;
+        }
+
+        public void FoldLineResultsIn(NUnitReport.TestSuite paragraphResult, NUnitReport.TestCase lineResult )
+        {
+            paragraphResult.TestCases.Add(lineResult);
+            paragraphResult.TestCaseCount++;
+            if (lineResult.Result == NUnitTestResult.Passed) paragraphResult.PassedTests++;
+            if (lineResult.Result == NUnitTestResult.Failed) paragraphResult.FailedTests++;
+            if (lineResult.Result == NUnitTestResult.Skipped) paragraphResult.SkippedTests++;
+            if (lineResult.Result == NUnitTestResult.Inconclusive) paragraphResult.InconclusiveTests++;
         }
 
         public NUnitReport.TestCase ExecuteStep(CST.Step step)
@@ -260,11 +294,6 @@ namespace Tabula
                     stepText += symbol.Text + " ";
                 }
             }
-
-            //var instance = Activator.CreateInstance(Workflow);
-            //Instance = instance;
-            //string name = Instance.GetType().FullName;
-            //LearnMethods(Workflow);
 
             MethodInfo methodInfo = FindMethod(searchName);
             if (methodInfo == null)

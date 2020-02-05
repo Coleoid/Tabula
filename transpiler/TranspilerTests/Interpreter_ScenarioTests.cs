@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using LibraryHoldingTestWorkflows;
 using Tabula.CST;
 
 namespace Tabula
@@ -37,6 +36,58 @@ namespace Tabula
             Assert.That(result.InconclusiveTests, Is.EqualTo(0));
             Assert.That(result.SkippedTests, Is.EqualTo(0));
         }
+
+        [Test]
+        public void UseCommand_Loads_workflow_class()
+        {
+            Paragraph paragraph = new Paragraph();
+
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "GreetingWorkflow" })
+                );
+
+            paragraph.Actions.Add(
+                new Step(222,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "world")
+                ));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.TotalTests, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void UseCommand_complains_clearly_when_not_finding_workflow_class()
+        {
+            Paragraph paragraph = new Paragraph();
+
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "GripingWorkflow" }) { StartLine = 221 }
+                );
+
+            paragraph.Actions.Add(
+                new Step(222,
+                    (TokenType.Word, "go"),
+                    (TokenType.Word, "away"),
+                    (TokenType.Word, "world")
+                ));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
+            Assert.That(result.TotalTests, Is.EqualTo(2));
+            Assert.That(result.TestSuites[0].TestCases[0].FailureInfo.Message,
+                Is.EqualTo("Tried to use workflow \"GripingWorkflow\", and did not find it."));
+        }
+
 
         [Test]
         public void Table_before_any_paragraph_is_wrong()
