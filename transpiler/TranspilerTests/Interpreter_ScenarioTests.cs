@@ -37,6 +37,65 @@ namespace Tabula
             Assert.That(result.SkippedTests, Is.EqualTo(0));
         }
 
+
+        [Test]
+        public void SetCommand_sets_variable_in_outer_scope()
+        {
+            Paragraph paragraph = new Paragraph();
+
+            paragraph.Actions.Add(
+                new CommandSet("friend", new Symbol(TokenType.String, "Annelise"))
+                );
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+
+            paragraph = new Paragraph();
+
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "GreetingWorkflow" })
+                );
+
+            paragraph.Actions.Add(
+                new Step(222,
+                    (TokenType.Word, "my"),
+                    (TokenType.Word, "friend"),
+                    (TokenType.Variable, "friend"),
+                    (TokenType.Word, "turned"),
+                    (TokenType.Number, "38"),
+                    (TokenType.Word, "on"),
+                    (TokenType.Date, "11/22/2019")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(223,
+                    (TokenType.Word, "Verify"),
+                    (TokenType.Word, "my"),
+                    (TokenType.Word, "friend"),
+                    (TokenType.Word, "is"),
+                    (TokenType.Word, "named"),
+                    (TokenType.String, "Annelise")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(224,
+                    (TokenType.Word, "Verify"),
+                    (TokenType.Word, "my"),
+                    (TokenType.Word, "friend"),
+                    (TokenType.Word, "is"),
+                    (TokenType.Word, "named"),
+                    (TokenType.Variable, "friend")
+                ));
+
+            scenario.Sections.Add(paragraph);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.TotalTests, Is.EqualTo(3));
+        }
+
+
         [Test]
         public void UseCommand_Loads_workflow_class()
         {
@@ -85,7 +144,36 @@ namespace Tabula
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
             Assert.That(result.TotalTests, Is.EqualTo(2));
             Assert.That(result.TestSuites[0].TestCases[0].FailureInfo.Message,
-                Is.EqualTo("Tried to use workflow \"GripingWorkflow\", and did not find it."));
+                Is.EqualTo("Tried to use workflow \"GripingWorkflow\" on line 221, and did not find it."));
+            Assert.That(result.TestSuites[0].TestCases[0].Name,
+                Is.EqualTo("use: GripingWorkflow"));
+        }
+
+        [Test]
+        public void UseCommand_loads_multiple_workflows()
+        {
+            Paragraph paragraph = new Paragraph();
+
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "GreetingWorkflow", "SomeWorkflow" }) { StartLine = 221 }
+                );
+
+            paragraph.Actions.Add(
+                new Step(222,
+                    (TokenType.Word, "fail"),
+                    (TokenType.Word, "if"),
+                    (TokenType.Number, "4"),
+                    (TokenType.Word, "is"),
+                    (TokenType.Word, "odd")
+                ));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.TotalTests, Is.EqualTo(1));
         }
 
 

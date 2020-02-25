@@ -183,46 +183,48 @@ namespace Tabula
 
             foreach (var action in paragraph.Actions)
             {
+                if (action is CST.CommandSet cmdSet)
+                {
+                    Scope[cmdSet.Name] = cmdSet.Term.Text;
+                }
                 if (action is CST.CommandUse cmd)
                 {
-                    var name = cmd.Workflows[0];
-                   
-                    try
+                    foreach (var workflowName in cmd.Workflows)
                     {
-                        //TODO: loop over all workflows
-                        
-                        UseWorkflow(name);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        var result = new NUnitReport.TestCase
+                        try
                         {
-                            FailureInfo = new NUnitReport.TestCaseFailure(),
-                            Name = "" //FIX step.GetReadableText()
-                        };
-
-                        Exception stepException = ex.InnerException;
-                        if (ex.InnerException == null)
-                        {
-                            stepException = ex;
+                            UseWorkflow(workflowName);
                         }
-
-                        var failureCatagory = string.Empty;
-                        if (stepException is AssertionException)
+                        catch (Exception ex)
                         {
-                            failureCatagory = "failed";
-                        }
-                        else
-                        {
-                            failureCatagory = "threw exception";
-                            skipLine = cmd.StartLine;
-                            skipSteps = true;
-                        }
+                            var result = new NUnitReport.TestCase
+                            {
+                                FailureInfo = new NUnitReport.TestCaseFailure(),
+                                Name = "use: " + workflowName  //TODO: Test this is what we want
+                            };
 
-                        result.FailureInfo.Message = $"Tried to use workflow \""  + name + "\", and did not find it.";
-                        result.Result = NUnitTestResult.Failed;
-                        FoldLineResultsIn(paragraphResult, result);
+                            Exception stepException = ex.InnerException;
+                            if (ex.InnerException == null)
+                            {
+                                stepException = ex;
+                            }
+
+                            var failureCatagory = string.Empty;
+                            if (stepException is AssertionException)
+                            {
+                                failureCatagory = "failed";
+                            }
+                            else
+                            {
+                                failureCatagory = "threw exception";
+                                skipLine = cmd.StartLine;
+                                skipSteps = true;
+                            }
+
+                            result.FailureInfo.Message = $"Tried to use workflow \"{workflowName}\" on line {cmd.StartLine}, and did not find it.";
+                            result.Result = NUnitTestResult.Failed;
+                            FoldLineResultsIn(paragraphResult, result);
+                        }
                     }
                 }
                 else if (action is CST.Step step)
