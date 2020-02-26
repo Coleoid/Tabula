@@ -96,13 +96,15 @@ namespace Tabula
         }
 
 
-        [Test]
-        public void UseCommand_Loads_workflow_class()
+        [TestCase("GreetingWorkflow")]
+        [TestCase("greetingworkflow")]
+        [TestCase("GreetingWorkflow")]
+        [TestCase("some workflow")]
+        public void UseCommand_Loads_workflow_class(string workflowName)
         {
             Paragraph paragraph = new Paragraph();
-
             paragraph.Actions.Add(
-                new CommandUse(new List<string> { "GreetingWorkflow" })
+                new CommandUse(new List<string> { workflowName })
                 );
 
             paragraph.Actions.Add(

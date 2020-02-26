@@ -51,9 +51,9 @@
     <Compile Include="CommentsModalWorkflow.cs" />
     <Compile Include="DivisionManagement.cs" />
     <Compile Include="GreetingWorkflow.cs" />
-    <Compile Include="SomeWorkflow.cs" />
     <Compile Include="MvcBaseWorkflow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Some_Workflow.cs" />
     <Compile Include="Workflow.cs" />
     <Compile Include="WorkflowProperty.cs" />
   </ItemGroup>

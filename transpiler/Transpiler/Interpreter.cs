@@ -33,7 +33,7 @@ namespace Tabula
             LoadWorkflowDLL();
         }
 
-        List<Type> MyTypes { get; set; }
+        Dictionary<string, Type> MyWorkflowTypes { get; set; }
         public void LoadWorkflowDLL()
         {
             AppPath = @"D:\code\coleoid\Tabula\transpiler";
@@ -45,8 +45,14 @@ namespace Tabula
             curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
             var asms = curDomain.GetAssemblies();
 
-            MyTypes = new List<Type>();
-            MyTypes.AddRange(asm2.ExportedTypes);
+            MyWorkflowTypes = new Dictionary<string, Type>();
+            //MyWorkflowTypes.AddRange(asm2.ExportedTypes);
+            foreach (var type in asm2.ExportedTypes)
+            {
+                string normalizedName = type.Name.ToUpper().Replace("_", "");
+                //MyWorkflowTypes[normalizedName] = type;
+                MyWorkflowTypes.Add(normalizedName, type);
+            }
         }
 
 
@@ -168,7 +174,8 @@ namespace Tabula
         private string AppPath { get; set; }
         public void UseWorkflow(string name)
         {
-            Type workflow = MyTypes.Find(t => t.Name == name);
+            string normalizedUseName = name.ToUpper().Replace(" ", "");
+            Type workflow = MyWorkflowTypes[normalizedUseName];
 
             var instance = Activator.CreateInstance(workflow);
             Instance = instance;

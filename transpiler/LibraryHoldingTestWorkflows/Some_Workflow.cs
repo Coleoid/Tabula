@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace LibraryHoldingTestWorkflows
 {
-    public class SomeWorkflow
+    public class Some_Workflow
     {
         public void Fail_if__is_odd(int evenInput)
         {
             Assert.That(evenInput % 2 == 0, $"Input [{evenInput}] should have been even.");
+        }
+
+        public void Hello_World()
+        {
+            // yep.
         }
     }
 }
