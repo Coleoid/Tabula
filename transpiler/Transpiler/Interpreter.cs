@@ -36,14 +36,15 @@ namespace Tabula
         Dictionary<string, Type> MyWorkflowTypes { get; set; }
         public void LoadWorkflowDLL()
         {
-            AppPath = @"D:\code\coleoid\Tabula\transpiler";
+            AppPath = @"D:\code\Tabula\transpiler";
             var dllLocation = Path.Combine(AppPath, @"LibraryHoldingTestWorkflows\bin\Debug\LibraryHoldingTestWorkflows.dll");
 
-            Assembly asm2 = Assembly.LoadFrom(dllLocation);
 
             AppDomain curDomain = AppDomain.CurrentDomain;
             curDomain.ReflectionOnlyAssemblyResolve += resolveAssembly;
             var asms = curDomain.GetAssemblies();
+
+            Assembly asm2 = Assembly.LoadFrom(dllLocation);
 
             MyWorkflowTypes = new Dictionary<string, Type>();
             //MyWorkflowTypes.AddRange(asm2.ExportedTypes);

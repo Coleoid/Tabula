@@ -16,6 +16,21 @@ namespace LibraryHoldingTestWorkflows
             friendBirthday = birthday;
         }
 
+        public void Verify_that_my_friend_is_named__(string name)
+        {
+            Assert.That(name, Is.EqualTo(friendName));
+        }
+
+        public void Verify_that_my_friend_is_age__(int age)
+        {
+            Assert.That(age, Is.EqualTo(friendAge));
+        }
+
+        public void Verify_that_my_friend_has_birthday__(DateTime birthday)
+        {
+            Assert.That(birthday, Is.EqualTo(friendBirthday));
+        }
+
 
         public string range;
         public void Hello_World()
@@ -30,7 +45,7 @@ namespace LibraryHoldingTestWorkflows
 
         public void There_should_be_eight_of__(int theseGuys)
         {
-            Assert.That(theseGuys, Is.EqualTo(8), "failed as expected");
+            Assert.That(theseGuys, Is.EqualTo(10), "failed as expected");
         }
 
         public void Verify_my_friend_is_named__(string name)

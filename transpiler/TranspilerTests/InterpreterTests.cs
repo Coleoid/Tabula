@@ -124,14 +124,14 @@ namespace Tabula
                     $"Step threw exception: argument {argMessageDetail} does not match parameter 'favoriteDay' (DateTime)."));
         }
 
-        [Ignore("Fix references to members now that DLLs are dynamically loaded")]
+        //[Ignore("Fix references to members now that DLLs are dynamically loaded")]
         [TestCase("Bob", 22, "1/12/2000")]
         [TestCase("Greta", 34, "2/14/1998")]
         public void Step_Call_passes_arguments(string name, int age, string birthday)
         {
-            //  my friend "Bob" turned "22" on "1/12/2000"
-            //  my friend "Bob" turned 22 on 1/12/2000
-
+            interpreter.UseWorkflow("GreetingWorkflow");
+            
+            //  example:  my friend "Bob" turned 22 on 1/12/2000
             var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
@@ -142,15 +142,56 @@ namespace Tabula
                 (TokenType.Date, birthday)
             );
 
-            interpreter.UseWorkflow("GreetingWorkflow");
+            //  example:  Verify that my friend is named "Bob"
+            var step2 = new Step(223,
+                (TokenType.Word, "Verify"),
+                (TokenType.Word, "that"),
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Word, "is"),
+                (TokenType.Word, "named"),
+                (TokenType.String, name)
+            );
+
+            //  example:  Verify that my friend is age 22
+            var step3 = new Step(224,
+                (TokenType.Word, "Verify"),
+                (TokenType.Word, "that"),
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Word, "is"),
+                (TokenType.Word, "age"),
+                (TokenType.Number, age.ToString())
+            );
+
+            //  example:  Verify that my friend has birthday 1/12/2000
+            var step4 = new Step(225,
+                (TokenType.Word, "Verify"),
+                (TokenType.Word, "that"),
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Word, "has"),
+                (TokenType.Word, "birthday"),
+                (TokenType.Date, birthday)
+            );
 
             var result = interpreter.ExecuteStep(step);
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.Name, Is.EqualTo($"my friend \"{name}\" turned {age} on {birthday}"));
 
-            var greetings = (GreetingWorkflow) interpreter.Instance;
-            Assert.That(greetings.friendName, Is.EqualTo(name));
-            Assert.That(greetings.friendAge, Is.EqualTo(age));
-            Assert.That(greetings.friendBirthday, Is.EqualTo(DateTime.Parse(birthday)));
+            var result2 = interpreter.ExecuteStep(step2);
+            Assert.That(result2.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result2.Name, Is.EqualTo($"Verify that my friend is named \"{name}\""));
+
+            var result3 = interpreter.ExecuteStep(step3);
+            Assert.That(result3.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result3.Name, Is.EqualTo($"Verify that my friend is age {age}"));
+
+            var result4 = interpreter.ExecuteStep(step4);
+            Assert.That(result4.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result4.Name, Is.EqualTo($"Verify that my friend has birthday {birthday}"));
         }
+
 
         [TestCase("Bob", "twenty-two", "1/12/2000",
             "Step threw exception: argument \"twenty-two\" (String) does not match parameter 'age' (Int32).")]
@@ -217,17 +258,17 @@ namespace Tabula
                     "Step threw exception: argument \"88\" (Number) does not match parameter 'birthday' (DateTime)."));
         }
 
-        [Ignore("Fix references to members now that DLLs are dynamically loaded")]
         [TestCase("Bob", "22", "1/12/2000")]
         [TestCase("Greta", "34", "2/14/1998")]
         public void Step_Call_passes_values_from_variables(string name, string age, string birthday)
         {
-            //  my friend #friendName turned #age on #birthday
+            interpreter.UseWorkflow("GreetingWorkflow");
 
             interpreter.SetVariable("friendName", name);
             interpreter.SetVariable("age", age);
             interpreter.SetVariable("birthday", birthday);
 
+            //  example:  my friend #friendName turned #age on #birthday
             var step = new Step(222,
                 (TokenType.Word, "my"),
                 (TokenType.Word, "friend"),
@@ -238,15 +279,54 @@ namespace Tabula
                 (TokenType.Variable, "birthday")
             );
 
-            interpreter.UseWorkflow("GreetingWorkflow");
+            //  example:  Verify that my friend is named "Bob"
+            var step2 = new Step(223,
+                (TokenType.Word, "Verify"),
+                (TokenType.Word, "that"),
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Word, "is"),
+                (TokenType.Word, "named"),
+                (TokenType.Variable, "friendName")
+            );
+
+            //  example:  Verify that my friend is age 22
+            var step3 = new Step(224,
+                (TokenType.Word, "Verify"),
+                (TokenType.Word, "that"),
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Word, "is"),
+                (TokenType.Word, "age"),
+                (TokenType.Variable, "age")
+            );
+
+            //  example:  Verify that my friend has birthday 1/12/2000
+            var step4 = new Step(225,
+                (TokenType.Word, "Verify"),
+                (TokenType.Word, "that"),
+                (TokenType.Word, "my"),
+                (TokenType.Word, "friend"),
+                (TokenType.Word, "has"),
+                (TokenType.Word, "birthday"),
+                (TokenType.Variable, "birthday")
+            );
 
             var result = interpreter.ExecuteStep(step);
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.Name, Is.EqualTo("my friend #friendName turned #age on #birthday"));
 
-            Assert.That(result.FailureInfo.Message, Is.Null);
-            var greetings = (GreetingWorkflow) interpreter.Instance;
-            Assert.That(greetings.friendName, Is.EqualTo(name));
-            Assert.That(greetings.friendAge.ToString(), Is.EqualTo(age));
-            Assert.That(greetings.friendBirthday, Is.EqualTo(DateTime.Parse(birthday)));
+            var result2 = interpreter.ExecuteStep(step2);
+            Assert.That(result2.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result2.Name, Is.EqualTo($"Verify that my friend is named #friendName"));
+
+            var result3 = interpreter.ExecuteStep(step3);
+            Assert.That(result3.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result3.Name, Is.EqualTo($"Verify that my friend is age #age"));
+
+            var result4 = interpreter.ExecuteStep(step4);
+            Assert.That(result4.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result4.Name, Is.EqualTo($"Verify that my friend has birthday #birthday"));
         }
 
         [TestCase("frieendName", "Maybe you meant 'friendname'?")]
