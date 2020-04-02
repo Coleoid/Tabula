@@ -45,15 +45,8 @@ namespace LibraryHoldingTestWorkflows
 
         public void There_should_be_eight_of__(int theseGuys)
         {
-            Assert.That(theseGuys, Is.EqualTo(10), "failed as expected");
+            Assert.That(theseGuys, Is.EqualTo(8), "failed as expected");
         }
-
-        public void Verify_my_friend_is_named__(string name)
-        {
-            Assert.That(name, Is.EqualTo(friendName), "failed as expected");
-        }
-        //TODO: same methods for age and birthday
-
 
         public void My_favorite_day_is__(DateTime favoriteDay)
         { }

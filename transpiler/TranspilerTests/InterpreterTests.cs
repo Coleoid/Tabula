@@ -258,6 +258,40 @@ namespace Tabula
                     "Step threw exception: argument \"88\" (Number) does not match parameter 'birthday' (DateTime)."));
         }
 
+
+        [Test]
+        public void GetReadableStepText_handles_fancy_arguments()
+        {
+            var step = new CST.Step(new List<CST.Symbol> {
+                new CST.Symbol(TokenType.Word, "Hello"),
+                new CST.Symbol(TokenType.Date, "11/16/2017"),
+                new CST.Symbol(TokenType.Word, "today"),
+                new CST.Symbol(TokenType.Number, "11"),
+                new CST.Symbol(TokenType.Word, "times"),
+                new CST.Symbol(TokenType.Word, "with"),
+                new CST.Symbol(TokenType.String, "Bob"),
+            });
+
+            var readableName = interpreter.GetReadableStepText(step);
+
+            Assert.That(readableName, Is.EqualTo(@"Hello 11/16/2017 today 11 times with ""Bob"""));
+        }
+
+        [Test]
+        public void GetReadableStepString_wraps_in_quotes()
+        {
+            var step = new CST.Step(new List<CST.Symbol> {
+                new CST.Symbol(TokenType.Word, "Hello"),
+                new CST.Symbol(TokenType.String, "Bob"),
+                new CST.Symbol(TokenType.Word, "today"),
+            });
+
+            var readableName = interpreter.GetReadableStepString(step);
+
+            Assert.That(readableName, Is.EqualTo(@"@""Hello """"Bob"""" today"""));
+        }
+
+
         [TestCase("Bob", "22", "1/12/2000")]
         [TestCase("Greta", "34", "2/14/1998")]
         public void Step_Call_passes_values_from_variables(string name, string age, string birthday)
@@ -313,20 +347,22 @@ namespace Tabula
             );
 
             var result = interpreter.ExecuteStep(step);
+
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
-            Assert.That(result.Name, Is.EqualTo("my friend #friendName turned #age on #birthday"));
+            string message = $"my friend #friendName ({name}) turned #age ({age}) on #birthday ({birthday})";
+            Assert.That(result.Name, Is.EqualTo(message));
 
             var result2 = interpreter.ExecuteStep(step2);
             Assert.That(result2.Result, Is.EqualTo(NUnitTestResult.Passed));
-            Assert.That(result2.Name, Is.EqualTo($"Verify that my friend is named #friendName"));
+            Assert.That(result2.Name, Is.EqualTo($"Verify that my friend is named #friendName ({name})"));
 
             var result3 = interpreter.ExecuteStep(step3);
             Assert.That(result3.Result, Is.EqualTo(NUnitTestResult.Passed));
-            Assert.That(result3.Name, Is.EqualTo($"Verify that my friend is age #age"));
+            Assert.That(result3.Name, Is.EqualTo($"Verify that my friend is age #age ({age})"));
 
             var result4 = interpreter.ExecuteStep(step4);
             Assert.That(result4.Result, Is.EqualTo(NUnitTestResult.Passed));
-            Assert.That(result4.Name, Is.EqualTo($"Verify that my friend has birthday #birthday"));
+            Assert.That(result4.Name, Is.EqualTo($"Verify that my friend has birthday #birthday ({birthday})"));
         }
 
         [TestCase("frieendName", "Maybe you meant 'friendname'?")]

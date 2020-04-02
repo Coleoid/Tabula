@@ -37,41 +37,6 @@ namespace Tabula.CST
             return name;
         }
 
-        //TODO:  Keep watch on string representations, eventual rework
-        public string GetReadableText()
-        {
-            var stepText = "";
-            string delim = "";
-            foreach (var sym in Symbols)
-            {
-                if (sym.Type == TokenType.String)
-                {
-                    stepText += delim + "\"" + sym.Text + "\"";
-                }
-                else if (sym.Type == TokenType.Variable)
-                {
-                    stepText += delim + "#" + sym.Text;
-                }
-                else
-                {
-                    stepText += delim + sym.Text;
-                }
-
-                delim = " ";
-            }
-            return stepText;
-
-        }
-
-        //TODO:  Keep watch on string representations, eventual rework
-        public object GetReadableString()
-        {
-            var readableText = GetReadableText();
-
-            string readableString = readableText.Replace("\"", "\"\"");
-            readableString = "@\"" + readableString + "\"";
-
-            return readableString;
-        }
+ 
     }
 }

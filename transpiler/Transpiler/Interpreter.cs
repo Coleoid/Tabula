@@ -268,12 +268,59 @@ namespace Tabula
             if (lineResult.Result == NUnitTestResult.Inconclusive) paragraphResult.InconclusiveTests++;
         }
 
+        public string GetReadableStepText(CST.Step step)
+        {
+            return GetReadableText(step);
+        }
+
+        public string GetReadableStepString(CST.Step step)
+        {
+            return GetReadableString(step);
+        }
+
+        //TODO:  Keep watch on string representations, eventual rework
+        public string GetReadableText(CST.Step step)
+        {
+            var stepText = "";
+            string delim = "";
+            foreach (var sym in step.Symbols)
+            {
+                if (sym.Type == TokenType.String)
+                {
+                    stepText += delim + "\"" + sym.Text + "\"";
+                }
+                else if (sym.Type == TokenType.Variable)
+                {
+                    string variableValue = Scope[sym.Text];
+                    stepText += delim + "#" + sym.Text + $" ({variableValue})";
+                }
+                else
+                {
+                    stepText += delim + sym.Text;
+                }
+
+                delim = " ";
+            }
+            return stepText;
+
+        }
+
+        //TODO:  Keep watch on string representations, eventual rework
+        public string GetReadableString(CST.Step step)
+        {
+            var readableText = GetReadableText(step);
+
+            string readableString = readableText.Replace("\"", "\"\"");
+            readableString = "@\"" + readableString + "\"";
+
+            return readableString;
+        }
         public NUnitReport.TestCase ExecuteStep(CST.Step step)
         {
             var result = new NUnitReport.TestCase
             {
                 FailureInfo = new NUnitReport.TestCaseFailure(),
-                Name = step.GetReadableText()
+                Name = GetReadableText(step)
             };
 
             if (skipSteps)

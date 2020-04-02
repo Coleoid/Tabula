@@ -363,6 +363,47 @@ namespace Tabula
             }
         }
 
+        //TODO:  Keep watch on string representations, eventual rework
+        public string GetReadableText(CST.Step step)
+        {
+            var stepText = "";
+            string delim = "";
+            foreach (var sym in step.Symbols)
+            {
+                if (sym.Type == TokenType.String)
+                {
+                    stepText += delim + "\"" + sym.Text + "\"";
+                }
+                else if (sym.Type == TokenType.Variable)
+                {
+                    string variableValue = $"{{Var[\"{sym.Text}\"]}}";
+                    //hoping to see:  {Var["friendName"]}
+
+                    stepText += delim + "#" + sym.Text + $" ({variableValue})";
+                    //hoping to see generated: #friendName ({Var["friendName"]})
+                    //hoping at runtime it evaluates into: #friendName (Greta)
+                }
+                else
+                {
+                    stepText += delim + sym.Text;
+                }
+
+                delim = " ";
+            }
+            return stepText;
+        }
+
+        //TODO:  Keep watch on string representations, eventual rework
+        public string GetReadableString(CST.Step step)
+        {
+            var readableText = GetReadableText(step);
+
+            string readableString = readableText.Replace("\"", "\"\"");
+            readableString = "@\"" + readableString + "\"";
+
+            return readableString;
+        }
+
         public void BuildStep(CST.Step step)
         {
             //FUTURE:  method search names should include argument count, and FindImplementation should include a count argument
@@ -377,7 +418,7 @@ namespace Tabula
 
             if (method == null || stepArgCount != method.Args.Count())
             {
-                var stepText = step.GetReadableString();
+                var stepText = GetReadableString(step);
                 var unfound = $"Unfound(  {stepText}, @{sourceLocation});";
                 sectionsBody.AppendLine(unfound);
             }

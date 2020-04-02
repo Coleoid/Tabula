@@ -47,38 +47,5 @@ namespace Tabula
 
             Assert.That(canonicalName, Is.EqualTo("hellotodaytimes"));
         }
-
-
-        [Test]
-        public void GetReadableText_handles_fancy_arguments()
-        {
-            var step = new CST.Step(new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "Hello"),
-                new CST.Symbol(TokenType.Date, "11/16/2017"),
-                new CST.Symbol(TokenType.Word, "today"),
-                new CST.Symbol(TokenType.Number, "11"),
-                new CST.Symbol(TokenType.Word, "times"),
-                new CST.Symbol(TokenType.Word, "with"),
-                new CST.Symbol(TokenType.String, "Bob"),
-            });
-
-            var readableName = step.GetReadableText();
-
-            Assert.That(readableName, Is.EqualTo(@"Hello 11/16/2017 today 11 times with ""Bob"""));
-        }
-
-        [Test]
-        public void GetReadableString_wraps_in_quotes()
-        {
-            var step = new CST.Step(new List<CST.Symbol> {
-                new CST.Symbol(TokenType.Word, "Hello"),
-                new CST.Symbol(TokenType.String, "Bob"),
-                new CST.Symbol(TokenType.Word, "today"),
-            });
-
-            var readableName = step.GetReadableString();
-
-            Assert.That(readableName, Is.EqualTo(@"@""Hello """"Bob"""" today"""));
-        }
     }
 }
