@@ -8,10 +8,30 @@ using System.IO;
 
 namespace Tabula
 {
+    public class CallableWorkflow
+    {
+        public object Instance { get; set; }
+        public Dictionary<string, MethodInfo> SearchableMethods { get; set; }
+
+        public MethodInfo FindMethod(string searchName)
+        {
+            if (SearchableMethods.ContainsKey(searchName))
+            {
+                return SearchableMethods[searchName];
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
     public class Interpreter
     {
-       // public Type Workflow { get; set; }
-        public Object Instance { get; set; }
+        //public object Instance { get; set; }
+        //public Dictionary<string, MethodInfo> searchableMethods { get; set; }
+
+        public List<CallableWorkflow> Workflows { get; }
         public bool skipSteps { get; set; }
         public int skipLine { get; set; }
 
@@ -30,6 +50,7 @@ namespace Tabula
 
         public Interpreter()
         {
+            Workflows = new List<CallableWorkflow>();
             LoadWorkflowDLL();
         }
 
@@ -60,7 +81,7 @@ namespace Tabula
 
         public NUnitReport.TestSuite ExecuteScenario(CST.Scenario scenario)
         {
-            var scenarioResult = new NUnitReport.TestSuite();         
+            var scenarioResult = new NUnitReport.TestSuite();
             CST.Paragraph previousParagraph = null;
             bool hasExecuted = false;
 
@@ -69,9 +90,9 @@ namespace Tabula
 
             NUnitReport.TestSuite paragraphResult;
             foreach (var section in scenario.Sections)
-            {                
+            {
                 if (section is CST.Paragraph)
-                {                   
+                {
                     if (previousParagraph != null && !hasExecuted)
                     {
                         paragraphResult = ExecuteParagraph((previousParagraph));
@@ -179,8 +200,10 @@ namespace Tabula
             Type workflow = MyWorkflowTypes[normalizedUseName];
 
             var instance = Activator.CreateInstance(workflow);
-            Instance = instance;
-            LearnMethods(workflow);
+            var callable = new CallableWorkflow();
+            callable.Instance = instance;
+            callable.SearchableMethods = LearnMethods(workflow);
+            Workflows.Add(callable);
         }
 
         public NUnitReport.TestSuite ExecuteParagraph(CST.Paragraph paragraph)
@@ -254,6 +277,8 @@ namespace Tabula
             {
                 paragraphResult.Result = NUnitTestResult.Passed;
             }
+
+            Workflows.Clear();
 
             return paragraphResult;
         }
@@ -352,7 +377,18 @@ namespace Tabula
                 }
             }
 
-            MethodInfo methodInfo = FindMethod(searchName);
+            MethodInfo methodInfo = null;
+            object Instance = null;
+            foreach (var workflow in Workflows)
+            {
+                methodInfo = workflow.FindMethod(searchName);
+                if (methodInfo != null)
+                {
+                    Instance = workflow.Instance;
+                    break;
+                }
+            }
+
             if (methodInfo == null)
             {
                 result.FailureInfo.Message = $"Couldn't find step '{stepText.Trim()}' on line {step.StartLine}";
@@ -484,28 +520,16 @@ namespace Tabula
             return param;
         }
 
-        public Dictionary<string, MethodInfo> searchableMethods { get; set; }
-        public void LearnMethods(Type workflowType)
+        public Dictionary<string, MethodInfo> LearnMethods(Type workflowType)
         {
-            searchableMethods = new Dictionary<string, MethodInfo>();
+            var searchableMethods = new Dictionary<string, MethodInfo>();
             foreach (MethodInfo mi in workflowType.GetMethods())
             {
                 string searchName = mi.Name.Replace("_", "").ToLower();
 
                 searchableMethods[searchName] = mi;
             }
-        }
-
-        public MethodInfo FindMethod(string searchName)
-        {
-            if (searchableMethods.ContainsKey(searchName))
-            {
-                return searchableMethods[searchName];
-            }
-            else
-            {
-                return null;
-            }
+            return searchableMethods;
         }
     }
 }

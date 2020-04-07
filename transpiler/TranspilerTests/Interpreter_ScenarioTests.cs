@@ -41,13 +41,13 @@ namespace Tabula
         [Test]
         public void SetCommand_sets_variable_in_outer_scope()
         {
+            Scenario scenario = new Scenario();
             Paragraph paragraph = new Paragraph();
 
             paragraph.Actions.Add(
                 new CommandSet("friend", new Symbol(TokenType.String, "Annelise"))
                 );
 
-            Scenario scenario = new Scenario();
             scenario.Sections.Add(paragraph);
 
             paragraph = new Paragraph();
@@ -70,6 +70,7 @@ namespace Tabula
             paragraph.Actions.Add(
                 new Step(223,
                     (TokenType.Word, "Verify"),
+                    (TokenType.Word, "that"),
                     (TokenType.Word, "my"),
                     (TokenType.Word, "friend"),
                     (TokenType.Word, "is"),
@@ -80,6 +81,7 @@ namespace Tabula
             paragraph.Actions.Add(
                 new Step(224,
                     (TokenType.Word, "Verify"),
+                    (TokenType.Word, "that"),
                     (TokenType.Word, "my"),
                     (TokenType.Word, "friend"),
                     (TokenType.Word, "is"),
@@ -98,7 +100,7 @@ namespace Tabula
 
         [TestCase("GreetingWorkflow")]
         [TestCase("greetingworkflow")]
-        [TestCase("GreetingWorkflow")]
+        [TestCase("Greeting Workflow")]
         [TestCase("some workflow")]
         public void UseCommand_Loads_workflow_class(string workflowName)
         {
@@ -119,6 +121,118 @@ namespace Tabula
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.TotalTests, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void UseCommand_Loads_multiple_workflow_classes()
+        {
+            Paragraph paragraph = new Paragraph();
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "Greeting Workflow", "Some Workflow" })
+                );
+
+            //TODO: determine which workflow was called
+            paragraph.Actions.Add(
+                new Step(222,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "world")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(223,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "america")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(224,
+                    (TokenType.Word, "fail"),
+                    (TokenType.Word, "if"),
+                    (TokenType.Number, "2"),
+                    (TokenType.Word, "is"),
+                    (TokenType.Word, "odd")
+                ));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.TotalTests, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void Multiple_UseCommands_Load_multiple_workflow_classes()
+        {
+            Paragraph paragraph = new Paragraph();
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "Greeting Workflow" })
+                );
+
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "some Workflow" })
+                );
+
+            //TODO: determine which workflow was called
+            paragraph.Actions.Add(
+                new Step(222,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "world")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(223,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "america")
+                ));
+
+            paragraph.Actions.Add(
+                new Step(224,
+                    (TokenType.Word, "fail"),
+                    (TokenType.Word, "if"),
+                    (TokenType.Number, "2"),
+                    (TokenType.Word, "is"),
+                    (TokenType.Word, "odd")
+                ));
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Passed));
+            Assert.That(result.TotalTests, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void Workflows_are_forgotten_between_Paragraphs()
+        {
+            Paragraph paragraph = new Paragraph();
+            paragraph.Actions.Add(
+                new CommandUse(new List<string> { "Greeting Workflow" })
+                );
+
+            Scenario scenario = new Scenario();
+            scenario.Sections.Add(paragraph);
+
+            Paragraph paragraph2 = new Paragraph();
+            paragraph2.Actions.Add(
+                new CommandUse(new List<string> { "some Workflow" })
+                );
+
+            paragraph2.Actions.Add(
+                new Step(223,
+                    (TokenType.Word, "hello"),
+                    (TokenType.Word, "america")
+                ));
+
+            scenario.Sections.Add(paragraph2);
+
+            NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
+
+            Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
             Assert.That(result.TotalTests, Is.EqualTo(1));
         }
 
@@ -208,8 +322,6 @@ namespace Tabula
             Table table = ExampleTable();
             Scenario scenario = ExampleScenario(null, null, paragraph, table);
 
-            interpreter.UseWorkflow("GreetingWorkflow");
-
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
             Assert.That(result.Result, Is.EqualTo(NUnitTestResult.Failed));
@@ -236,8 +348,6 @@ namespace Tabula
                                                 paragraph,
                                                 table,
                                                 table2);
-
-            interpreter.UseWorkflow("GreetingWorkflow");
 
             NUnitReport.TestSuite result = interpreter.ExecuteScenario(scenario);
 
@@ -272,31 +382,28 @@ namespace Tabula
         private Paragraph ExampleParagraph(Symbol symbolToTest)
         {
             Paragraph paragraph = new Paragraph();
-            paragraph.Actions.Add(
-                Step4());
 
             paragraph.Actions.Add(
-                Step5());
+                new CommandUse(new List<string> { "Greeting Workflow" })
+            );
+
+            paragraph.Actions.Add(
+                new Step(4,
+                    (TokenType.Word, "Hello"),
+                    (TokenType.Word, "America")
+                )
+            );
+
+            paragraph.Actions.Add(
+                new Step(5,
+                    (TokenType.Word, "Hello"),
+                    (TokenType.Word, "world")
+                )
+            );
 
             paragraph.Actions.Add(
                 Step6(symbolToTest));
             return paragraph;
-        }
-
-        private Step Step4()
-        {
-            return new Step(4,
-                (TokenType.Word, "Hello"),
-                (TokenType.Word, "America")
-            );
-        }
-
-        private Step Step5()
-        {
-            return new Step(5,
-                (TokenType.Word, "hello"),
-                (TokenType.Word, "world")
-            );
         }
 
         private Step Step6(Symbol symbolToTest)

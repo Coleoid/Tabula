@@ -25,9 +25,10 @@ namespace Tabula
         [TestCase("myfriendturnedon", true)]
         public void LearnMethods_builds_dictionary(string searchName, bool hasKey)
         {
-            interpreter.LearnMethods(typeof(GreetingWorkflow));
+            interpreter.Workflows.Clear();
 
-            Assert.That(interpreter.searchableMethods.ContainsKey(searchName), Is.EqualTo(hasKey));
+            var methods = interpreter.LearnMethods(typeof(GreetingWorkflow));
+            Assert.That(methods.ContainsKey(searchName), Is.EqualTo(hasKey));
         }
 
 
@@ -405,14 +406,16 @@ namespace Tabula
                 (TokenType.Word, location)
             );
 
+            interpreter.Workflows.Clear();
             interpreter.UseWorkflow("GreetingWorkflow");
 
             interpreter.ExecuteStep(step);
 
             //var greetings = (GreetingWorkflow)interpreter.Instance;
             //Assert.That(greetings.range, Is.EqualTo(range));
-            MethodInfo mInfo =  interpreter.FindMethod("getrange");
-            var result = mInfo.Invoke(interpreter.Instance, new object[] { });
+            var callable = interpreter.Workflows[0];
+            MethodInfo mInfo =  callable.FindMethod("getrange");
+            var result = mInfo.Invoke(callable.Instance, new object[] { });
 
             Assert.That((string)result, Is.EqualTo(range));
         }
